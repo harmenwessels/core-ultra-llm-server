@@ -11,10 +11,11 @@ tricks, and no heavyweight serving framework.
 - **iGPU-first**: INT4 OpenVINO IR models, compile caching, single-flight scheduling tuned for shared-memory iGPUs
 - **Lean**: one ~300-line FastAPI file plus three scripts; dependencies are `openvino-genai`, `fastapi`, `uvicorn`, `huggingface_hub`
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together, and
-[RESEARCH.md](RESEARCH.md) for the benchmark methodology, the full set of performance findings
-(bandwidth scaling, memory ceiling, quantization recipes, prompt-lookup decoding), and the
-model-conversion playbook.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together,
+[RESEARCH.md](RESEARCH.md) for the performance findings (bandwidth scaling, memory ceiling,
+quantization recipes, prompt-lookup decoding) and the model-conversion playbook, and
+[BENCHMARKS.md](BENCHMARKS.md) for workload-representative benchmarks (autocomplete /
+assistant / architect profiles with correctness probes) and per-role model recommendations.
 
 ## Requirements
 
