@@ -11,4 +11,5 @@ models/
 
 # Local-only / editor
 .vscode/
+.claude/
 *.log
