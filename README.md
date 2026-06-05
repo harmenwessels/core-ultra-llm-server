@@ -35,9 +35,9 @@ py -3.12 -m venv .venv
 # 1. Verify the Arc iGPU is visible to OpenVINO
 .\.venv\Scripts\python.exe scripts\check_gpu.py
 
-# 2. Download the default models (~6 GB total; requires `hf auth login`)
+# 2. Download the default models (~5 GB total; requires `hf auth login`)
 .\.venv\Scripts\python.exe scripts\download_model.py --repo gregor160300/gemma-4-E2B-it-int4-ov
-.\.venv\Scripts\python.exe scripts\download_model.py --repo OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov
+.\.venv\Scripts\python.exe scripts\download_model.py --repo OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
 
 # 3. Optional: benchmark a model (TTFT + decode tok/s)
 .\.venv\Scripts\python.exe scripts\bench.py --model-dir models\gemma-4-E2B-it-int4-ov
@@ -47,7 +47,7 @@ py -3.12 -m venv .venv
 ```
 
 The server loads **two models by default** and routes by the request's `model` field:
-`gemma-4-E2B-it-int4-ov` (chat) and `Qwen2.5-Coder-3B-Instruct-int4-ov` (autocomplete via
+`gemma-4-E2B-it-int4-ov` (chat) and `Qwen2.5-Coder-1.5B-Instruct-int4-ov` (autocomplete via
 `/v1/completions` with FIM). The first launch per model pays a one-time compile cost (~30–70 s);
 subsequent launches load from the cache in seconds.
 
@@ -80,9 +80,9 @@ models:
     roles:
       - chat
       - edit
-  - name: Qwen2.5 Coder 3B (local autocomplete)
+  - name: Qwen2.5 Coder 1.5B (local autocomplete)
     provider: openai
-    model: Qwen2.5-Coder-3B-Instruct-int4-ov
+    model: Qwen2.5-Coder-1.5B-Instruct-int4-ov
     apiBase: http://127.0.0.1:8000/v1
     apiKey: dummy
     roles:
@@ -102,9 +102,9 @@ OpenVINO 2026.3 nightly:
 |---|---|---|---|---|---|---|
 | [Qwen2.5-Coder-0.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 0.3 GB | text | 32k | **87.6 tok/s** | 0.06 s | fastest; quality floor for autocomplete |
 | [Qwen3.5-0.8B INT4](https://huggingface.co/yangsu0423/Qwen3.5-0.8B-int4-ov) | 0.9 GB | text, image¹ | 256k | **72.7 tok/s** | 0.08 s | newest gen at near-0.5B speed; community conversion |
-| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot candidate |
+| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (default autocomplete) | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot: FIM-trained, 2.4× faster than the 3B |
 | **[Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)** (default chat) | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | fastest chat-quality model; very responsive in Continue |
-| [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) (default autocomplete) | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
+| [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
 | [Qwen3.5-4B INT4](https://huggingface.co/yangsu0423/Qwen3.5-4B-int4-ov) | 3.3 GB | text, image¹ | 256k | 19.9 tok/s | 0.31 s | newest gen; faster than the 9B at similar quality class; community conversion |
 | [Gemma 4 E4B INT4](https://huggingface.co/OpenVINO/gemma-4-E4B-it-int4-ov) | 6.0 GB | text, image, audio¹ | 128k | 15.7 tok/s | 0.52 s | mid |
 | [Qwen2.5-Coder-7B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-7B-Instruct-int4-ov) | 4.2 GB | text | 32k | 15.0 tok/s | 0.20 s | best chat quality that fits |

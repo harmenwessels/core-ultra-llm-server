@@ -45,7 +45,7 @@ ROOT = pathlib.Path(__file__).resolve().parent
 
 _default_dirs = (
     f"{ROOT / 'models' / 'gemma-4-E2B-it-int4-ov'};"
-    f"{ROOT / 'models' / 'Qwen2.5-Coder-3B-Instruct-int4-ov'}"
+    f"{ROOT / 'models' / 'Qwen2.5-Coder-1.5B-Instruct-int4-ov'}"
 )
 if os.environ.get("MODEL_DIR"):  # single-model override
     _default_dirs = os.environ["MODEL_DIR"]
