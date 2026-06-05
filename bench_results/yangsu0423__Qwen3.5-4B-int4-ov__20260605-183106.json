@@ -1,0 +1,35 @@
+{
+  "model": "yangsu0423/Qwen3.5-4B-int4-ov",
+  "pipeline": "VLMPipeline",
+  "timestamp": "2026-06-05T18:26:29",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "assistant-edit": {
+      "plain": {
+        "tps": 20.24559211730957,
+        "ttft": 0.2665535888671875,
+        "wall": 25.509149400051683,
+        "text": "The user wants me to rewrite a Python function with type hints and a one-line docstring, while keeping the logic and variable names identical.\n\nLet me analyze the function:\n- Input parameters: `orders`, `inventory`, `prices`\n- Returns: `total`, `shipped`, `backordered`\n\nLooking at the types:\n- `orders`: list of dictionaries with \"item\" and \"qty\" keys\n- `inventory`: dictionary mapping item names to quantities\n- `prices`: dictionary mapping item names to prices\n- Returns: tuple of (total, shipped, backordered) where shipped and backordered are lists of dictionaries\n\nLet me add type hints:\n- `orders: List[Dict[str, Any]]` or similar\n- `inventory: Dict[str, int]`\n- `prices: Dict[str, float]`\n- Returns: `Tuple[int, List[Dict[str, Any]], List[Dict[str, Any]]]`\n\nActually, looking at the code more carefully:\n- `orders` is a list of dicts with \"item\" and \"qty\" keys\n- `inventory` is a dict mapping item to quantity (int)\n- `prices` is a dict mapping item to price (float)\n- Returns total (int), shipped (list of dicts), backordered (list of dicts)\n\nFor type hints, I'll use:\n- `orders: List[Dict[str, Any]]`\n- `inventory: Dict[str, int]`\n- `prices: Dict[str, float]`\n- Returns: `Tuple[int, List[Dict[str, Any]], List[Dict[str, Any]]]`\n\nActually, let me be more specific. Looking at the code:\n- `item` is a string\n- `qty` is an integer\n- `inventory[item]` is an integer\n- `prices.get(item, 0)` returns a float or int\n\nFor the return types:\n- `total` is an int\n- `shipped` is a list of dicts with \"item\", \"qty\", \"cost\" keys\n- `backordered` is a list of dicts with \"item\", \"qty\" keys (or order dicts)\n\nLet me write the type hints properly:\n\n```python\nfrom typing import List, Dict, Tuple, Any\n\ndef process_orders(orders: List[Dict[str, Any]], inventory: Dict[str, int], prices: Dict[str, float"
+      }
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 20.598358154296875,
+        "ttft": 0.23783358764648438,
+        "wall": 12.620234299916774,
+        "text": "Here's a thinking process that leads to the explanation:\n\n1.  **Analyze the Request:**\n    *   **Input:** A Python function `process_orders(orders, inventory, prices)`.\n    *   **Task:** Explain step-by-step what the function does, including edge cases and one potential bug/improvement.\n    *   **Constraint:** The explanation must cover the logic, edge cases, and critique.\n\n2.  **Analyze the Code:**\n    *   **Function Signature:** `def process_orders(orders, inventory, prices):`\n        *   `orders`: Likely a list of dictionaries, where each dict represents an order (e.g., `{\"item\": \"apple\", \"qty\": 5}`).\n        *   `inventory`: Likely a dictionary mapping item names to available quantities (e.g., `{\"apple\": 10}`).\n        *   `prices`: Likely a dictionary mapping item names to prices (e.g., `{\"apple\": 1.5}`).\n    *   **Variables:**\n        *   `total`: Accumulates the cost of shipped items.\n        *   `shipped`: List of dictionaries containing details of successfully shipped items.\n        *   `"
+      }
+    },
+    "architect": {
+      "plain": {
+        "tps": 20.206829071044922,
+        "ttft": 0.3177417907714844,
+        "wall": 25.608421199955046,
+        "text": "Here's a thinking process that leads to the suggested architecture:\n\n1.  **Analyze the Request:**\n    *   **Goal:** Design an order-fulfillment service.\n    *   **Context:** Mid-sized webshop (implies growing volume, need for scalability, but not enterprise-level complexity like Amazon).\n    *   **Key Constraints/Features:** Multiple warehouses, partial shipments allowed (not all items in an order must come from one stock location).\n    *   **Output Requirements:** Architecture components, data model, API design, and the *two most important trade-offs*.\n\n2.  **Deconstruct the Problem:**\n    *   *Order Management:* Need to store orders, line items, status, and shipping addresses.\n    *   *Inventory Management:* Need to track stock levels across warehouses.\n    *   *Fulfillment Logic:* Need to decide *where* to ship items from (split shipments vs. single warehouse).\n    *   *Shipping:* Need to calculate costs, generate labels, and track status.\n    *   *Integration:* Needs to talk to the frontend (webshop), backend (order processing), and potentially 3rd party carriers.\n\n3.  **Identify Key Components:**\n    *   **API Gateway:** Entry point.\n    *   **Order Service:** Core logic for order lifecycle.\n    *   **Inventory Service:** Stock tracking.\n    *   **Warehouse Service:** Location logic (which warehouse has stock).\n    *   **Shipping Service:** Carrier integration, labels, tracking.\n    *   **Notification Service:** Email/Updates.\n    *   **Database:** Persistent storage.\n    *   **Cache:** Performance (Redis).\n\n4.  **Drafting the Architecture (Mental Model):**\n    *   *Frontend:* Webshop -> API Gateway.\n    *   *Backend:* Order Service -> Inventory Service -> Warehouse Service -> Shipping Service.\n    *   *Data:* SQL for orders, NoSQL/SQL for inventory (maybe), Redis for caching stock.\n    *   *Async:* Webhooks for status updates.\n\n5.  **Refining the Data Model:**\n    *   Need `Orders`, `OrderItems`, `Warehouses`, `Inventory`, `Shipments`.\n    *   *Crucial Decision:* How to handle partial shipments?\n        *   Option A: Split the order into multiple shipment records.\n        *   Option"
+      }
+    }
+  },
+  "probes": {
+    "assistant-edit": "FAIL (SyntaxError)"
+  }
+}

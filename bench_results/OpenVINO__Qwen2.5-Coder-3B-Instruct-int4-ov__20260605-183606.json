@@ -1,0 +1,67 @@
+{
+  "model": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
+  "pipeline": "LLMPipeline",
+  "timestamp": "2026-06-05T18:31:08",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "autocomplete": {
+      "plain": {
+        "tps": 28.331279754638672,
+        "ttft": 0.09631049346923828,
+        "wall": 1.791258400073275,
+        "text": "        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])"
+      },
+      "fim": true
+    },
+    "assistant-edit": {
+      "plain": {
+        "tps": 29.240402221679688,
+        "ttft": 0.10626150512695312,
+        "wall": 8.75983989983797,
+        "text": "```python\nfrom typing import List, Dict\n\ndef process_orders(orders: List[Dict[str, int]], inventory: Dict[str, int], prices: Dict[str, float]) -> Tuple[float, List[Dict[str, int]], List[Dict[str, int]]]:\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      },
+      "pl": {
+        "tps": 63.23114013671875,
+        "ttft": 0.10212960052490234,
+        "wall": 3.9890543001238257,
+        "text": "```python\ndef process_orders(orders: list[dict[str, int]], inventory: dict[str, int], prices: dict[str, float]) -> tuple[float, list[dict[str, int]], list[dict[str, int]]]:\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      },
+      "pl_delta_pct": 116.2
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 29.186811447143555,
+        "ttft": 0.10648889923095703,
+        "wall": 8.843759199837223,
+        "text": "This function processes a list of orders, updating an inventory and calculating the total cost of the orders that can be fulfilled. Here's a step-by-step breakdown of how it works:\n\n1. **Initialization**:\n   - `total` is initialized to 0 to keep track of the total cost of all orders.\n   - `shipped` is initialized as an empty list to store details of orders that have been successfully shipped.\n   - `backordered` is initialized as an empty list to store details of orders that cannot be fulfilled due to insufficient inventory.\n\n2. **Processing Each Order**:\n   - For each order in the `orders` list:\n     - Extract the `item` and `qty` from the order dictionary.\n     - Check if the `item` is present in the `inventory`. If not, add the order to the `backordered` list and continue to the next order.\n\n3. **Fulfilling Orders**:\n   - If the `item` is in the inventory:\n     - Check if the available quantity (`inventory[item]`) is greater than or equal to the required quantity (`qty`).\n       - If it is, update the inventory by subtracting the required quantity and calculate the cost of the shipment.\n       - Add the"
+      },
+      "pl": {
+        "tps": 21.73138427734375,
+        "ttft": 0.10114230346679688,
+        "wall": 11.835006899898872,
+        "text": "This function processes a list of orders, updating the inventory and calculating the total cost of the orders that can be fulfilled. Here's a step-by-step breakdown of what the function does:\n\n1. **Initialization**:\n   - `total`: Accumulates the total cost of all orders that can be fulfilled.\n   - `shipped`: A list to store details of orders that have been shipped.\n   - `backordered`: A list to store details of orders that cannot be fulfilled due to insufficient inventory.\n\n2. **Iterate over each order**:\n   - For each order, extract the `item` and `qty` (quantity).\n   - Check if the `item` is in the `inventory`. If not, add the order to the `backordered` list and continue to the next order.\n\n3. **Check inventory availability**:\n   - If the `item` is in the `inventory`, check if the available quantity (`inventory[item]`) is greater than or equal to the required quantity (`qty`).\n   - If the available quantity is sufficient:\n     - Subtract the required quantity from the inventory.\n     - Calculate the cost of the order by multiplying the price of the item (`prices.get(item, 0)`) by the quantity.\n     -"
+      },
+      "pl_delta_pct": -25.5
+    },
+    "architect": {
+      "plain": {
+        "tps": 29.6020565032959,
+        "ttft": 0.08694420623779296,
+        "wall": 17.348293900024146,
+        "text": "Designing an order-fulfilment service for a mid-size webshop involves several key components, a robust data model, and well-defined APIs to facilitate efficient order processing and fulfillment. Below is a proposed architecture, along with the two most important trade-offs considered.\n\n### Components\n\n1. **Order Management System (OMS)**\n   - **Functionality**: Handles incoming orders, manages order status, and provides order tracking.\n   - **Data Model**: Includes tables for orders, customers, products, and order items.\n\n2. **Warehouse Management System (WMS)**\n   - **Functionality**: Manages inventory, tracks stock levels, and handles shipments.\n   - **Data Model**: Includes tables for warehouses, locations, products, and inventory levels.\n\n3. **Shipping Service Provider Integration**\n   - **Functionality**: Integrates with various shipping providers to handle shipping requests and track shipments.\n   - **Data Model**: Includes tables for shipping methods, carriers, and shipment details.\n\n4. **Inventory Management System (IMS)**\n   - **Functionality**: Manages inventory levels across all warehouses and ensures stock availability.\n   - **Data Model**: Includes tables for inventory levels, stock transfers, and inventory history.\n\n5. **API Gateway**\n   - **Functionality**: Acts as a single entry point for all client requests, handling authentication, rate limiting, and load balancing.\n   - **Data Model**: None, but it manages API endpoints and routing.\n\n6. **Notification System**\n   - **Functionality**: Sends notifications to customers about order status changes and shipment updates.\n   - **Data Model**: Includes tables for notifications, customer preferences, and notification history.\n\n7. **Payment Processing System**\n   - **Functionality**: Handles payment processing and transaction management.\n   - **Data Model**: Includes tables for payments, transactions, and payment methods.\n\n8. **Analytics and Reporting System**\n   - **Functionality**: Provides insights into order performance, inventory usage, and shipping metrics.\n   - **Data Model**: Includes tables for analytics data, reports, and dashboards.\n\n### Data Model\n\nThe data model should be normalized to ensure data integrity and scalability. Key entities include:\n\n- **Orders**: Order ID, customer ID, product IDs, quantity, order status, shipping address, etc.\n- **Products**: Product ID, name, description, price, stock level, etc.\n- **Warehouses**: Warehouse ID, location, capacity, etc.\n- **Inventory Levels**: Warehouse ID, product ID, quantity, etc.\n- **"
+      },
+      "pl": {
+        "tps": 25.84355354309082,
+        "ttft": 0.08977040100097657,
+        "wall": 19.87403150019236,
+        "text": "Designing an order-fulfilment service for a mid-size webshop involves several key components, a robust data model, and well-defined APIs. Below is a proposed architecture, along with the two most important trade-offs considered.\n\n### Components\n\n1. **Order Management System (OMS)**\n   - **Functionality**: Handles incoming orders, manages order status, and coordinates with other systems.\n   - **Data Model**: Includes tables for orders, order items, customers, and warehouses.\n\n2. **Warehouse Management System (WMS)**\n   - **Functionality**: Manages inventory, stock levels, and shipment logistics.\n   - **Data Model**: Includes tables for warehouse locations, inventory items, and shipment details.\n\n3. **Inventory Management System (IMS)**\n   - **Functionality**: Tracks inventory levels and ensures stock availability.\n   - **Data Model**: Includes tables for inventory items, stock levels, and inventory transactions.\n\n4. **Shipping Management System (SMS)**\n   - **Functionality**: Handles shipment logistics, tracking, and delivery notifications.\n   - **Data Model**: Includes tables for shipment details, tracking information, and delivery status.\n\n5. **Payment Gateway**\n   - **Functionality**: Processes payments and handles payment notifications.\n   - **Data Model**: Includes tables for payment transactions, payment methods, and payment statuses.\n\n6. **API Gateway**\n   - **Functionality**: Acts as a single entry point for all client requests, routing them to the appropriate backend services.\n   - **Data Model**: Includes tables for API requests, responses, and error handling.\n\n7. **Notification System**\n   - **Functionality**: Sends notifications to customers and stakeholders.\n   - **Data Model**: Includes tables for notification types, recipients, and notification details.\n\n### Data Model\n\n- **Order**: Contains details about the order, including order ID, customer ID, order items, and order status.\n- **Order Item**: Contains details about each item in the order, including item ID, quantity, and item details.\n- **Customer**: Contains details about the customer, including customer ID, name, email, and contact information.\n- **Warehouse**: Contains details about each warehouse, including warehouse ID, location, and capacity.\n- **Inventory**: Contains details about inventory items, including item ID, quantity, and location.\n- **Shipment**: Contains details about each shipment, including shipment ID, order ID, warehouse ID, shipment status, and tracking information.\n- **Payment**: Contains details about payment transactions, including transaction ID,"
+      },
+      "pl_delta_pct": -12.7
+    }
+  },
+  "probes": {
+    "autocomplete": "PASS",
+    "assistant-edit": "PASS",
+    "assistant-edit+PL": "PASS"
+  }
+}

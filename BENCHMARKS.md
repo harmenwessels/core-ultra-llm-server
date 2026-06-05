@@ -40,8 +40,16 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 | Granite-4.1-3b-cw (ours) | 3.27 s (0.07) probe ✗¹ | 28.8 **✗ behavior changed** | 42.3 (+47%) **✗ syntax** | 29.5 | 17.1 (−42%) | 29.6 | 17.9 (−39%) |
 | Qwen3.5-2B | n/a (VLM) | **42.1 ✓** | n/a | **37.2** | n/a | **43.2** | n/a |
 | Gemma 4 E2B (default chat) | n/a (VLM) | 23.1 ✓ | n/a | 22.9 | n/a | 23.0 | n/a |
+| Qwen2.5-Coder-3B | 1.79 s (0.10) probe ✓ | 29.2 **✓** | **63.2 (+116%) ✓** | 29.2 | 21.7 (−26%) | 29.6 | 25.8 (−13%) |
+| Granite-4.1-3b **int8** (rebuilt) | 6.67 s (0.11) probe ✓ | 14.8 **✓** | 24.6 (+66%) **✓** | 14.3 | 14.4 (+0%) | 14.9 | 15.9 (+6%) |
+| Qwen3.5-0.8B | n/a (VLM) | 61.4 ✓ | n/a | 61.4 | n/a | **61.4** | n/a |
+| OmniCoder-9B | n/a (VLM) | 13.3 ✗² | n/a | 13.4 | n/a | 13.4 | n/a |
+| Qwen3.5-4B | n/a (VLM) | 20.2 ✗² | n/a | 20.6 | n/a | 20.2 | n/a |
 
 ¹ raw-continuation probe artifact (no stop criterion), not a verified failure.
+² **untagged thinking preamble**: the model spends the token budget on prose reasoning before
+(or instead of) the code — OmniCoder-9B produced *zero* code in 512 tokens. Not a conversion
+defect, but a practical disqualifier for the edit role at these decode speeds.
 
 ## Findings
 
@@ -51,19 +59,32 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 2. **PL is not always quality-neutral**: Granite's +PL edit output dropped a closing
    parenthesis (SyntaxError) — reproduced across runs. The continuous-batching backend's
    numerics can change outputs for the worse; the probe gate matters.
-3. **Granite-4.1-cw silently dropped a line of logic** in the edit task (the backordered
-   remainder of partial shipments) — reproduced. Whether this is channel-wise quantization
-   damage or the base model is unresolved (re-test against an int8 build to isolate).
+3. **RESOLVED: Granite-4.1-cw's edit flaws are channel-wise quantization damage.** The int8
+   rebuild of the same base passes *every* probe (autocomplete, edit, edit+PL) where the cw
+   build dropped logic and broke syntax under PL. The cw recipe's 2× speed costs measurable
+   correctness on this model. Secondary observation: int8's PL penalties on explain/architect
+   are also gone (+0%/+6% vs cw's −42%/−39%) — speculation overhead amortizes better at int8's
+   slower decode.
 4. **Qwen2.5-Coder-1.5B is an autocomplete specialist**: best-in-class completion latency with
    a passing probe, but it cannot complete the edit task within 512 tokens (verbose type
    annotation spam + a missing `Tuple` import).
 5. **Qwen3.5-2B outperforms the current chat default (Gemma 4 E2B) on every chat profile**
    (~42 vs ~23 tok/s, lower TTFT, edit probe passing) on this suite.
+6. **Qwen2.5-Coder-3B is the new edit champion**: all probes green, edit+PL at **63.2 tok/s**
+   (+116%) — nearly twice the 7B+PL — while keeping clean FIM autocomplete. The Coder family's
+   instruction style (code first, no musing) is exactly what the edit role rewards.
+7. **Untagged thinking preambles disqualify otherwise-strong models from the edit role**:
+   OmniCoder-9B and Qwen3.5-4B reason in prose before coding and blow the budget; Qwen3.5-2B
+   and 0.8B don't share this behavior despite being the same family.
+8. **Qwen3.5-0.8B does 61.4 tok/s across all chat profiles with a passing edit probe** — at
+   0.85 GiB. Whether 0.8B-class reasoning is *good enough* for explain/architect is a quality
+   question for official benchmarks, but the serving math is remarkable.
 
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |
 |---|---|---|
 | Autocomplete | Qwen2.5-Coder-1.5B (+PL) | 1.07 s completions, probe ✓ |
-| Assistant (edit-heavy) | Qwen2.5-Coder-7B **with PL** | only fast *and* correct edit model (34.4 tok/s, probes ✓) |
-| Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓ — pending a chat-quality A/B vs Gemma E2B |
+| Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
+| Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
+| Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-**cw** | thinking preambles (former two); quantization damage (cw) |
