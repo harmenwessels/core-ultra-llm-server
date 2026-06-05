@@ -98,21 +98,28 @@ template disabled — required for autocomplete to work).
 Core Ultra 155H (Meteor Lake), Arc iGPU, 32 GB LPDDR5x, driver 32.0.101.8724,
 OpenVINO 2026.3 nightly:
 
-| Model | Weights | Modalities | Max context | Decode | TTFT | Verdict |
-|---|---|---|---|---|---|---|
-| [Qwen2.5-Coder-0.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 0.3 GB | text | 32k | **87.6 tok/s** | 0.06 s | fastest; quality floor for autocomplete |
-| [Qwen3.5-0.8B INT4](https://huggingface.co/yangsu0423/Qwen3.5-0.8B-int4-ov) | 0.9 GB | text, image¹ | 256k | **72.7 tok/s** | 0.08 s | newest gen at near-0.5B speed; community conversion |
-| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (default autocomplete) | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot: FIM-trained, 2.4× faster than the 3B |
-| **[Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)** (default chat) | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | fastest chat-quality model; very responsive in Continue |
-| [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
-| [Qwen3.5-4B INT4](https://huggingface.co/yangsu0423/Qwen3.5-4B-int4-ov) | 3.3 GB | text, image¹ | 256k | 19.9 tok/s | 0.31 s | newest gen; faster than the 9B at similar quality class; community conversion |
-| [Gemma 4 E4B INT4](https://huggingface.co/OpenVINO/gemma-4-E4B-it-int4-ov) | 6.0 GB | text, image, audio¹ | 128k | 15.7 tok/s | 0.52 s | mid |
-| [Qwen2.5-Coder-7B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-7B-Instruct-int4-ov) | 4.2 GB | text | 32k | 15.0 tok/s | 0.20 s | best chat quality that fits |
-| [Qwen3-VL-8B INT4](https://huggingface.co/OpenVINO/Qwen3-VL-8B-Instruct-int4-ov) | 5.5 GB | text, image, video¹ | 256k | 14.5 tok/s | 0.15 s | chat-class speed; vision+video capable |
-| [Qwen3.5-9B INT4-asym](https://huggingface.co/droans/qwen3.5-9B-int4-asym-ov) | 5.7 GB | text, image¹ | 256k | 13.2 tok/s | 0.44 s | newest model generation; community conversion (droans) |
-| ~~[gpt-oss-20b INT4](https://huggingface.co/OpenVINO/gpt-oss-20b-int4-ov)~~ | ~~11.7 GiB~~ | ~~text~~ | ~~128k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile despite 18 GB free host RAM |
-| ~~[Qwen3-Coder-30B-A3B INT4](https://huggingface.co/OpenVINO/Qwen3-Coder-30B-A3B-Instruct-int4-ov)~~ | ~~15.2 GiB~~ | ~~text~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile |
-| ~~[Gemma 4 26B A4B INT4](https://huggingface.co/Morteza89/gemma-4-26b-a4b-it-int4-ov)~~ | ~~14.3 GiB~~ | ~~text, image, audio¹~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM** (tested 3×): fails during weight upload even with 24 GB free RAM |
+| Model | Base released² | Weights | Modalities | Max context | Decode | TTFT | Verdict |
+|---|---|---|---|---|---|---|---|
+| [Qwen2.5-Coder-0.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 2024-11 | 0.3 GB | text | 32k | **87.6 tok/s** | 0.06 s | fastest; quality floor for autocomplete |
+| [Qwen3.5-0.8B INT4](https://huggingface.co/yangsu0423/Qwen3.5-0.8B-int4-ov) | 2026-02 | 0.9 GB | text, image¹ | 256k | **72.7 tok/s** | 0.08 s | newest gen at near-0.5B speed; community conversion |
+| [Qwen3-0.6B INT4](https://huggingface.co/OpenVINO/Qwen3-0.6B-int4-ov) | 2025-04 | 0.4 GB | text | 40k | **62.7 tok/s** | 0.10 s | slower than the newer, similar-size Qwen3.5-0.8B |
+| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (default autocomplete) | 2024-09 | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot: FIM-trained, 2.4× faster than the 3B |
+| **[Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)** (default chat) | 2026-03 | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | fastest chat-quality model; very responsive in Continue |
+| [Qwen3-4B INT4](https://huggingface.co/OpenVINO/Qwen3-4B-int4-ov) | 2025-04 | 2.1 GB | text | 40k | 24.9 tok/s | 0.10 s | same speed as Coder-3B with a newer base |
+| [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 2024-11 | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
+| [Qwen3.5-4B INT4](https://huggingface.co/yangsu0423/Qwen3.5-4B-int4-ov) | 2026-02 | 3.3 GB | text, image¹ | 256k | 19.9 tok/s | 0.31 s | newest gen; faster than the 9B at similar quality class; community conversion |
+| [Gemma 4 E4B INT4](https://huggingface.co/OpenVINO/gemma-4-E4B-it-int4-ov) | 2026-03 | 6.0 GB | text, image, audio¹ | 128k | 15.7 tok/s | 0.52 s | mid |
+| [Qwen2.5-Coder-7B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-7B-Instruct-int4-ov) | 2024-09 | 4.2 GB | text | 32k | 15.0 tok/s | 0.20 s | best chat quality that fits |
+| [Qwen3-8B INT4](https://huggingface.co/OpenVINO/Qwen3-8B-int4-ov) | 2025-04 | 4.6 GB | text | 40k | 15.0 tok/s | 0.13 s | Coder-7B speed with a newer base |
+| [Qwen3-VL-8B INT4](https://huggingface.co/OpenVINO/Qwen3-VL-8B-Instruct-int4-ov) | 2025-10 | 5.5 GB | text, image, video¹ | 256k | 14.5 tok/s | 0.15 s | chat-class speed; vision+video capable |
+| [Qwen3.5-9B INT4-asym](https://huggingface.co/droans/qwen3.5-9B-int4-asym-ov) | 2026-02 | 5.7 GB | text, image¹ | 256k | 13.2 tok/s | 0.44 s | newest model generation; community conversion (droans) |
+| ~~[LFM2.5-8B-A1B INT4](https://huggingface.co/Echo9Zulu/LFM2.5-8B-A1B-int4_sym-awq-ov)~~ | ~~2026-05~~ | ~~4.5 GB~~ | ~~text~~ | — | — | — | **unsupported arch**: GPU compile of the hybrid conv/attention graph never completes (killed after 27 min, 15 GB RSS) |
+| ~~[gpt-oss-20b INT4](https://huggingface.co/OpenVINO/gpt-oss-20b-int4-ov)~~ | ~~2025-08~~ | ~~11.7 GiB~~ | ~~text~~ | ~~128k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile despite 18 GB free host RAM |
+| ~~[Qwen3-Coder-30B-A3B INT4](https://huggingface.co/OpenVINO/Qwen3-Coder-30B-A3B-Instruct-int4-ov)~~ | ~~2025-07~~ | ~~15.2 GiB~~ | ~~text~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile |
+| ~~[Gemma 4 26B A4B INT4](https://huggingface.co/Morteza89/gemma-4-26b-a4b-it-int4-ov)~~ | ~~2026-03~~ | ~~14.3 GiB~~ | ~~text, image, audio¹~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM** (tested 3×): fails during weight upload even with 24 GB free RAM |
+
+² "Base released" is the Hugging Face creation date of the *original base model* repo (e.g.
+`google/gemma-4-E2B-it`, `Qwen/Qwen2.5-Coder-1.5B-Instruct`), not the OpenVINO conversion date.
 
 ¹ Modalities and max context are the *model's* capabilities (from each model's `config.json`).
 The server currently exposes a **text-only** API and keeps practical context well below the
@@ -155,6 +162,18 @@ requirements.txt           pinned dependency versions (incl. OpenVINO nightly in
 models/                    downloaded models (gitignored)
 .ovcache/                  compiled-blob cache (gitignored)
 ```
+
+## Alternatives / related projects
+
+This server is deliberately minimal. If you need more than chat + autocomplete, look at:
+
+- [OpenVINO Model Server (OVMS)](https://github.com/openvinotoolkit/model_server) — Intel's official
+  serving solution, speaks the OpenAI API, production-grade.
+- [OpenArc](https://github.com/SearchSavior/OpenArc) — community inference server for Intel devices
+  (CPU/GPU/NPU): LLMs, VLMs, Whisper, TTS, embeddings and rerankers over OpenAI endpoints, with
+  multi-model concurrency and speculative decoding. Note: model conversions published by its author
+  (e.g. the LFM2.5 family) are typically validated on Arc B-series discrete GPUs — support on a
+  Core Ultra iGPU may differ (see the LFM2.5 row in the results table).
 
 ## License
 
