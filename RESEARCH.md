@@ -200,6 +200,11 @@ Hard-won rules:
   default the moment a small FIM-trained variant ships.
 - **Ministral-3 / `mistral3` export support** in optimum-intel: blocked upstream (gate-2
   catch-22 above).
+- **Gemma-4-12B / `gemma4_unified`**: the quality standout of the fitting size class
+  (MMLU-Pro 77.2, LiveCodeBench 72.0 at 11.95B) is a new encoder-free architecture absent
+  from both transformers ≤5.5 and optimum-intel's export registry — unconvertible today,
+  which explains why no OV IR of it exists. High-value re-check when support lands
+  (~6.7 GiB int4 would also probe the load ceiling).
 - **Gemma 4 E2B coding finetunes**: exist only as GGUF (e.g. `Gemma-4-e2bxOpus-4.7-turbo`);
   a safetensors release would enable converting the only curve-breaking architecture with
   coding tuning — the most valuable potential artifact for this hardware.
