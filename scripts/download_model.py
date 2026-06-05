@@ -33,7 +33,8 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    target = args.root / args.repo.split("/")[-1]
+    # mirror the HF repo id on disk: models/<owner>/<name>
+    target = args.root / args.repo
     target.mkdir(parents=True, exist_ok=True)
     print(f"Downloading {args.repo} -> {target}")
 

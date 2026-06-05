@@ -40,16 +40,18 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe scripts\download_model.py --repo OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
 
 # 3. Optional: benchmark a model (TTFT + decode tok/s)
-.\.venv\Scripts\python.exe scripts\bench.py --model-dir models\gemma-4-E2B-it-int4-ov
+.\.venv\Scripts\python.exe scripts\bench.py --model-dir models\gregor160300\gemma-4-E2B-it-int4-ov
 
 # 4. Start the server on http://127.0.0.1:8000/v1
 .\.venv\Scripts\python.exe server.py
 ```
 
-The server loads **two models by default** and routes by the request's `model` field:
-`gemma-4-E2B-it-int4-ov` (chat) and `Qwen2.5-Coder-1.5B-Instruct-int4-ov` (autocomplete via
-`/v1/completions` with FIM). The first launch per model pays a one-time compile cost (~30–70 s);
-subsequent launches load from the cache in seconds.
+Models live under `models/<owner>/<name>`, mirroring their Hugging Face repo ids, and the served
+model id is the same `owner/name` string. The server loads **two models by default** and routes by
+the request's `model` field: `gregor160300/gemma-4-E2B-it-int4-ov` (chat) and
+`OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov` (autocomplete via `/v1/completions` with FIM).
+The first launch per model pays a one-time compile cost (~30–70 s); subsequent launches load from
+the cache in seconds.
 
 ### Configuration (environment variables)
 
@@ -60,11 +62,12 @@ subsequent launches load from the cache in seconds.
 | `DEVICE` | `GPU` | OpenVINO device (`CPU` as debug fallback) |
 | `HOST` / `PORT` | `127.0.0.1` / `8000` | bind address |
 | `CACHE_DIR` | `./.ovcache` | compiled-blob cache location |
+| `PROMPT_LOOKUP_MODELS` | the autocomplete model | `;`-separated model ids that use prompt-lookup speculative decoding (+25% measured on FIM workloads; do **not** enable for general chat models — measured −20…−33%; unsupported on VLM-shaped models) |
 
 Example — serve one bigger chat model instead:
 
 ```powershell
-$env:MODEL_DIR = "models\Qwen2.5-Coder-7B-Instruct-int4-ov"
+$env:MODEL_DIR = "models\OpenVINO\Qwen2.5-Coder-7B-Instruct-int4-ov"
 .\.venv\Scripts\python.exe server.py
 ```
 
@@ -74,7 +77,7 @@ $env:MODEL_DIR = "models\Qwen2.5-Coder-7B-Instruct-int4-ov"
 models:
   - name: Gemma 4 E2B (local OpenVINO)
     provider: openai
-    model: gemma-4-E2B-it-int4-ov
+    model: gregor160300/gemma-4-E2B-it-int4-ov
     apiBase: http://127.0.0.1:8000/v1
     apiKey: dummy
     roles:
@@ -82,7 +85,7 @@ models:
       - edit
   - name: Qwen2.5 Coder 1.5B (local autocomplete)
     provider: openai
-    model: Qwen2.5-Coder-1.5B-Instruct-int4-ov
+    model: OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
     apiBase: http://127.0.0.1:8000/v1
     apiKey: dummy
     roles:
@@ -107,7 +110,7 @@ OpenVINO 2026.3 nightly:
 | [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (default autocomplete) | 2024-09 | 0.9 GB | text | 32k | 57.0 tok/s | 0.06 s | autocomplete sweet spot: FIM-trained, 2.4× faster than the 3B |
 | [Ministral-3b-instruct INT4](https://huggingface.co/Echo9Zulu/Ministral-3b-instruct-int4_asym-ov) | 2024-03 | 1.7 GB | text | 128k | 36.0 tok/s | 0.07 s | community Mistral derivative (not official Mistral AI); 2024-era quality |
 | [Qwen3.5-2B INT4](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | 2026-02 | 2.0 GB | text, image¹ | 256k | 34.6 tok/s | 0.17 s | fastest chat-quality model; community conversion |
-| **[Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)** (default chat) | 2026-03 | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | very responsive in Continue |
+| [Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov) (default chat) | 2026-03 | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | very responsive in Continue |
 | [Granite-4.1-3b INT4-cw](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-ov) (our conversion) | 2026-04 | 1.7 GB | text | 128k | 27.4 tok/s | 0.13 s | newest Granite; first OV IR of 4.1. Recipe matters: int4_sym channel-wise 27.4 / int8 17.4 / int4_asym g128 13.0 tok/s — group-wise dequant is expensive on Arc. cw quality not yet evaluated. |
 | [Qwen3-4B INT4](https://huggingface.co/OpenVINO/Qwen3-4B-int4-ov) | 2025-04 | 2.1 GB | text | 40k | 24.9 tok/s | 0.10 s | same speed as Coder-3B with a newer base |
 | [Granite-4.0-micro INT4](https://huggingface.co/llmware/granite-4-micro-ov) | 2025-09 | 2.2 GB | text | 128k | 24.6 tok/s | 0.16 s | IBM; 128k context at 3B-class speed; community conversion (llmware) |
@@ -157,6 +160,15 @@ memory. Multimodal IRs run fine text-only through `VLMPipeline`.
   auto-detect the IR shape per model directory.
 - GPU latency tuning hints (`PERFORMANCE_HINT=LATENCY`, `INFERENCE_PRECISION_HINT=f16`,
   `KV_CACHE_PRECISION=u8`) made no measurable difference on this hardware.
+- **Prompt-lookup speculative decoding** (`scripts/bench_prompt_lookup.py`) is a per-model bet on
+  draft acceptance: +25% for the FIM-trained Qwen2.5-Coder-1.5B on code-edit prompts, but −20…−33%
+  for general models (Qwen3-4B/8B) whose output diverges from the prompt. The server enables it
+  for the autocomplete model only. Note: it switches to the continuous-batching backend, whose
+  numerics differ slightly — outputs are quality-equivalent but not bit-identical.
+- **Quantization-recipe sensitivity is architecture-specific**: Granite-4.1 gained 2.1× from
+  channel-wise int4 (vs group-128), while the identical recipe change gained Gemma 4 E2B nothing
+  (its remaining overhead is the per-layer-embedding gather path, not dequant). When converting
+  models yourself, benchmark recipes — don't assume.
 
 ## Repository layout
 
@@ -166,7 +178,7 @@ scripts/check_gpu.py       verify OpenVINO sees the Arc iGPU
 scripts/download_model.py  fetch OpenVINO IR models from Hugging Face
 scripts/bench.py           TTFT + decode-throughput benchmark (3 measured runs)
 requirements.txt           pinned dependency versions (incl. OpenVINO nightly index)
-models/                    downloaded models (gitignored)
+models/<owner>/<name>/     downloaded models, mirroring HF repo ids (gitignored)
 .ovcache/                  compiled-blob cache (gitignored)
 ```
 

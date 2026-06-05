@@ -14,12 +14,17 @@ Design choices (see README):
     VLMPipeline; plain LLM IRs (Qwen) go through LLMPipeline.
 
 Config via environment variables:
-  MODEL_DIRS (";"-separated list; default: models/gemma-4-E2B-it-int4-ov;models/Qwen2.5-Coder-3B-Instruct-int4-ov)
+  MODEL_DIRS (";"-separated list; default: models/gemma-4-E2B-it-int4-ov;models/Qwen2.5-Coder-1.5B-Instruct-int4-ov)
   MODEL_DIR  (single-model override, kept for backward compat)
   DEVICE     (default: GPU)
   HOST       (default: 127.0.0.1)
   PORT       (default: 8000)
   CACHE_DIR  (default: ./.ovcache)
+  PROMPT_LOOKUP_MODELS (";"-separated model ids; default: Qwen2.5-Coder-1.5B-Instruct-int4-ov)
+             Enables prompt-lookup speculative decoding for the listed models.
+             Measured +25% decode on FIM/code-edit workloads for the coder
+             model, but it *hurts* general chat models (-20..-33%) — enable
+             only for echo-faithful (FIM-trained) models. LLMPipeline only.
 
 Run:
     .\.venv\Scripts\python.exe server.py
@@ -44,8 +49,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 ROOT = pathlib.Path(__file__).resolve().parent
 
 _default_dirs = (
-    f"{ROOT / 'models' / 'gemma-4-E2B-it-int4-ov'};"
-    f"{ROOT / 'models' / 'Qwen2.5-Coder-1.5B-Instruct-int4-ov'}"
+    f"{ROOT / 'models' / 'gregor160300' / 'gemma-4-E2B-it-int4-ov'};"
+    f"{ROOT / 'models' / 'OpenVINO' / 'Qwen2.5-Coder-1.5B-Instruct-int4-ov'}"
 )
 if os.environ.get("MODEL_DIR"):  # single-model override
     _default_dirs = os.environ["MODEL_DIR"]
@@ -56,6 +61,20 @@ DEVICE = os.environ.get("DEVICE", "GPU")
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8000"))
 CACHE_DIR = pathlib.Path(os.environ.get("CACHE_DIR", ROOT / ".ovcache"))
+PROMPT_LOOKUP_MODELS = set(
+    m for m in os.environ.get(
+        "PROMPT_LOOKUP_MODELS", "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov"
+    ).split(";") if m
+)
+
+
+def _model_id(model_dir: pathlib.Path) -> str:
+    """Model id mirrors the HF repo id: 'owner/name' for dirs under models/,
+    plain folder name otherwise."""
+    try:
+        return model_dir.resolve().relative_to((ROOT / "models").resolve()).as_posix()
+    except ValueError:
+        return model_dir.name
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("server")
@@ -63,6 +82,7 @@ log = logging.getLogger("server")
 app = FastAPI(title="openvino-windows-openai-api")
 
 _pipes: dict[str, object] = {}  # model id -> pipeline
+_prompt_lookup_enabled: dict[str, bool] = {}  # model id -> PL active
 _gen_lock = threading.Lock()  # single-flight generation across all models
 
 
@@ -99,11 +119,20 @@ def _load_pipelines() -> None:
             raise SystemExit(f"model dir not found: {model_dir}")
         is_vlm = (model_dir / "openvino_vision_embeddings_model.xml").exists()
         pipe_cls = ov_genai.VLMPipeline if is_vlm else ov_genai.LLMPipeline
-        log.info("Loading %s from %s on %s (cache: %s)",
-                 pipe_cls.__name__, model_dir, DEVICE, CACHE_DIR)
+        kwargs: dict = {"CACHE_DIR": str(CACHE_DIR)}
+        model_id = _model_id(model_dir)
+        use_pl = model_id in PROMPT_LOOKUP_MODELS and not is_vlm
+        if use_pl:
+            kwargs["prompt_lookup"] = True
+        if model_id in PROMPT_LOOKUP_MODELS and is_vlm:
+            log.warning("%s: prompt lookup requested but unsupported on "
+                        "VLM-shaped IRs — ignoring", model_id)
+        log.info("Loading %s from %s on %s (cache: %s, prompt_lookup: %s)",
+                 pipe_cls.__name__, model_dir, DEVICE, CACHE_DIR, use_pl)
         t0 = time.perf_counter()
-        _pipes[model_dir.name] = pipe_cls(str(model_dir), DEVICE, CACHE_DIR=str(CACHE_DIR))
-        log.info("%s ready in %.1fs", model_dir.name, time.perf_counter() - t0)
+        _pipes[model_id] = pipe_cls(str(model_dir), DEVICE, **kwargs)
+        _prompt_lookup_enabled[model_id] = use_pl
+        log.info("%s ready in %.1fs", model_id, time.perf_counter() - t0)
 
 
 def _resolve_pipe(body: dict):
@@ -120,12 +149,17 @@ def _resolve_pipe(body: dict):
     return model_id, pipe
 
 
-def _build_generation_config(pipe, body: dict, default_max: int = 1024
+def _build_generation_config(pipe, body: dict, default_max: int = 1024,
+                             model_id: str | None = None
                              ) -> ov_genai.GenerationConfig:
     cfg = pipe.get_generation_config()
     cfg.max_new_tokens = int(
         body.get("max_completion_tokens") or body.get("max_tokens") or default_max
     )
+    if model_id and _prompt_lookup_enabled.get(model_id):
+        # speculative prompt-lookup decoding (measured +25% on FIM workloads)
+        cfg.num_assistant_tokens = 5
+        cfg.max_ngram_size = 3
     temperature = body.get("temperature")
     top_p = body.get("top_p")
     if temperature is not None and temperature > 0:
@@ -204,7 +238,7 @@ async def chat_completions(request: Request):
 
     model_id, pipe = _resolve_pipe(body)
     history = _to_chat_history(messages)
-    gen_cfg = _build_generation_config(pipe, body)
+    gen_cfg = _build_generation_config(pipe, body, model_id=model_id)
     comp_id = _new_id("chatcmpl")
     created = int(time.time())
 
@@ -263,7 +297,7 @@ async def completions(request: Request):
         prompt = prompt[0] if prompt else ""
 
     model_id, pipe = _resolve_pipe(body)
-    gen_cfg = _build_generation_config(pipe, body, default_max=256)
+    gen_cfg = _build_generation_config(pipe, body, default_max=256, model_id=model_id)
     # Raw continuation: do NOT wrap the prompt in the chat template (defaults to
     # True in openvino_genai and would break FIM autocomplete prompts).
     gen_cfg.apply_chat_template = False
