@@ -118,24 +118,32 @@ best validated mode; "+PL" where prompt-lookup wins).
 | Qwen2.5-Coder-7B | — | **HE 88.4** / MBPP 83.5 | — | 3.64 s | 34.4 +PL | ~16 | **✓** |
 | Qwen3.5-0.8B | 29.7 | n.r. | 52.1 | n/a | 61.4 | 61.4 | ✓ |
 | Qwen3.5-2B | 55.3 | n.r. | 61.2 | n/a | 42.1 | ~40 | ✓ |
-| Qwen3.5-4B | — (not fetched) | n.r. | — | n/a | (thinking preamble) | ~20 | ✗² |
+| Qwen3.5-4B | **79.1**⁴ | LCB-v6 55.8 | 89.8 | n/a | (thinking preamble) | ~20 | ✗² |
 | Gemma 4 E2B (both conversions) | 60.0 | LCB-v6 44.0 | — | n/a | 21–23 | ~23 | ✓ |
-| Gemma 4 E4B | **69.4** | LCB-v6 52.0 | — | *not suite-tested* | — | 15.7¹ | untested |
+| Gemma 4 E4B | **69.4** | LCB-v6 52.0 | — | n/a | 15.6 | ~16 | **✓** |
 | Granite-4.1-3b cw v2 (ours) | 49.8 | HE 81.7 / MBPP 71.2 | 82.3 | — | 31.3 | ~31 | **✓** |
 | Granite-4.1-3b int8 (ours) | 49.8 | same base | 82.3 | — | 24.6 +PL | ~15 | **✓** |
 | Granite-4.1-8b cw (ours) | 56.0 | HE 85.4 / **MBPP 87.3** | **87.1** | — | 27.0 +PL | ~14 | **✓** |
-| OmniCoder-9B | — | GPQA-D 83.8 / TB-2.0 23.6 | — | n/a | (zero code in budget) | ~13 | ✗² |
-| Qwen3-VL-8B | n.r. | n.r. | n.r. | n/a | 14.8 | ~15 | ✓ |
-| Qwen3-0.6B | n.r. | n.r. | n.r. | 1.16 s | (behavior changed) | ~84 | ✗ |
+| OmniCoder-9B (base: Qwen3.5-9B⁴: MMLU-Pro 82.5, LCB-v6 65.6, IFEval 91.5) | — | GPQA-D 83.8 / TB-2.0 23.6 | — | n/a | (zero code in budget) | ~13 | ✗² |
+| Qwen3-VL-8B | n.r.⁵ | n.r.⁵ | n.r.⁵ | n/a | 14.8 | ~15 | ✓ |
+| Qwen3-0.6B | n.r.⁵ | n.r.⁵ | n.r.⁵ | 1.16 s | (behavior changed) | ~84 | ✗ |
 | LFM2.5-1.2B-Thinking | 49.7 | **card warns against programming use** | 88.4 | — | (no code block) | 84.7 (137.9 architect+PL) | ✗ |
 
-¹ old-method decode number (model predates the workload suite and was deleted).
+⁴ Qwen3.5-4B/9B cards report thinking-mode-default scores — not directly comparable with
+non-thinking rows (the 2B card shows the gap: 55.3 non-thinking vs 66.5 thinking on MMLU-Pro),
+and the thinking preamble is precisely what fails our edit-budget probe.
+⁵ official numbers exist only in the Qwen3 tech report (tables not published on the cards in
+extractable form).
 
-Reading across the axes: **Granite-4.1-8b** is the quality/integrity leader among validated
-artifacts (IFEval 87, MBPP 87, BFCL v3 68.3 tool calling) at 14–27 tok/s; **Gemma E4B** has
-the top general scores but is slow and integrity-untested; **Coder-7B** still edges raw
-HumanEval; **Qwen3.5-2B** is the speed/quality balance point for chat; LFM's architect speed
-comes with its own vendor's warning against programming-domain use.
+Reading across the axes: on raw scores the **Qwen3.5-4B/9B generation leads everything**
+(MMLU-Pro 79–83, LCB 56–66) — but those are thinking-mode numbers, and the thinking preamble
+is exactly what disqualifies them from fast edit workloads on this hardware; they're
+quality-first chat picks if you accept reasoning latency. Among **probe-validated,
+non-thinking** artifacts: **Gemma E4B** has the best general scores (MMLU-Pro 69.4, probe ✓,
+15.6 tok/s — but VLM-shaped, so no PL acceleration), **Granite-4.1-8b** leads instruction
+following / MBPP / tool calling with the fastest validated quality-tier edits (27 tok/s +PL),
+**Coder-7B** edges raw HumanEval, **Qwen3.5-2B** is the chat speed/quality balance point, and
+LFM's architect speed carries its vendor's own warning against programming-domain use.
 
 ## Current role recommendations (will evolve as more models run)
 
@@ -145,6 +153,7 @@ comes with its own vendor's warning against programming-domain use.
 | Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
 | Architect (experimental) | LFM2.5-1.2B-Thinking **+PL** | 137.9 tok/s with design-aligned reasoning — but LiquidAI's own card advises against knowledge-intensive/programming use; try-and-judge with low expectations |
-| Assistant (quality tier) | Granite-4.1-8b cw (ours) **+PL** | strongest validated all-rounder by official scores (IFEval 87, MBPP 87, BFCL 68): 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
+| Chat (quality tier) | Gemma 4 E4B | best validated general scores (MMLU-Pro 69.4), 15.6 tok/s, probe ✓ — when answer quality beats pace |
+| Assistant (edit/tool quality tier) | Granite-4.1-8b cw (ours) **+PL** | IFEval 87 / MBPP 87 / BFCL 68: 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
 | Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |
