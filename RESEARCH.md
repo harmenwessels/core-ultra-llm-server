@@ -139,9 +139,11 @@ of generated 3-grams already present in the prompt
 
 **(c) The rule** (this *corrects* our first hypothesis "FIM-trained vs general"): PL gain tracks
 **output/prompt n-gram overlap**, break-even ≈ 35–40% here. The two real drivers:
-- **Thinking mode is PL's worst case** — Qwen3's `<think>` preamble is hundreds of free-form
-  tokens with ~zero prompt overlap; every draft is rejected. This, not "general vs coder",
-  is why Qwen3-4B/8B regressed (−33%/−20%).
+- **Free-prose thinking is PL's worst case** — Qwen3's `<think>` preamble is hundreds of
+  free-form tokens with ~zero prompt overlap; every draft is rejected. This, not "general vs
+  coder", is why Qwen3-4B/8B regressed (−33%/−20%). But thinking per se isn't the variable:
+  LFM2.5-1.2B-Thinking *gains* +63% on architect prompts because its reasoning restates the
+  prompt heavily. Echo overlap must be measured, not inferred from model category.
 - **Instruction-faithful echoing is the best case regardless of family** — Granite-4.1 (not
   FIM-trained) hit 71.6% overlap by following "keep the logic identical" verbatim and gained
   +58%, *beating* the Coder, which rewrote more creatively (44.4%).

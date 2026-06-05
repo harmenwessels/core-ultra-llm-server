@@ -1,0 +1,67 @@
+{
+  "model": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
+  "pipeline": "LLMPipeline",
+  "timestamp": "2026-06-05T22:03:25",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "autocomplete": {
+      "plain": {
+        "tps": 14.071084976196289,
+        "ttft": 0.19950190734863282,
+        "wall": 6.93817470013164,
+        "text": "        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])\n    return result\n```\n\nThis implementation uses two pointers, `i` and `j`, to iterate through the two input lists, `a` and `b`, respectively. It compares the elements at the current positions of the pointers and"
+      },
+      "fim": false
+    },
+    "assistant-edit": {
+      "plain": {
+        "tps": 14.066293716430664,
+        "ttft": 0.33087640380859373,
+        "wall": 20.095610099844635,
+        "text": "```python\nfrom typing import List, Dict, Any, Tuple\n\ndef process_orders(orders: List[Dict[str, Any]], inventory: Dict[str, int], prices: Dict[str, float]) -> Tuple[float, List[Dict[str, Any]], List[Dict[str, Any]]]:\n    \"\"\"Process customer orders, updating inventory, calculating total sales, and tracking shipped and backordered items.\"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      },
+      "pl": {
+        "tps": 26.96331214904785,
+        "ttft": 0.3352344055175781,
+        "wall": 11.017505200114101,
+        "text": "```python\nfrom typing import List, Dict, Any\n\ndef process_orders(orders: List[Dict[str, Any]], \n                  inventory: Dict[str, int], \n                  prices: Dict[str, float]) -> (int, List[Dict[str, Any]], List[Dict[str, Any]]):\n    \"\"\"\n    Process a list of orders against a given inventory and prices, calculating total revenue, shipped items, and backordered items.\n    \"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      },
+      "pl_delta_pct": 91.7
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 14.089835166931152,
+        "ttft": 0.3364289855957031,
+        "wall": 18.45511529990472,
+        "text": "Certainly! Let's break down the `process_orders` function step by step, explaining its purpose, the logic it follows, the edge cases it handles, and then discuss a potential improvement or bug.\n\n### Function Purpose\nThe `process_orders` function is designed to process a list of orders against a given inventory and calculate the total revenue from fulfilled orders. It categorizes the orders into three groups:\n1. **Shipped**: Orders that have been fulfilled.\n2. **Backordered**: Orders that could not be fulfilled immediately and are therefore marked for future fulfillment.\n3. **Backordered (remaining)**: The remaining quantity of orders that could not be fulfilled due to insufficient inventory.\n\n### Step-by-Step Explanation\n\n1. **Initialization**:\n   - `total`: A variable initialized to `0`, which will accumulate the total revenue from the shipped orders.\n   - `shipped`: An empty list that will store dictionaries representing the shipped orders, including the item, quantity, and cost.\n   - `backordered`: An empty list that will store orders that could not be fulfilled immediately.\n\n2. **Iterating Over Orders**:\n   - The function iterates over each `order` in the `orders` list.\n   - For each order, it extracts the"
+      },
+      "pl": {
+        "tps": 12.163309097290039,
+        "ttft": 0.314069091796875,
+        "wall": 21.27349180006422,
+        "text": "Certainly! Let's break down the `process_orders` function step by step, explaining its purpose, the logic it follows, the edge cases it handles, and then discuss a potential improvement or bug.\n\n### Function Purpose\nThe `process_orders` function processes a list of orders against a given inventory and calculates the total revenue from fulfilled orders. It categorizes the orders into three groups:\n1. **Shipped**: Orders that have been fulfilled.\n2. **Backordered**: Orders that could not be fulfilled immediately and are marked for future fulfillment.\n3. **Backordered (remaining)**: The remaining quantity of items that could not be fulfilled due to inventory constraints.\n\n### Step-by-Step Explanation\n\n1. **Initialization**:\n   - `total`: A variable initialized to `0`, which will accumulate the total revenue from the shipped orders.\n   - `shipped`: An empty list that will store dictionaries representing the shipped orders.\n   - `backordered`: An empty list that will store orders that could not be fulfilled immediately.\n\n2. **Iterating Over Orders**:\n   - The function iterates over each `order` in the `orders` list.\n   - For each order, it extracts the `item` and `qty` (quantity).\n\n3. **"
+      },
+      "pl_delta_pct": -13.7
+    },
+    "architect": {
+      "plain": {
+        "tps": 14.196817398071289,
+        "ttft": 0.22306329345703124,
+        "wall": 36.22663739998825,
+        "text": "## Proposed Service Architecture for a High-Volume Order-Fulfillment System\n\n### 1. Overview\nThe architecture is designed to handle approximately 50,000 orders per day, support multi-warehouse inventory, and allow for partial shipments. The system is microservices-oriented, ensuring scalability, resilience, and agility.\n\n### 2. Components\n\n#### 2.1 Core Services\n- **Order Service**: Manages the lifecycle of an order, from creation to fulfillment.\n- **Inventory Service**: Tracks inventory levels across multiple warehouses.\n- **Shipping Service**: Coordinates shipping logistics, including route optimization and carrier management.\n- **Payment Service**: Handles payment processing and transactions.\n- **Notification Service**: Sends out order-related communications (e.g., order confirmation, shipping updates).\n\n#### 2.2 Supporting Services\n- **User Service**: Manages user profiles, preferences, and authentication.\n- **Product Catalog Service**: Maintains the product catalog, including details, pricing, and availability.\n- **Analytics Service**: Collects and analyzes data for business insights and performance monitoring.\n- **Search Service**: Provides product search capabilities, including filtering and sorting.\n\n#### 2.3 Infrastructure & Cross-cutting Concerns\n- **Message Broker**: Apache Kafka or RabbitMQ for asynchronous communication between services.\n- **API Gateway**: Kong or Apigee for routing, rate limiting, and security.\n- **Service Mesh**: Istio for traffic management, observability, and security policies.\n- **Database**: A mix of relational (PostgreSQL) and NoSQL (MongoDB) databases for structured and semi-structured data.\n- **Cache**: Redis for caching frequently accessed data (e.g., product details, inventory levels).\n- **Authentication & Authorization**: OAuth 2.0 and OpenID Connect for secure access, with JWT tokens for service-to-service communication.\n\n### 3. Data Model\n\n#### 3.1 Key Entities\n- **Order**: Contains order details, including order_id, user_id, items (array of product_id, quantity), status, and shipping_address.\n- **Inventory**: Tracks product quantities across warehouses, with fields like product_id, warehouse_id, and quantity.\n- **Shipping**: Represents the shipping process, including shipping_id, order_id, shipping_status, and tracking_info.\n- **Payment**: Holds payment details, including payment_id, order_id, payment_status, and amount.\n- **Notification**: Stores notifications, including notification_id, order_id, type (e.g., email, SMS), content, and sent_at.\n\n####"
+      },
+      "pl": {
+        "tps": 11.87665843963623,
+        "ttft": 0.30051141357421873,
+        "wall": 43.32577449991368,
+        "text": "## Proposed Service Architecture for a High-Volume Order-Fulfillment Service\n\n### 1. Overview\nThe architecture is designed to handle approximately 50,000 orders per day, support multi-warehouse inventory, and allow for partial shipments. The system is microservices-oriented, leveraging scalability, resilience, and flexibility as core design principles.\n\n### 2. Components\n\n#### 2.1. Core Services\n- **Order Service**: Manages the lifecycle of an order, from creation to fulfillment.\n- **Inventory Service**: Tracks inventory levels across multiple warehouses.\n- **Shipping Service**: Coordinates the shipping process, including route optimization and carrier management.\n- **Payment Service**: Handles payment processing, including partial payments for partial shipments.\n- **Notification Service**: Sends real-time notifications to customers and internal stakeholders (e.g., order updates, shipping confirmations).\n- **Analytics Service**: Collects and analyzes data for business intelligence and operational insights.\n\n#### 2.2. Supporting Services\n- **Authentication & Authorization Service (Auth Service)**: Manages user authentication and access control.\n- **Product Catalog Service**: Maintains the product catalog, including details, pricing, and availability.\n- **Warehouse Management System (WMS) Integration Layer**: Interfaces with external WMS systems for warehouses not directly managed by the company.\n- **Message Queue Service**: Facilitates asynchronous communication between services (e.g., RabbitMQ, Kafka).\n\n### 3. Data Model\n\n#### 3.1. Key Entities\n- **Order**: Contains order details, including order items, shipping address, payment status, and order status.\n- **OrderItem**: Represents an item within an order, including product ID, quantity, and price.\n- **Inventory**: Tracks the quantity of each product across different warehouses.\n- **Shipping**: Includes shipping details, such as carrier, tracking number, and shipping status.\n- **Payment**: Stores payment-related information, including payment method, amount, and transaction ID.\n\n#### 3.2. Data Flow\n- **Order Creation**: The Order Service creates an order, which triggers inventory reservation via the Inventory Service.\n- **Inventory Check**: The Inventory Service checks available stock across warehouses and reserves the required quantity.\n- **Payment Processing**: The Payment Service processes the payment, which can be partial if the order allows for partial fulfillment.\n- **Shipping Initiation**: The Shipping Service is notified to initiate shipping, which may involve partial shipments if the order allows.\n- **Notifications**: The Notification Service is notified to send updates to customers and stakeholders.\n\n### "
+      },
+      "pl_delta_pct": -16.3
+    }
+  },
+  "probes": {
+    "autocomplete": "FAIL",
+    "assistant-edit": "PASS",
+    "assistant-edit+PL": "PASS (no return hint)"
+  }
+}

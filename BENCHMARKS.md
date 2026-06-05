@@ -50,6 +50,8 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 | Qwen3-VL-8B | n/a (VLM) | 14.8 ✓ | n/a | 15.0 | n/a | 15.1 | n/a |
 | Gemma 4 E2B (our conversion) | n/a (VLM) | 21.5 ✓ | n/a | 23.3 | n/a | 24.5 | n/a |
 | Qwen3-0.6B (thinking) | 1.16 s (0.05) ✓ | 86.7 ✗ behavior | 56.5 (−35%) ✗ | 85.2 | 47.6 (−44%) | 79.6 | 53.1 (−33%) |
+| LFM2.5-1.2B-Thinking | 1.19 s (0.05) ✗¹ | 83.9 ✗ no code | 92.7 (+10%) ✗ | 84.7 | 101.6 (+20%) | 84.7 | **137.9 (+63%)** |
+| **Granite-4.1-8b cw (AWQ+SE, ours)** | 6.94 s (0.20) ✗¹ | 14.1 **✓** | **27.0 (+92%) ✓** | 14.1 | 12.2 (−14%) | 14.2 | 11.9 (−16%) |
 
 ¹ raw-continuation probe artifact (no stop criterion), not a verified failure.
 ² **untagged thinking preamble**: the model spends the token budget on prose reasoning before
@@ -91,6 +93,13 @@ need ≥1.5B; the 0.5B remains autocomplete-only.
    recalibrated Granite cw build (v2) passes every probe the data-free build failed, at the
    same 1.72 GiB and ~31 tok/s. Data-aware calibration (`--awq --scale-estimation --dataset
    wikitext2`) should be the default for int4 conversions. Both HF artifacts updated in place.
+   The recipe re-validated at 8B scale: our Granite-4.1-8b conversion (first OV IR of that
+   model) passes its edit probes on day one.
+10. **Thinking models split on PL by echo style, refining finding 1**: LFM2.5-1.2B-Thinking
+    gains from PL on *every* profile (architect +63%, the fastest chat measurement recorded:
+    137.9 tok/s) because its reasoning restates the prompt heavily, while Qwen3's free-prose
+    thinking loses everywhere. Echo overlap must be measured per model, not inferred from
+    "thinking vs non-thinking".
 
 ## Current role recommendations (will evolve as more models run)
 
@@ -99,5 +108,7 @@ need ≥1.5B; the 0.5B remains autocomplete-only.
 | Autocomplete | Qwen2.5-Coder-1.5B (+PL) | 1.07 s completions, probe ✓ |
 | Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
+| Architect (experimental) | LFM2.5-1.2B-Thinking **+PL** | 137.9 tok/s with design-aligned reasoning — quality unprobed, try-and-judge |
+| Assistant (edit, quality tier) | Granite-4.1-8b cw (ours) **+PL** | 27.0 tok/s edits, probes ✓, 128k context |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
 | Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |
