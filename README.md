@@ -98,14 +98,22 @@ template disabled — required for autocomplete to work).
 Core Ultra 155H (Meteor Lake), Arc iGPU, 32 GB LPDDR5x, driver 32.0.101.8724,
 OpenVINO 2026.3 nightly:
 
-| Model | Weights | Decode | TTFT | Verdict |
-|---|---|---|---|---|
-| **Gemma 4 E2B INT4** (default chat) | 4.1 GB | **29.9 tok/s** | 0.23 s | fastest; very responsive in Continue |
-| Qwen2.5-Coder-3B INT4 (default autocomplete) | 2.1 GB | 24.0 tok/s | 0.15 s | lowest TTFT |
-| Gemma 4 E4B INT4 | 6.0 GB | 15.7 tok/s | 0.52 s | mid |
-| Qwen2.5-Coder-7B INT4 | 4.2 GB | 15.0 tok/s | 0.20 s | best chat quality that fits |
-| Qwen3-Coder-30B-A3B INT4 | 15.2 GiB | — | — | **OOM**: device allocation fails at compile |
-| Gemma 4 26B A4B INT4 | 14.3 GiB | — | — | **OOM** (tested 3×): fails during weight upload even with 24 GB free RAM |
+| Model | Weights | Modalities | Max context | Decode | TTFT | Verdict |
+|---|---|---|---|---|---|---|
+| Qwen2.5-Coder-0.5B INT4 | 0.3 GB | text | 32k | **87.6 tok/s** | 0.06 s | fastest; quality floor for autocomplete |
+| Qwen2.5-Coder-1.5B INT4 | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot candidate |
+| **Gemma 4 E2B INT4** (default chat) | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | fastest chat-quality model; very responsive in Continue |
+| Qwen2.5-Coder-3B INT4 (default autocomplete) | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
+| Gemma 4 E4B INT4 | 6.0 GB | text, image, audio¹ | 128k | 15.7 tok/s | 0.52 s | mid |
+| Qwen2.5-Coder-7B INT4 | 4.2 GB | text | 32k | 15.0 tok/s | 0.20 s | best chat quality that fits |
+| Qwen3-VL-8B INT4 | 5.5 GB | text, image, video¹ | 256k | 14.5 tok/s | 0.15 s | chat-class speed; the only vision+video model that fits |
+| ~~Qwen3-Coder-30B-A3B INT4~~ | ~~15.2 GiB~~ | ~~text~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile |
+| ~~Gemma 4 26B A4B INT4~~ | ~~14.3 GiB~~ | ~~text, image, audio¹~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM** (tested 3×): fails during weight upload even with 24 GB free RAM |
+
+¹ Modalities and max context are the *model's* capabilities (from each model's `config.json`).
+The server currently exposes a **text-only** API and keeps practical context well below the
+maximum — KV-cache grows with context and competes with weights for the same shared iGPU
+memory. Multimodal IRs run fine text-only through `VLMPipeline`.
 
 ### What we learned about the hardware
 
@@ -121,8 +129,9 @@ OpenVINO 2026.3 nightly:
 - **Host RAM matters separately**: the first compile of a large model also needs roughly
   weights-sized free *system* RAM, failing with a `USM Host` allocation error otherwise. Freeing
   RAM fixes that failure mode — but not the device ceiling.
-- **Decode is memory-bandwidth-bound**, not compute-bound: ~15 tok/s at ~4 GB of weights,
-  ~24–30 tok/s at ~2–4 GB. Smaller models are faster in direct proportion to bytes read per token.
+- **Decode is memory-bandwidth-bound**, not compute-bound: throughput scales almost exactly
+  inversely with weight size across two orders of magnitude — 0.3 GB → 88 tok/s,
+  0.9 GB → 57, 2.1 GB → 24, 4.2 GB → 15 (tok/s × GB ≈ 26–60, tightening as models grow).
 - **Gemma 4 IRs are VLM-shaped** (MatFormer per-layer embeddings + vision tower) and require
   `VLMPipeline` even for text-only use; Qwen IRs are plain `LLMPipeline`. The server and bench
   auto-detect the IR shape per model directory.
