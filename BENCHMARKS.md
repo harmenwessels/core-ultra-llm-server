@@ -51,6 +51,7 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 | Gemma 4 E2B (our conversion) | n/a (VLM) | 21.5 ✓ | n/a | 23.3 | n/a | 24.5 | n/a |
 | Qwen3-0.6B (thinking) | 1.16 s (0.05) ✓ | 86.7 ✗ behavior | 56.5 (−35%) ✗ | 85.2 | 47.6 (−44%) | 79.6 | 53.1 (−33%) |
 | LFM2.5-1.2B-Thinking | 1.19 s (0.05) ✗¹ | 83.9 ✗ no code | 92.7 (+10%) ✗ | 84.7 | 101.6 (+20%) | 84.7 | **137.9 (+63%)** |
+| MiniCPM5-1B g128 (ours)⁶ | 1.21 s (0.04) ✗¹ | 81.9 ✗ no code | 79.0 (−3%) ✗ | 82.9 | 55.0 (−34%) | 86.9 | 65.9 (−24%) |
 | **Granite-4.1-8b cw (AWQ+SE, ours)** | 6.94 s (0.20) ✗¹ | 14.1 **✓** | **27.0 (+92%) ✓** | 14.1 | 12.2 (−14%) | 14.2 | 11.9 (−16%) |
 
 ¹ raw-continuation probe artifact (no stop criterion), not a verified failure.
@@ -134,6 +135,10 @@ non-thinking rows (the 2B card shows the gap: 55.3 non-thinking vs 66.5 thinking
 and the thinking preamble is precisely what fails our edit-budget probe.
 ⁵ official numbers exist only in the Qwen3 tech report (tables not published on the cards in
 extractable form).
+⁶ MiniCPM5-1B thinks by default under its embedded OV chat template (despite the card's
+`enable_thinking=False` default in Python) → edit-budget failures and PL hostility. Quantization
+note: the cw+AWQ recipe produced **degenerate garbage** at this 1B scale (repetition loops) —
+the same recipe that works at 3B/8B; g128 and int8 are coherent. See RESEARCH playbook.
 
 Reading across the axes: on raw scores the **Qwen3.5-4B/9B generation leads everything**
 (MMLU-Pro 79–83, LCB 56–66) — but those are thinking-mode numbers, and the thinking preamble

@@ -181,6 +181,10 @@ optimum-cli export openvino -m google/gemma-4-E2B-it --task image-text-to-text `
 ```
 
 Hard-won rules:
+0. **Quantization granularity must scale with model size**: cw-sym int4 + AWQ is the speed
+   recipe for ~3B–8B (validated on Granite 4.1), but at ≤1B it produces *degenerate output*
+   (MiniCPM5-1B: repetition loops; int8 and g128 of the same model are coherent). For tiny
+   models use g128 or int8 and always run a coherence probe before benchmarking speed.
 1. **transformers version must match the target architecture** — and the requirements differ
    per model: granite wants 4.57.x; gemma4 wants exactly 5.5.0 (5.10 renamed an attention
    attribute and breaks the trace); Qwen3.5 wants 5.x. Swap per export; pip's dependency
@@ -194,10 +198,34 @@ Hard-won rules:
 4. **Bench every artifact before publishing** (Finding 5). Verify stateful export:
    the IR should have 4 inputs (`input_ids`, `attention_mask`, `position_ids`, `beam_idx`).
 
+## Candidate screening ledger (sweep of 2026-06-06)
+
+Exhaustive sweep of public models against our gates (dense or GPU-runnable, supported
+architecture, ≤ ~6 GiB int4, permissive license, quality above incumbents). Screened out:
+
+| Candidate | Reason |
+|---|---|
+| Gemma-4-12B (MMLU-Pro 77.2, LCB 72.0) | new `gemma4_unified` arch — unknown to transformers ≤5.5 and the export registry |
+| GLM-4.7-Flash | MoE (`glm4_moe_lite`), unsupported type, too big |
+| Qwen3.6-27B / Mistral-Small-4 / Gemma-4-31B / EXAONE-4.5-33B / Codestral | over the memory ceiling |
+| Qwen3.6 small dense / Qwen3.5-Coder / EXAONE-4.5 ≤8B | not released yet |
+| Seed-Coder-8B | 2025-05 vintage — matched/beaten by granite-4.1-8b (already published) |
+| EXAONE-4.0 family | gated + restrictive license |
+| GLM-4-9B-0414, Phi-4-mini, Falcon-3, OLMo-3, Hunyuan-7B | dated or dominated by incumbents at equal size |
+| DeepSeek-R1 distills | thinking-default (edit-budget failures) |
+| MiniCPM5-1B | converted & tested: coherent at g128 (~82–87 tok/s) but thinks by default under the OV chat template → no role won vs Qwen3.5-0.8B; also produced the granularity-vs-scale finding (playbook rule 0) |
+
+Conclusion: as of 2026-06-06 the served lineup is at the practical optimum for this hardware —
+every higher-quality candidate is upstream-blocked or unreleased, not effort-blocked.
+
 ## Open items (as of 2026-06)
 
 - **Qwen3.5-Coder**: not yet released — would likely obsolete the Qwen2.5-Coder autocomplete
   default the moment a small FIM-trained variant ships.
+- **Qwen3.6 small dense** (2B/4B/8B class): the 27B dense (2026-04, SWE-bench 77.2) suggests
+  smaller siblings are coming — would likely supersede the Qwen3.5 tier.
+- **EXAONE-4.5 small sizes**: 33B-only so far; STEM avg 77.3 beats GPT-5-mini — but mind the
+  restrictive EXAONE license before investing.
 - **Ministral-3 / `mistral3` export support** in optimum-intel: blocked upstream (gate-2
   catch-22 above).
 - **Gemma-4-12B / `gemma4_unified`**: the quality standout of the fitting size class
