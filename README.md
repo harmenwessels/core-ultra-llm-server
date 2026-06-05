@@ -100,12 +100,15 @@ OpenVINO 2026.3 nightly:
 
 | Model | Base released² | Weights | Modalities | Max context | Decode | TTFT | Verdict |
 |---|---|---|---|---|---|---|---|
-| [Qwen2.5-Coder-0.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 2024-11 | 0.3 GB | text | 32k | **87.6 tok/s** | 0.06 s | fastest; quality floor for autocomplete |
-| [LFM2.5-1.2B-Thinking INT4](https://huggingface.co/Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov) | 2026-01 | 0.6 GB | text | 128k | **87.6 tok/s** | 0.08 s | hybrid conv/attention; reasoning model (thinking tokens add latency); community conversion |
-| [Qwen3.5-0.8B INT4](https://huggingface.co/yangsu0423/Qwen3.5-0.8B-int4-ov) | 2026-02 | 0.9 GB | text, image¹ | 256k | **72.7 tok/s** | 0.08 s | newest gen at near-0.5B speed; community conversion |
-| [Qwen3-0.6B INT4](https://huggingface.co/OpenVINO/Qwen3-0.6B-int4-ov) | 2025-04 | 0.4 GB | text | 40k | **62.7 tok/s** | 0.10 s | slower than the newer, similar-size Qwen3.5-0.8B |
-| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (default autocomplete) | 2024-09 | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot: FIM-trained, 2.4× faster than the 3B |
-| **[Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)** (default chat) | 2026-03 | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | fastest chat-quality model; very responsive in Continue |
+| [Qwen2.5-Coder-0.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 2024-11 | 0.3 GB | text | 32k | 87.6 tok/s | 0.06 s | fastest; quality floor for autocomplete |
+| [LFM2.5-1.2B-Thinking INT4](https://huggingface.co/Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov) | 2026-01 | 0.6 GB | text | 128k | 87.6 tok/s | 0.08 s | hybrid conv/attention; reasoning model (thinking tokens add latency); community conversion |
+| [Qwen3.5-0.8B INT4](https://huggingface.co/yangsu0423/Qwen3.5-0.8B-int4-ov) | 2026-02 | 0.9 GB | text, image¹ | 256k | 72.7 tok/s | 0.08 s | newest gen at near-0.5B speed; community conversion |
+| [Qwen3-0.6B INT4](https://huggingface.co/OpenVINO/Qwen3-0.6B-int4-ov) | 2025-04 | 0.4 GB | text | 40k | 62.7 tok/s | 0.10 s | slower than the newer, similar-size Qwen3.5-0.8B |
+| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (default autocomplete) | 2024-09 | 0.9 GB | text | 32k | 57.0 tok/s | 0.06 s | autocomplete sweet spot: FIM-trained, 2.4× faster than the 3B |
+| [Ministral-3b-instruct INT4](https://huggingface.co/Echo9Zulu/Ministral-3b-instruct-int4_asym-ov) | 2024-03 | 1.7 GB | text | 128k | 36.0 tok/s | 0.07 s | community Mistral derivative (not official Mistral AI); 2024-era quality |
+| [Qwen3.5-2B INT4](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | 2026-02 | 2.0 GB | text, image¹ | 256k | 34.6 tok/s | 0.17 s | fastest chat-quality model; community conversion |
+| **[Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)** (default chat) | 2026-03 | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | very responsive in Continue |
+| [Granite-4.1-3b INT4-cw](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-ov) (our conversion) | 2026-04 | 1.7 GB | text | 128k | 27.4 tok/s | 0.13 s | newest Granite; first OV IR of 4.1. Recipe matters: int4_sym channel-wise 27.4 / int8 17.4 / int4_asym g128 13.0 tok/s — group-wise dequant is expensive on Arc. cw quality not yet evaluated. |
 | [Qwen3-4B INT4](https://huggingface.co/OpenVINO/Qwen3-4B-int4-ov) | 2025-04 | 2.1 GB | text | 40k | 24.9 tok/s | 0.10 s | same speed as Coder-3B with a newer base |
 | [Granite-4.0-micro INT4](https://huggingface.co/llmware/granite-4-micro-ov) | 2025-09 | 2.2 GB | text | 128k | 24.6 tok/s | 0.16 s | IBM; 128k context at 3B-class speed; community conversion (llmware) |
 | [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 2024-11 | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
