@@ -1,0 +1,18 @@
+# Pinned after Gate 2/3 passed (2026-06-04) for reproducibility.
+# Install on Windows with Python 3.12:
+#   py -3.12 -m venv .venv
+#   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+--extra-index-url https://storage.openvinotoolkit.org/simple/wheels/nightly
+
+# OpenVINO nightly stack (Gemma 4 support requires nightly, newer than 2026.2 stable)
+openvino==2026.3.0.dev20260603
+openvino-genai==2026.3.0.0.dev20260603
+openvino-tokenizers==2026.3.0.0.dev20260603
+nncf==3.2.0
+
+# Model download
+huggingface_hub==1.17.0
+
+# API server
+fastapi==0.136.3
+uvicorn==0.49.0
