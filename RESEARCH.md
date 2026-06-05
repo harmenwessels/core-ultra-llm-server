@@ -167,9 +167,11 @@ Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + 
 from git master, torch CPU wheels, `nncf`, `compressed-tensors`.
 
 ```powershell
-# typical text-only model, speed-first recipe
+# typical text-only model, speed-first recipe WITH data-aware calibration
+# (data-free cw-int4 measurably damaged quality on granite — AWQ+SE repaired it
+#  at zero size/speed cost; see BENCHMARKS.md finding 9)
 optimum-cli export openvino -m <org>/<model> --weight-format int4 --sym --group-size -1 `
-  models\<owner>\<name>-int4-cw-ov
+  --awq --scale-estimation --dataset wikitext2 models\<owner>\<name>-int4-cw-ov
 
 # multimodal (Gemma 4, Qwen-VL...): the supported task must be explicit
 optimum-cli export openvino -m google/gemma-4-E2B-it --task image-text-to-text `

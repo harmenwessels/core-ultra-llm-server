@@ -45,6 +45,7 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 | Qwen3.5-0.8B | n/a (VLM) | 61.4 ✓ | n/a | 61.4 | n/a | **61.4** | n/a |
 | OmniCoder-9B | n/a (VLM) | 13.3 ✗² | n/a | 13.4 | n/a | 13.4 | n/a |
 | Qwen3.5-4B | n/a (VLM) | 20.2 ✗² | n/a | 20.6 | n/a | 20.2 | n/a |
+| Granite-4.1-3b **cw v2 (AWQ+SE)** | 1.75 s (0.09) ✗¹ | 31.3 **✓** | 30.9 (−1%) **✓** | 31.4 | 23.2 (−26%) | 31.7 | 24.8 (−22%) |
 
 ¹ raw-continuation probe artifact (no stop criterion), not a verified failure.
 ² **untagged thinking preamble**: the model spends the token budget on prose reasoning before
@@ -79,6 +80,10 @@ defect, but a practical disqualifier for the edit role at these decode speeds.
 8. **Qwen3.5-0.8B does 61.4 tok/s across all chat profiles with a passing edit probe** — at
    0.85 GiB. Whether 0.8B-class reasoning is *good enough* for explain/architect is a quality
    question for official benchmarks, but the serving math is remarkable.
+9. **AWQ + scale-estimation repairs data-free cw-int4 damage at zero size/speed cost.** The
+   recalibrated Granite cw build (v2) passes every probe the data-free build failed, at the
+   same 1.72 GiB and ~31 tok/s. Data-aware calibration (`--awq --scale-estimation --dataset
+   wikitext2`) should be the default for int4 conversions. Both HF artifacts updated in place.
 
 ## Current role recommendations (will evolve as more models run)
 
@@ -87,4 +92,5 @@ defect, but a practical disqualifier for the edit role at these decode speeds.
 | Autocomplete | Qwen2.5-Coder-1.5B (+PL) | 1.07 s completions, probe ✓ |
 | Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
-| Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-**cw** | thinking preambles (former two); quantization damage (cw) |
+| Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
+| Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |
