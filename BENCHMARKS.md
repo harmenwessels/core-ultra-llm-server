@@ -101,6 +101,30 @@ need ≥1.5B; the 0.5B remains autocomplete-only.
     thinking loses everywhere. Echo overlap must be measured per model, not inferred from
     "thinking vs non-thinking".
 
+## Official quality reference (base models, vendor-reported)
+
+Quality *ranking* comes from the base models' official benchmarks, not from our probes (which
+only validate artifact integrity). Caveat: vendors report different suites — MMLU-Pro is the
+only cross-family anchor here; coding columns are not comparable across rows.
+
+| Base model | MMLU-Pro | Coding (vendor's suite) | IFEval | Source |
+|---|---|---|---|---|
+| Gemma 4 E4B | **69.4** | LiveCodeBench v6: 52.0 | — | Google card |
+| Gemma 4 E2B | 60.0 | LiveCodeBench v6: 44.0 | — | Google card |
+| Granite-4.1-8b | 56.0 | HumanEval 85.4 / MBPP **87.3** | **87.1** | IBM card (also BFCL v3 68.3 tool calling) |
+| Qwen3.5-2B | 55.3 (66.5 thinking) | not reported | 61.2 | Qwen card |
+| Granite-4.1-3b | 49.8 | HumanEval 81.7 / MBPP 71.2 | 82.3 | IBM card |
+| Qwen3.5-0.8B | 29.7 | not reported | 52.1 | Qwen card |
+| OmniCoder-9B | — | GPQA-D 83.8, Terminal-Bench 23.6 (agentic) | — | Tesslate card |
+| Qwen2.5-Coder-7B | — | HumanEval 88.4 / MBPP 83.5 | — | Qwen2.5-Coder report (arXiv:2409.12186, 2024) |
+| Qwen2.5-Coder-3B | — | HumanEval 84.1 / MBPP 73.6 | — | same report |
+| Qwen2.5-Coder-1.5B | — | HumanEval 70.7 / MBPP 69.2 | — | same report |
+
+Reading across quality × measured speed: Gemma E4B has the best general scores but is slow
+(15.7) and never passed through the edit probe; **Granite-4.1-8b leads on instruction
+following, MBPP and tool calling** among validated artifacts (27 tok/s edits with PL);
+Qwen2.5-Coder-7B still edges HumanEval; Qwen3.5-2B pairs mid-pack quality with 42 tok/s.
+
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |
@@ -109,6 +133,6 @@ need ≥1.5B; the 0.5B remains autocomplete-only.
 | Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
 | Architect (experimental) | LFM2.5-1.2B-Thinking **+PL** | 137.9 tok/s with design-aligned reasoning — quality unprobed, try-and-judge |
-| Assistant (edit, quality tier) | Granite-4.1-8b cw (ours) **+PL** | 27.0 tok/s edits, probes ✓, 128k context |
+| Assistant (quality tier) | Granite-4.1-8b cw (ours) **+PL** | strongest validated all-rounder by official scores (IFEval 87, MBPP 87, BFCL 68): 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
 | Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |

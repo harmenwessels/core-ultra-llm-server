@@ -207,3 +207,8 @@ Hard-won rules:
   in newer OpenVINO nightlies.
 - **Linux**: the ~50%-of-RAM ceiling is Windows driver policy; the same laptop under native
   Ubuntu might load the 12–16 GiB models that OOM here. Untested.
+- **Server enhancement — per-request prompt-lookup**: PL is per-workload (+92% edits, −14%
+  explain for the same model), but `PROMPT_LOOKUP_MODELS` toggles per model. A finer policy —
+  enable PL only on `/v1/completions`, or when the chat prompt contains a code block — would
+  capture the edit gains without the explain/architect penalty. Requires two pipeline
+  instances or the CB pipeline's per-request config.
