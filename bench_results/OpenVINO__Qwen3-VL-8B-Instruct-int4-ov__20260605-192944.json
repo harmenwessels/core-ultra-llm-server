@@ -1,0 +1,35 @@
+{
+  "model": "OpenVINO/Qwen3-VL-8B-Instruct-int4-ov",
+  "pipeline": "VLMPipeline",
+  "timestamp": "2026-06-05T19:24:43",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "assistant-edit": {
+      "plain": {
+        "tps": 14.761488914489746,
+        "ttft": 0.17194418334960937,
+        "wall": 16.02280279994011,
+        "text": "```python\ndef process_orders(orders: list, inventory: dict, prices: dict) -> tuple:\n    \"\"\"Processes orders, updating inventory and tracking shipped and backordered items.\"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      }
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 15.02263355255127,
+        "ttft": 0.19331170654296875,
+        "wall": 17.170339500065893,
+        "text": "Let's walk through the `process_orders` function step by step, analyze what it does, identify edge cases it handles, and then point out a potential bug or improvement.\n\n---\n\n## \ud83e\udde9 Function Overview\n\nThe function `process_orders(orders, inventory, prices)` processes a list of customer orders against available inventory and price lists. It returns:\n\n- `total`: total cost of all successfully shipped items.\n- `shipped`: list of dictionaries representing successfully shipped orders (item, qty, cost).\n- `backordered`: list of dictionaries representing orders that couldn't be fulfilled (either item not in inventory, or insufficient stock).\n\n---\n\n## \ud83d\udeb6\u200d\u2642\ufe0f Step-by-Step Execution\n\n### 1. Initialize variables\n```python\ntotal = 0\nshipped = []\nbackordered = []\n```\n- `total`: accumulates the total cost of shipped items.\n- `shipped`: stores order details for items that were successfully shipped.\n- `backordered`: stores order details for items that couldn't be shipped.\n\n---\n\n### 2. Loop through each order\n```python\nfor order in orders:\n    item = order[\"item\"]\n    qty = order[\"qty\"]\n```\n- Extract the item name and quantity from each order"
+      }
+    },
+    "architect": {
+      "plain": {
+        "tps": 15.057414054870605,
+        "ttft": 0.14519390869140625,
+        "wall": 34.08995039993897,
+        "text": "Here\u2019s a scalable, practical architecture for your mid-size webshop\u2019s order-fulfilment service, designed for ~50k orders/day with multi-warehouse, partial shipments, and high availability.\n\n---\n\n## \ud83e\udde9 Core Architecture Components\n\n### 1. **Order Ingestion & Validation**\n- **Component**: API Gateway + Order Validator\n- **Function**: Accepts orders from frontend/checkout, validates rules (e.g., stock, shipping zones, payment status), enqueues for fulfilment.\n- **Tech**: Async message queue (e.g., Kafka or RabbitMQ) \u2192 durable backlog for spikes.\n\n### 2. **Order Fulfilment Orchestrator**\n- **Component**: Fulfilment Engine (central coordinator)\n- **Function**: \n  - Parses order \u2192 splits into partial shipments (e.g., \u201csend 2 items from Warehouse A, 1 from Warehouse B\u201d).\n  - Uses inventory-aware routing logic.\n  - Assigns fulfillment tasks to warehouse workers.\n- **Tech**: Microservice (e.g., Spring Boot, Node.js) with state machine (e.g., Automata or Stateful Service).\n\n### 3. **Inventory & Warehouse Management**\n- **Component**: Inventory Service (per warehouse)\n- **Function**: \n  - Real-time inventory per SKU per warehouse.\n  - Supports \u201creserve inventory\u201d for partial shipments.\n  - Updates inventory on shipment completion.\n- **Tech**: Distributed cache (Redis) + eventual-consistent DB (e.g., PostgreSQL with CDC).\n\n### 4. **Warehouse Workers (Shipment Executors)**\n- **Component**: Worker Services (per warehouse)\n- **Function**: \n  - Pulls fulfillment tasks from queue.\n  - Executes packing, labels, and shipping.\n  - Updates order status and inventory.\n- **Tech**: Worker pool (Celery, BullMQ, or Kubernetes Jobs).\n\n### 5. **Order Status & Tracking**\n- **Component**: Order Status Service\n- **Function**: \n  - Tracks order lifecycle (pending \u2192 shipped \u2192 delivered).\n  - Exposes real-time status via API.\n  - Integrates with external tracking (e.g., carrier APIs).\n- **Tech**: Event-driven (Kafka + Webhook) + Redis for real-time updates.\n\n### 6. **Analytics & Monitoring**\n- **Component**: Metrics & Alerting\n- **Function**: \n  - Track SLAs (e.g., \u201c95% of orders shipped within 24h\u201d).\n  - Monitor warehouse bottlene"
+      }
+    }
+  },
+  "probes": {
+    "assistant-edit": "PASS"
+  }
+}

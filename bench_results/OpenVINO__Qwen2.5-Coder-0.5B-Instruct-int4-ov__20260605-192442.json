@@ -1,0 +1,67 @@
+{
+  "model": "OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov",
+  "pipeline": "LLMPipeline",
+  "timestamp": "2026-06-05T19:23:03",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "autocomplete": {
+      "plain": {
+        "tps": 102.759521484375,
+        "ttft": 0.025208499908447264,
+        "wall": 0.9501449000090361,
+        "text": "        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])\n    return result\n\n# Example usage:\nlist1 = [1, 3, 5]\nlist2 = [2, 4, 6]\nsorted_list = merge_sorted_lists(list1, list2)\nprint(sorted_list)"
+      },
+      "fim": true
+    },
+    "assistant-edit": {
+      "plain": {
+        "tps": 80.64005279541016,
+        "ttft": 0.06219729995727539,
+        "wall": 4.620692400028929,
+        "text": "```python\ndef process_orders(\n    orders: list,\n    inventory: dict,\n    prices: dict\n) -> tuple:\n    \"\"\"\n    Process orders by calculating the total cost of items, tracking backordered items,\n    and handling backordered items that cannot be shipped.\n    \n    Parameters:\n    - orders (list): A list of order dictionaries.\n    - inventory (dict): A dictionary mapping items to their stock levels.\n    - prices (dict): A dictionary mapping items to their prices.\n    \n    Returns:\n    - tuple: A tuple containing the total cost of items, a list of backordered items,\n             and a list of items that cannot be shipped.\n    \"\"\"\n    total_cost = 0\n    backordered_items = []\n    backordered_items_by_item = {}\n    \n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        \n        if item not in inventory:\n            backordered.append(order)\n            continue\n        \n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total_cost += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n            backordered_items.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total_cost += cost\n                backordered_items.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered_items_by_item[item] = cost\n            else:\n                backordered.append(order)\n    \n    return total_cost, backordered_items, backordered_items_by_item\n```"
+      },
+      "pl": {
+        "tps": 130.62503051757812,
+        "ttft": 0.05251259994506836,
+        "wall": 2.449415900046006,
+        "text": "```python\ndef process_orders(orders: list, inventory: dict, prices: dict) -> tuple:\n    \"\"\"\n    Processes a list of orders, updating inventory and shipping status based on item availability and price.\n    \n    Parameters:\n    orders (list): A list of order dictionaries.\n    inventory (dict): A dictionary mapping items to their quantities.\n    prices (dict): A dictionary mapping items to their prices.\n    \n    Returns:\n    tuple: A tuple containing the total cost, a list of shipped orders, and a list of backordered orders.\n    \"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    \n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    \n    return total, shipped, backordered\n```"
+      },
+      "pl_delta_pct": 62.0
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 87.73799133300781,
+        "ttft": 0.061472301483154294,
+        "wall": 2.9769244000781327,
+        "text": "This function processes a list of orders, where each order contains an item name, quantity, and price. It calculates the total cost of the items ordered and tracks which items were shipped and which were backordered. The function returns a tuple containing the total cost, a list of items shipped, and a list of items backordered.\n\n### Explanation:\n\n1. **Initialization**: \n   - `total` is initialized to 0 to keep track of the total cost.\n   - `shipped` is an empty list to store items that have been shipped.\n   - `backordered` is an empty list to store items that need to be returned.\n\n2. **Processing Each Order**:\n   - For each order, it extracts the item name, quantity, and price.\n   - It checks if the item is in the inventory. If not, it adds the order to the `backordered` list.\n   - If the item is in the inventory and there are enough available stock, it calculates the cost of the order and adds it to the `total`. It also updates the inventory by reducing the quantity by the order's quantity.\n   - If the item is in the inventory but there are not enough available stock, it adds the order to the `backordered` list"
+      },
+      "pl": {
+        "tps": 67.88429260253906,
+        "ttft": 0.04759970092773438,
+        "wall": 1.7566855000331998,
+        "text": "This function is designed to process a list of orders, where each order is a dictionary containing the item name, quantity, and price. It calculates the total cost of the orders, and it tracks the items that are currently in stock and those that are backordered. The function returns a tuple containing the total cost, a list of orders that are shipped, and a list of orders that are backordered. The function handles edge cases such as missing items or invalid prices, and it provides a potential improvement for handling backordered items by reordering them based on their availability in inventory."
+      },
+      "pl_delta_pct": -22.6
+    },
+    "architect": {
+      "plain": {
+        "tps": 93.42770385742188,
+        "ttft": 0.054541397094726565,
+        "wall": 5.524919900111854,
+        "text": "### Architecture Overview\n\n#### Components:\n1. **Order Management System (OMS):**\n   - **Data Model:** This includes tables for customers, orders, items, and shipping addresses.\n   - **APIs:** Provides endpoints for creating, updating, and deleting orders, as well as managing inventory levels.\n   - **Authentication and Authorization:** Uses OAuth 2.0 for authentication and authorization of users.\n\n2. **Inventory Management System (IMS):**\n   - **Data Model:** This includes tables for warehouses, items, and stock levels.\n   - **APIs:** Provides endpoints for listing items, adding new items, and updating existing items.\n   - **Authentication and Authorization:** Uses OAuth 2.0 for authentication and authorization of users.\n\n3. **Shipping Management System (SMS):**\n   - **Data Model:** This includes tables for shipping addresses, shipments, and tracking information.\n   - **APIs:** Provides endpoints for creating, updating, and deleting shipments, as well as managing shipping methods and rates.\n   - **Authentication and Authorization:** Uses OAuth 2.0 for authentication and authorization of users.\n\n4. **Payment Gateway (PG):**\n   - **Data Model:** This includes tables for payment methods, transactions, and payment status.\n   - **APIs:** Provides endpoints for processing payments, such as sending emails to customers or integrating with payment gateways like Stripe.\n   - **Authentication and Authorization:** Uses OAuth 2.0 for authentication and authorization of users.\n\n5. **Customer Relationship Management (CRM):**\n   - **Data Model:** This includes tables for customers, orders, and customer profiles.\n   - **APIs:** Provides endpoints for managing customer information, such as creating, updating, and deleting customers.\n   - **Authentication and Authorization:** Uses OAuth 2.0 for authentication and authorization of users.\n\n6. **Notification System (NS):**\n   - **Data Model:** This includes tables for notifications, such as email alerts, SMS messages, and other types of notifications.\n   - **APIs:** Provides endpoints for sending notifications, such as sending emails to customers or integrating with notification gateways like Pushover.\n   - **Authentication and Authorization:** Uses OAuth 2.0 for authentication and authorization of users.\n\n### Trade-offs Considered:\n\n#### 1. **Scalability and Performance:**\n   - **OMS:** For handling large volumes of orders and items, it might be more scalable than the other systems. This is crucial for maintaining high availability and performance.\n   - **IMS"
+      },
+      "pl": {
+        "tps": 88.90691375732422,
+        "ttft": 0.051809501647949216,
+        "wall": 5.79708749987185,
+        "text": "### Architecture Overview\n\n#### Components\n\n1. **Order Management System (OMS):**\n   - **Data Model:** This includes tables for orders, customers, items, shipments, and other relevant data.\n   - **APIs:** Provides endpoints for creating, updating, and deleting orders, customers, items, shipments, and other related data.\n\n2. **Inventory Management System (IMS):**\n   - **Data Model:** This includes tables for warehouses, items, and inventory levels.\n   - **APIs:** Provides endpoints for managing inventory levels, updating item quantities, and other inventory-related data.\n\n3. **Payment Gateway (PG):**\n   - **Data Model:** This includes tables for payment methods, payment transactions, and other payment-related data.\n   - **APIs:** Provides endpoints for managing payment transactions, updating payment status, and other payment-related data.\n\n4. **Shipping Management System (SMS):**\n   - **Data Model:** This includes tables for shipping orders, shipments, and other shipping-related data.\n   - **APIs:** Provides endpoints for managing shipping orders, updating shipping status, and other shipping-related data.\n\n5. **Customer Management System (CM):**\n   - **Data Model:** This includes tables for customers, including their addresses, phone numbers, and other customer-related data.\n   - **APIs:** Provides endpoints for managing customer information, updating customer addresses, and other customer-related data.\n\n6. **Notification System (NS):**\n   - **Data Model:** This includes tables for notifications, including email notifications, SMS notifications, and other notification-related data.\n   - **APIs:** Provides endpoints for managing notification settings, updating notification configurations, and other notification-related data.\n\n#### Trade-offs\n\n1. **Data Integrity and Consistency:**\n   - **Pros:** Ensures that all data is accurate and consistent across all components.\n   - **Cons:** Can lead to data loss if not properly managed.\n\n2. **Performance and Scalability:**\n   - **Pros:** Can handle a large number of orders and shipments efficiently.\n   - **Cons:** Can be resource-intensive if not optimized for performance.\n\n3. **Security and Compliance:**\n   - **Pros:** Ensures that sensitive information is not exposed to unauthorized parties.\n   - **Cons:** Can be complex to implement and maintain.\n\n4. **User Experience:**\n   - **Pros:** Provides a seamless user experience for customers.\n   - **Cons:** Can be less intuitive for users who are not familiar with the system.\n\n5. **Cost Management"
+      },
+      "pl_delta_pct": -4.8
+    }
+  },
+  "probes": {
+    "autocomplete": "PASS",
+    "assistant-edit": "FAIL (NameError)",
+    "assistant-edit+PL": "PASS"
+  }
+}

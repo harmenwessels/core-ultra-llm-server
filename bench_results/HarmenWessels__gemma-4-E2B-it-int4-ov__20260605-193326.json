@@ -1,0 +1,35 @@
+{
+  "model": "HarmenWessels/gemma-4-E2B-it-int4-ov",
+  "pipeline": "VLMPipeline",
+  "timestamp": "2026-06-05T19:29:45",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "assistant-edit": {
+      "plain": {
+        "tps": 21.475849151611328,
+        "ttft": 0.5660234375,
+        "wall": 15.251006899867207,
+        "text": "```python\nfrom typing import List, Dict, Tuple, Any\n\ndef process_orders(orders: List[Dict[str, Any]], inventory: Dict[str, int], prices: Dict[str, float]) -> Tuple[int, List[Dict[str, Any]], List[Dict[str, Any]]]:\n    \"\"\"Processes orders against inventory and prices, tracking shipped and backordered items.\"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      }
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 23.30678367614746,
+        "ttft": 0.5471038208007812,
+        "wall": 11.518403299851343,
+        "text": "## Explanation of the `process_orders` Function\n\nThe `process_orders` function simulates the processing of customer orders against a current inventory, calculating the total cost of the items that are successfully shipped.\n\nHere is a step-by-step breakdown of what the function does:\n\n**Function Signature:**\n`def process_orders(orders, inventory, prices):`\n\n* **Inputs:**\n    * `orders`: A list of dictionaries, where each dictionary represents an order (expected to have an `\"item\"` and `\"qty\"`).\n    * `inventory`: A dictionary representing the current stock levels (e.g., `{\"item_A\": 10, \"item_B\": 5}`).\n    * `prices`: A dictionary mapping items to their unit prices (e.g., `{\"item_A\": 5.00}`).\n* **Outputs:** A tuple containing three elements: `(total, shipped, backordered)`.\n\n**Initialization:**\n1. **`total = 0`**: Initializes a running total for the cost of all items that are successfully shipped.\n2. **`shipped = []`**: Initializes an empty list to store details of items that are successfully fulfilled.\n3"
+      }
+    },
+    "architect": {
+      "plain": {
+        "tps": 24.53790855407715,
+        "ttft": 0.4160940246582031,
+        "wall": 21.242470799945295,
+        "text": "This is a complex, high-throughput system requiring robust asynchronous processing and strong consistency guarantees for order management.\n\nHere is a proposed service architecture for your order fulfillment system.\n\n---\n\n## Proposed Service Architecture\n\nThe architecture will follow a **Microservices/Event-Driven** pattern to ensure scalability, resilience, and decoupling of core functions.\n\n### 1. Core Components (Microservices)\n\n| Component | Responsibility | Key Technology/Pattern |\n| :--- | :--- | :--- |\n| **Order Ingestion Service (OIS)** | Handles initial order placement, validation, and persistence of the order record. | REST API, Synchronous Write |\n| **Inventory Service (IS)** | Manages stock levels across all warehouses, handles reservations, and stock deductions. | Database/Cache, Atomic Operations |\n| **Fulfillment Orchestration Service (FOS)** | The brain. Receives an order, determines the fulfillment strategy (which warehouse(s) to use), and initiates the fulfillment workflow. | Event Listener, State Machine |\n| **Shipment Generation Service (SGS)** | Creates the actual shipping labels, generates necessary documentation, and communicates with external carriers. | REST API, Asynchronous Processing |\n| **Payment Service (PS)** | Handles payment authorization, capture, and refund orchestration. | REST API, Idempotency Checks |\n| **Notification Service (NS)** | Manages all outbound communications (email, SMS, webhook) to customers and internal teams. | Message Queue (e.g., Kafka/RabbitMQ) |\n| **Messaging/Event Bus** | The central nervous system for asynchronous communication between all services. | Message Broker (Kafka/RabbitMQ) |\n\n### 2. Data Model Overview\n\nThe data model must support eventual consistency while ensuring transactional integrity for the order lifecycle.\n\n**Key Entities:**\n\n1. **Order:**\n    * `order_id` (PK)\n    * `customer_id`\n    * `items` (Array of `OrderItem`)\n    * `status` (e.g., `PENDING_PAYMENT`, `PROCESSING`, `SHIPPED`, `CANCELLED`)\n    * `fulfillment_details` (JSON/Array detailing which warehouse(s) are handling which items)\n    * `created_at`, `updated_at`\n\n2. **Inventory:**\n    * `sku_id` (PK)\n    * `warehouse_id` (PK)\n    "
+      }
+    }
+  },
+  "probes": {
+    "assistant-edit": "PASS"
+  }
+}

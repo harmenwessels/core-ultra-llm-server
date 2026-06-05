@@ -46,11 +46,18 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 | OmniCoder-9B | n/a (VLM) | 13.3 ✗² | n/a | 13.4 | n/a | 13.4 | n/a |
 | Qwen3.5-4B | n/a (VLM) | 20.2 ✗² | n/a | 20.6 | n/a | 20.2 | n/a |
 | Granite-4.1-3b **cw v2 (AWQ+SE)** | 1.75 s (0.09) ✗¹ | 31.3 **✓** | 30.9 (−1%) **✓** | 31.4 | 23.2 (−26%) | 31.7 | 24.8 (−22%) |
+| Qwen2.5-Coder-0.5B | **0.95 s** (0.03) ✓ | 80.6 ✗³ | 130.6 (+62%) ✓³ | 87.7 | 67.9 (−23%) | 93.4 | 88.9 (−5%) |
+| Qwen3-VL-8B | n/a (VLM) | 14.8 ✓ | n/a | 15.0 | n/a | 15.1 | n/a |
+| Gemma 4 E2B (our conversion) | n/a (VLM) | 21.5 ✓ | n/a | 23.3 | n/a | 24.5 | n/a |
+| Qwen3-0.6B (thinking) | 1.16 s (0.05) ✓ | 86.7 ✗ behavior | 56.5 (−35%) ✗ | 85.2 | 47.6 (−44%) | 79.6 | 53.1 (−33%) |
 
 ¹ raw-continuation probe artifact (no stop criterion), not a verified failure.
 ² **untagged thinking preamble**: the model spends the token budget on prose reasoning before
 (or instead of) the code — OmniCoder-9B produced *zero* code in 512 tokens. Not a conversion
 defect, but a practical disqualifier for the edit role at these decode speeds.
+³ Coder-0.5B's plain edit failed (missing import) while its PL edit passed — the two backends'
+greedy paths diverge, and at 0.5B scale correctness is effectively a coin flip per path. Edits
+need ≥1.5B; the 0.5B remains autocomplete-only.
 
 ## Findings
 
