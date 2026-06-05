@@ -109,10 +109,15 @@ OpenVINO 2026.3 nightly:
 
 ### What we learned about the hardware
 
-- **The iGPU memory ceiling is 16.4 GiB (= 17.6 decimal GB)**, enforced by the Windows driver
-  (`GPU_DEVICE_TOTAL_MEM_SIZE`) — the same figure Task Manager shows as "~18 GB" shared GPU
-  memory. Weights *plus* upload/compile buffers must fit this budget, so the practical model
-  limit is ≈ 12–13 GiB of weights. Both ~14–15 GiB MoE models fail at load.
+- **The iGPU memory ceiling is ≈ 50% of installed system RAM**, enforced by the Windows
+  driver — on this 32 GB machine that is 16.4 GiB (= 17.6 decimal GB, the figure Task Manager
+  shows as "~18 GB" shared GPU memory; query it via `GPU_DEVICE_TOTAL_MEM_SIZE`). A 16 GB
+  laptop gets ~8 GiB; a 64 GB machine ~32 GiB. Weights *plus* upload/compile buffers must fit
+  this budget, so the practical model limit on 32 GB RAM is ≈ 12–13 GiB of weights — both
+  ~14–15 GiB MoE models fail at load here, but would likely fit with 64 GB of RAM.
+  Unit note: "32 GB" RAM is binary (32 GiB = 34.4 decimal GB), so dividing a decimal vRAM
+  figure (e.g. "17.9 GB") by it overstates the ratio — in consistent units the measured
+  ceiling is 52% of RAM (17,626,103,808 bytes vs 33,777,467,392 bytes).
 - **Host RAM matters separately**: the first compile of a large model also needs roughly
   weights-sized free *system* RAM, failing with a `USM Host` allocation error otherwise. Freeing
   RAM fixes that failure mode — but not the device ceiling.

@@ -36,7 +36,7 @@ flowchart TB
     end
 
     subgraph hw["Hardware"]
-        igpu["Intel Arc iGPU (Xe-LPG)<br/>16.4 GiB shared-memory ceiling"]
+        igpu["Intel Arc iGPU (Xe-LPG)<br/>shared-memory ceiling ≈ 50% of RAM<br/>(16.4 GiB on this 32 GB machine)"]
     end
 
     subgraph disk["models/ — downloaded from Hugging Face"]
@@ -145,8 +145,9 @@ inside the OpenVINO runtime with no Python/HF-tokenizers dependency at inference
   every subsequent startup loads the blob in seconds. The cache key includes the device + driver +
   OpenVINO build, so a driver or wheel update transparently triggers recompilation.
 - The iGPU has **no dedicated VRAM** — weights, KV-cache, and compile workspace all live in shared
-  system RAM, capped by the driver at **16.4 GiB** (`GPU_DEVICE_TOTAL_MEM_SIZE`). That cap, not
-  total system RAM, is what ruled out the 30B-class MoE models (~15.2–15.4 GB weights + workspace).
+  system RAM, capped by the Windows driver at **≈ 50% of installed RAM**
+  (`GPU_DEVICE_TOTAL_MEM_SIZE`; 16.4 GiB on the 32 GB development machine). That cap, not total
+  system RAM, is what ruled out the 30B-class MoE models (~14–15 GiB weights + workspace) here.
 
 ### 6. Models on disk
 
@@ -180,7 +181,7 @@ Continue → POST /v1/completions {model, prompt:"<|fim_prefix|>...<|fim_middle|
 
 | Constraint | Consequence |
 |---|---|
-| iGPU shares system RAM, 16.4 GiB cap | small INT4 models; single-flight lock; no 30B MoEs |
+| iGPU shares system RAM, capped at ≈ 50% of it by the driver | small INT4 models; single-flight lock; no 30B MoEs on 32 GB RAM |
 | Decode is bandwidth-bound (~15 tok/s per ~4 GB of weights) | E2B (4.1 GB → 30 tok/s) for chat, 3B (2.1 GB → 24 tok/s, 0.15 s TTFT) for autocomplete |
 | Continue needs OpenAI surface + streaming | exact OpenAI JSON/SSE shapes, `/v1` base path |
 | Gemma 4 IR is VLM-shaped | `VLMPipeline` + per-model pipeline auto-detection |
