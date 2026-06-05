@@ -11,7 +11,10 @@ tricks, and no heavyweight serving framework.
 - **iGPU-first**: INT4 OpenVINO IR models, compile caching, single-flight scheduling tuned for shared-memory iGPUs
 - **Lean**: one ~300-line FastAPI file plus three scripts; dependencies are `openvino-genai`, `fastapi`, `uvicorn`, `huggingface_hub`
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for how the pieces fit together, and
+[RESEARCH.md](RESEARCH.md) for the benchmark methodology, the full set of performance findings
+(bandwidth scaling, memory ceiling, quantization recipes, prompt-lookup decoding), and the
+model-conversion playbook.
 
 ## Requirements
 
@@ -62,7 +65,7 @@ the cache in seconds.
 | `DEVICE` | `GPU` | OpenVINO device (`CPU` as debug fallback) |
 | `HOST` / `PORT` | `127.0.0.1` / `8000` | bind address |
 | `CACHE_DIR` | `./.ovcache` | compiled-blob cache location |
-| `PROMPT_LOOKUP_MODELS` | the autocomplete model | `;`-separated model ids that use prompt-lookup speculative decoding (+25% measured on FIM workloads; do **not** enable for general chat models — measured −20…−33%; unsupported on VLM-shaped models) |
+| `PROMPT_LOOKUP_MODELS` | the autocomplete model | `;`-separated model ids that use prompt-lookup speculative decoding (helps FIM models, hurts general chat — see [RESEARCH.md](RESEARCH.md)) |
 
 Example — serve one bigger chat model instead:
 
@@ -111,7 +114,7 @@ OpenVINO 2026.3 nightly:
 | [Ministral-3b-instruct INT4](https://huggingface.co/Echo9Zulu/Ministral-3b-instruct-int4_asym-ov) | 2024-03 | 1.7 GB | text | 128k | 36.0 tok/s | 0.07 s | community Mistral derivative (not official Mistral AI); 2024-era quality |
 | [Qwen3.5-2B INT4](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | 2026-02 | 2.0 GB | text, image¹ | 256k | 34.6 tok/s | 0.17 s | fastest chat-quality model; community conversion |
 | [Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov) (default chat) | 2026-03 | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | very responsive in Continue |
-| [Granite-4.1-3b INT4-cw](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-ov) (our conversion) | 2026-04 | 1.7 GB | text | 128k | 27.4 tok/s | 0.13 s | newest Granite; first OV IR of 4.1. Recipe matters: int4_sym channel-wise 27.4 / int8 17.4 / int4_asym g128 13.0 tok/s — group-wise dequant is expensive on Arc. cw quality not yet evaluated. |
+| [Granite-4.1-3b INT4-cw](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-ov) (our conversion) | 2026-04 | 1.7 GB | text | 128k | 27.4 tok/s | 0.13 s | newest Granite; first OV IR of 4.1; channel-wise recipe is 2.1× faster than the int4 default here (RESEARCH.md) |
 | [Qwen3-4B INT4](https://huggingface.co/OpenVINO/Qwen3-4B-int4-ov) | 2025-04 | 2.1 GB | text | 40k | 24.9 tok/s | 0.10 s | same speed as Coder-3B with a newer base |
 | [Granite-4.0-micro INT4](https://huggingface.co/llmware/granite-4-micro-ov) | 2025-09 | 2.2 GB | text | 128k | 24.6 tok/s | 0.16 s | IBM; 128k context at 3B-class speed; community conversion (llmware) |
 | [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 2024-11 | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
@@ -121,9 +124,9 @@ OpenVINO 2026.3 nightly:
 | [Qwen3-8B INT4](https://huggingface.co/OpenVINO/Qwen3-8B-int4-ov) | 2025-04 | 4.6 GB | text | 40k | 15.0 tok/s | 0.13 s | Coder-7B speed with a newer base |
 | [Qwen3-VL-8B INT4](https://huggingface.co/OpenVINO/Qwen3-VL-8B-Instruct-int4-ov) | 2025-10 | 5.5 GB | text, image, video¹ | 256k | 14.5 tok/s | 0.15 s | chat-class speed; vision+video capable |
 | [Qwen3.5-9B INT4-asym](https://huggingface.co/droans/qwen3.5-9B-int4-asym-ov) | 2026-02 | 5.7 GB | text, image¹ | 256k | ≈13 tok/s | 0.46 s | newest model generation; community conversion (droans) |
-| [OmniCoder-9B INT4](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 2026-03 | 5.7 GB | text, image¹ | 256k | ≈13 tok/s | 0.50 s | coding finetune of Qwen3.5-9B — strongest coding model that fits; identical speed to its base (A/B verified); community conversion |
-| ~~[LFM2.5-350M INT8/FP16](https://huggingface.co/OpenVINO/LFM2.5-350M-int8-ov)~~ | ~~2026-03~~ | ~~0.4 GB~~ | ~~text~~ | — | — | — | **runtime bug**: compiles, but inference fails on `ScatterNDUpdate` shape validation (both official variants; OpenVINO nightly dev20260603) |
-| ~~[LFM2.5-8B-A1B INT4](https://huggingface.co/Echo9Zulu/LFM2.5-8B-A1B-int4_sym-awq-ov)~~ | ~~2026-05~~ | ~~4.5 GB~~ | ~~text~~ | — | — | — | **GPU compile never completes** (killed after 27 min, 15 GB RSS) — likely its MoE expert graph: the dense-hybrid LFM2.5-1.2B compiles in 13 s |
+| [OmniCoder-9B INT4](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 2026-03 | 5.7 GB | text, image¹ | 256k | ≈13 tok/s | 0.50 s | coding finetune of Qwen3.5-9B — strongest coding model that fits; community conversion |
+| ~~[LFM2.5-350M INT8/FP16](https://huggingface.co/OpenVINO/LFM2.5-350M-int8-ov)~~ | ~~2026-03~~ | ~~0.4 GB~~ | ~~text~~ | — | — | — | **runtime bug** (`ScatterNDUpdate` shape validation, both official variants) |
+| ~~[LFM2.5-8B-A1B INT4](https://huggingface.co/Echo9Zulu/LFM2.5-8B-A1B-int4_sym-awq-ov)~~ | ~~2026-05~~ | ~~4.5 GB~~ | ~~text~~ | — | — | — | **GPU compile never completes** (MoE expert graph; the dense-hybrid 1.2B works fine) |
 | ~~[gpt-oss-20b INT4](https://huggingface.co/OpenVINO/gpt-oss-20b-int4-ov)~~ | ~~2025-08~~ | ~~11.7 GiB~~ | ~~text~~ | ~~128k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile despite 18 GB free host RAM |
 | ~~[Qwen3-Coder-30B-A3B INT4](https://huggingface.co/OpenVINO/Qwen3-Coder-30B-A3B-Instruct-int4-ov)~~ | ~~2025-07~~ | ~~15.2 GiB~~ | ~~text~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile |
 | ~~[Gemma 4 26B A4B INT4](https://huggingface.co/Morteza89/gemma-4-26b-a4b-it-int4-ov)~~ | ~~2026-03~~ | ~~14.3 GiB~~ | ~~text, image, audio¹~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM** (tested 3×): fails during weight upload even with 24 GB free RAM |
@@ -136,50 +139,23 @@ The server currently exposes a **text-only** API and keeps practical context wel
 maximum — KV-cache grows with context and competes with weights for the same shared iGPU
 memory. Multimodal IRs run fine text-only through `VLMPipeline`.
 
-### What we learned about the hardware
-
-- **The iGPU memory ceiling is ≈ 50% of installed system RAM**, enforced by the Windows
-  driver — on this 32 GB machine that is 16.4 GiB (= 17.6 decimal GB, the figure Task Manager
-  shows as "~18 GB" shared GPU memory; query it via `GPU_DEVICE_TOTAL_MEM_SIZE`). A 16 GB
-  laptop gets ~8 GiB; a 64 GB machine ~32 GiB. Weights *plus* upload/compile buffers must fit
-  this budget, and the compile-time overhead is substantial: on 32 GB RAM the largest model
-  that loads is 6.0 GiB of weights, while 11.7 GiB (gpt-oss-20b) already fails — so the
-  practical limit lies somewhere between, well below the 16.4 GiB ceiling itself. All three
-  failed MoE models would likely fit with 64 GB of RAM.
-  Unit note: "32 GB" RAM is binary (32 GiB = 34.4 decimal GB), so dividing a decimal vRAM
-  figure (e.g. "17.9 GB") by it overstates the ratio — in consistent units the measured
-  ceiling is 52% of RAM (17,626,103,808 bytes vs 33,777,467,392 bytes).
-- **Host RAM matters separately**: the first compile of a large model also needs roughly
-  weights-sized free *system* RAM, failing with a `USM Host` allocation error otherwise. Freeing
-  RAM fixes that failure mode — but not the device ceiling.
-- **Decode is memory-bandwidth-bound**, not compute-bound: throughput scales almost exactly
-  inversely with weight size across two orders of magnitude — 0.3 GB → 88 tok/s,
-  0.9 GB → 57, 2.1 GB → 24, 4.2 GB → 15 (tok/s × GB ≈ 26–60, tightening as models grow).
-- **Gemma 4 IRs are VLM-shaped** (MatFormer per-layer embeddings + vision tower) and require
-  `VLMPipeline` even for text-only use; Qwen IRs are plain `LLMPipeline`. The server and bench
-  auto-detect the IR shape per model directory.
-- GPU latency tuning hints (`PERFORMANCE_HINT=LATENCY`, `INFERENCE_PRECISION_HINT=f16`,
-  `KV_CACHE_PRECISION=u8`) made no measurable difference on this hardware.
-- **Prompt-lookup speculative decoding** (`scripts/bench_prompt_lookup.py`) is a per-model bet on
-  draft acceptance: +25% for the FIM-trained Qwen2.5-Coder-1.5B on code-edit prompts, but −20…−33%
-  for general models (Qwen3-4B/8B) whose output diverges from the prompt. The server enables it
-  for the autocomplete model only. Note: it switches to the continuous-batching backend, whose
-  numerics differ slightly — outputs are quality-equivalent but not bit-identical.
-- **Quantization-recipe sensitivity is architecture-specific**: Granite-4.1 gained 2.1× from
-  channel-wise int4 (vs group-128), while the identical recipe change gained Gemma 4 E2B nothing
-  (its remaining overhead is the per-layer-embedding gather path, not dequant). When converting
-  models yourself, benchmark recipes — don't assume.
+The short version of *why* the table looks like this: decode speed on this iGPU is
+memory-bandwidth-bound (smaller weights = proportionally faster), the usable model size is
+capped well below the driver's ≈50%-of-RAM memory ceiling by compile-time overhead, and
+quantization recipe / speculative decoding gains are architecture- and workload-specific.
+The full methodology, measurements and conversion playbook live in [RESEARCH.md](RESEARCH.md).
 
 ## Repository layout
 
 ```
-server.py                  OpenAI-compatible FastAPI server (multi-model, SSE, FIM)
-scripts/check_gpu.py       verify OpenVINO sees the Arc iGPU
-scripts/download_model.py  fetch OpenVINO IR models from Hugging Face
-scripts/bench.py           TTFT + decode-throughput benchmark (3 measured runs)
-requirements.txt           pinned dependency versions (incl. OpenVINO nightly index)
-models/<owner>/<name>/     downloaded models, mirroring HF repo ids (gitignored)
-.ovcache/                  compiled-blob cache (gitignored)
+server.py                       OpenAI-compatible FastAPI server (multi-model, SSE, FIM)
+scripts/check_gpu.py            verify OpenVINO sees the Arc iGPU
+scripts/download_model.py       fetch OpenVINO IR models from Hugging Face
+scripts/bench.py                TTFT + decode-throughput benchmark (3 measured runs)
+scripts/bench_prompt_lookup.py  A/B harness for prompt-lookup speculative decoding
+requirements.txt                pinned dependency versions (incl. OpenVINO nightly index)
+models/<owner>/<name>/          downloaded models, mirroring HF repo ids (gitignored)
+.ovcache/                       compiled-blob cache (gitignored)
 ```
 
 ## Alternatives / related projects
