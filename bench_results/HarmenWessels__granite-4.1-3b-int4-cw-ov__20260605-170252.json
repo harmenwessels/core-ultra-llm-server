@@ -1,0 +1,67 @@
+{
+  "model": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
+  "pipeline": "LLMPipeline",
+  "timestamp": "2026-06-05T16:57:12",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "autocomplete": {
+      "plain": {
+        "tps": 28.598600387573242,
+        "ttft": 0.09605990600585937,
+        "wall": 1.7249961998313665,
+        "text": "        if a[i] < b[j]:\n            result.append(a[i])\n            i += 1\n        else:\n            result.append(b[j])\n            j += 1\n    result.extend(a[i:])\n    result.extend(b[j:])\n"
+      },
+      "fim": false
+    },
+    "assistant-edit": {
+      "plain": {
+        "tps": 29.102445602416992,
+        "ttft": 0.13762080383300782,
+        "wall": 8.076117299962789,
+        "text": "```python\ndef process_orders(orders: list, inventory: dict, prices: dict) -> tuple:\n    \"\"\"\n    Processes a list of orders against available inventory and returns the total cost,\n    shipped orders, and backordered orders.\n    \"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      },
+      "pl": {
+        "tps": 42.91250228881836,
+        "ttft": 0.1273020935058594,
+        "wall": 5.512428600108251,
+        "text": "```python\ndef process_orders(orders: list, inventory: dict, prices: dict) -> tuple:\n    \"\"\"\n    Processes a list of orders against available inventory and returns the total cost,\n    shipped orders, and backordered orders.\n    \"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost}\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost}\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      },
+      "pl_delta_pct": 47.5
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 28.088520050048828,
+        "ttft": 0.14470079040527345,
+        "wall": 9.223864500178024,
+        "text": "**Function Overview**\n\n`process_orders(orders, inventory, prices)` is designed to evaluate a list of orders (`orders`), determine which items can be fulfilled from an available stock (`inventory`), and calculate the total cost of fulfilled orders. It also identifies orders that cannot be fulfilled due to insufficient inventory.\n\n**Step-by-Step Explanation**\n\n1. **Initialization**\n   - `total` is initialized to 0. This variable will accumulate the monetary value of all orders that can be fulfilled.\n   - `shipped` and `backordered` lists are initialized to collect orders that can be shipped and those that cannot be fulfilled due to inventory shortages.\n\n2. **Iterating Through Orders**\n   - The function iterates over each order in the `orders` list. Each order is expected to be a dictionary containing at least an `\"item\"` key (the product to be ordered) and a `\"qty\"` key (quantity).\n\n3. **Checking Inventory Availability**\n   - For each order, the function checks if the requested item (`item`) exists in the `inventory` dictionary.\n   - If the item is not in `inventory`, the order is added to the `backordered` list immediately, and no cost is added to `total`.\n\n4. **F"
+      },
+      "pl": {
+        "tps": 17.56351089477539,
+        "ttft": 0.14097549438476562,
+        "wall": 14.659670800203457,
+        "text": "**Function Overview**\n\nThe `process_orders` function takes three parameters:\n\n1. **orders** - A list of dictionaries, where each dictionary represents an order with at least an `item` key (indicating the product) and a `qty` key (indicating the quantity of that product ordered). It may also contain other details like customer information, but for this function, we only need the `item` and `qty`.\n\n2. **inventory** - A dictionary where the keys are product names and the values are the quantities available in stock for each product.\n\n3. **prices** - A dictionary mapping product names to their unit prices.\n\n**Step-by-Step Explanation**\n\n1. **Initialization**  \n   - `total` is initialized to 0. This variable will accumulate the monetary value of all orders that can be fulfilled from the inventory.\n   - `shipped` and `backordered` lists will collect orders that can be shipped (from sufficient inventory) and those that cannot be fulfilled (out-of-stock or missing items).\n\n2. **Order Processing Loop**  \n   - The function iterates over each order in the `orders` list.\n\n3. **Item Existence Check**  \n   - For each order, it checks if the requested `item"
+      },
+      "pl_delta_pct": -37.5
+    },
+    "architect": {
+      "plain": {
+        "tps": 29.107389450073242,
+        "ttft": 0.08981409454345703,
+        "wall": 17.33677290007472,
+        "text": "**Service Architecture Proposal**\n\n**1. Components**\n\n- **Order Management System (OMS):** Centralized system to receive, validate, and route orders to the appropriate warehouse based on item location and customer preference.\n\n- **Warehouse Management System (WMS):** Coordinates inventory movement between warehouses, tracks stock levels, and manages inventory allocation.\n\n- **Shipping and Logistics Interface:** Connects with external logistics providers to arrange for order fulfillment and track shipments.\n\n- **Customer Communication System:** Handles order confirmations, shipping updates, and returns management via email, SMS, and the webshop\u2019s own portal.\n\n- **Analytics and Reporting Module:** Provides insights into order fulfillment efficiency, inventory performance, and potential operational improvements.\n\n**2. Data Model**\n\n- **Order Entity:** Contains order ID, customer details, order date, and status.\n\n- **Item Entity:** Includes SKU, quantity, price, and location (warehouse).\n\n- **Warehouse Entity:** Details location, inventory levels, and service area.\n\n- **Inventory Entity:** Tracks stock levels, item availability, and allocation history.\n\n**3. APIs Between Components**\n\n- **OMS \u2194 WMS:** RESTful API for order routing and inventory allocation requests.\n\n- **WMS \u2194 Logistics:** Integration for shipment creation and tracking.\n\n- **Customer Communication System \u2194 OMS:** To relay order status updates.\n\n**4. Two Most Important Trade-offs**\n\n1. **Speed vs. Cost:** Achieving faster order fulfillment may require additional investment in warehouse space and staff. It's crucial to balance the cost of maintaining extra inventory (in terms of warehouse space and labor) against the potential revenue from increased sales due to improved customer satisfaction and loyalty.\n\n2. **Automation vs. Flexibility:** While automation (through APIs and integrated systems) is key for efficiency, there must be a level of flexibility to handle exceptions and last-minute changes (e.g., product recalls, urgent orders). This means investing in a robust, yet adaptable, system architecture that can quickly adapt to unforeseen circumstances without major downtime.\n\n**Conclusion**\n\nThis proposed service architecture for the order-fulfilment service of a mid-size webshop focuses on efficiency, customer satisfaction, and adaptability. The integration of key systems and APIs ensures a smooth flow of orders from the moment they are placed until they are delivered to the customer. The two most important trade-offs considered are the balance between speed and cost in order fulfillment, and the need for automation while maintaining flexibility to handle exceptions and changes in the business environment."
+      },
+      "pl": {
+        "tps": 18.194156646728516,
+        "ttft": 0.1224395980834961,
+        "wall": 27.602387899998575,
+        "text": "**Service Architecture Proposal**\n\n**1. Components**\n\n- **Order Management System (OMS):** The central hub that receives orders from the webshop, validates them, and routes them to the appropriate fulfillment process. It interfaces with the e-commerce platform via APIs.\n\n- **Warehouse Management System (WMS):** Coordinates inventory across multiple warehouses. It tracks stock locations, and optimizes inventory movement based on order volume and customer demand patterns.\n\n- **Shipping and Logistics Interface:** Connects with external logistics providers to arrange for order fulfillment, including packaging, labeling, and dispatching.\n\n- **Customer Communication Module:** Handles order status updates and communication with customers via email or SMS, integrated with the e-commerce platform.\n\n- **Analytics and Reporting Module:** Analyzes order data to optimize inventory levels, shipping routes, and customer service processes.\n\n**2. Data Model**\n\n- **Order Entity:** Contains order details, customer information, and shipping preferences.\n\n- **Inventory Item Entity:** Tracks stock levels, locations, and types of items across warehouses.\n\n- **Warehouse Entity:** Represents each physical location where inventory is stored, including capacity and operational status.\n\n- **Customer and Payment Information:** Secure storage of customer profiles and payment details for order processing.\n\n**3. APIs Between Components**\n\n- **OMS \u2194 WMS API:** Facilitates inventory allocation requests and updates from the WMS to the OMS based on order details.\n\n- **WMS \u2194 Shipping Interface API:** Communicates shipment details to logistics providers for execution.\n\n- **Customer Communication Module \u2194 OMS API:** Sends order status updates to the webshop and customers.\n\n**4. Trade-offs Considered**\n\n- **Integration Complexity vs. Flexibility:** Prioritized a modular architecture to allow for easy updates and integrations with existing systems. However, this complexity may require additional resources for maintenance and development.\n\n- **Data Consistency vs. Performance:** Decided to use a centralized Order Management System to ensure data consistency across the fulfillment process. This could be a bottleneck during peak order volumes, necessitating investment in load-balancing and performance optimization techniques.\n\n**Conclusion**\n\nThis proposed architecture balances the need for a robust order fulfillment process with the requirement for flexibility and integration with existing systems. It emphasizes data consistency and real-time communication between systems, which are critical for maintaining customer trust and operational efficiency. However, the architecture must be designed to handle high order volumes without significant performance degradation, potentially requiring advanced load-balancing strategies and optimization of the data flow between systems."
+      },
+      "pl_delta_pct": -37.5
+    }
+  },
+  "probes": {
+    "autocomplete": "PASS",
+    "assistant-edit": "FAIL (behavior changed)",
+    "assistant-edit+PL": "FAIL (SyntaxError)"
+  }
+}

@@ -109,23 +109,47 @@ Gemma 4 E2B (whose g128 build already rides the curve) gained 0%. And group-wise
 for every Qwen we tested. **Rule: when converting, benchmark recipes; never assume.**
 (Quality caveat: cw quantizes more coarsely than g128; we measured speed, not perplexity.)
 
-## Finding 6 — Prompt-lookup decoding is a per-workload bet
+## Finding 6 — Prompt-lookup gain is predicted by output/prompt n-gram overlap
 
 Speculative decoding without a draft model (drafts from prompt n-grams, batched verification).
-Same code-edit prompt, three models:
+Three results, in the order we learned them:
 
-| Model | Plain | Prompt-lookup | Δ |
+**(a) The gain scales with model size within one family** (same code-edit prompt, same session;
+every accepted draft token saves a weight-read, and weight-reads are what big models pay for):
+
+| Qwen2.5-Coder | Plain | PL | Δ |
 |---|---|---|---|
-| Qwen2.5-Coder-1.5B (FIM-trained) | 53.4 | 66.6 | **+25%** |
-| Qwen3-4B (general) | 25.9 | 17.3 | −33% |
-| Qwen3-8B (general) | 15.6 | 12.4 | −20% |
+| 0.5B | 80.1 | 131.0 | +64% |
+| 1.5B | 62.1 | 70.0 | +13% |
+| 3B | 30.2 | 57.2 | +89% |
+| 7B | 17.1 | **41.8** | **+144%** |
 
-The dividing line is **echo fidelity**: FIM-trained coders reproduce prompt text near-verbatim
-(high draft acceptance → batched bandwidth wins); general chat models reformulate (drafts miss
-→ pure verification overhead). The server enables PL only for the autocomplete model
-(`PROMPT_LOOKUP_MODELS`). Caveats: LLMPipeline only (not VLM-shaped IRs); switches to the
-continuous-batching backend whose numerics differ slightly — outputs are quality-equivalent
-but not bit-identical.
+The 7B at 41.8 tok/s on edit workloads rewrites the speed/quality trade-off — 7B quality at
+3B-class effective speed for echo-heavy tasks.
+
+**(b) Why other models *lose* with PL** — measured via the draft-acceptance proxy: the fraction
+of generated 3-grams already present in the prompt
+([`scripts/research_pl_overlap.py`](scripts/research_pl_overlap.py)):
+
+| Model | Output/prompt overlap | Plain | PL | Δ |
+|---|---|---|---|---|
+| Qwen3-0.6B (thinking) | 27.4% | 78.0 | 53.5 | −31% |
+| Qwen2.5-Coder-1.5B | 44.4% | 61.6 | 68.5 | +11% |
+| Granite-4.1-3b (general instruct) | 71.6% | 29.9 | 47.1 | **+58%** |
+
+**(c) The rule** (this *corrects* our first hypothesis "FIM-trained vs general"): PL gain tracks
+**output/prompt n-gram overlap**, break-even ≈ 35–40% here. The two real drivers:
+- **Thinking mode is PL's worst case** — Qwen3's `<think>` preamble is hundreds of free-form
+  tokens with ~zero prompt overlap; every draft is rejected. This, not "general vs coder",
+  is why Qwen3-4B/8B regressed (−33%/−20%).
+- **Instruction-faithful echoing is the best case regardless of family** — Granite-4.1 (not
+  FIM-trained) hit 71.6% overlap by following "keep the logic identical" verbatim and gained
+  +58%, *beating* the Coder, which rewrote more creatively (44.4%).
+
+The server enables PL per model via `PROMPT_LOOKUP_MODELS` (default: the autocomplete coder).
+Caveats: LLMPipeline only (not VLM-shaped IRs); switches to the continuous-batching backend
+whose numerics differ slightly — outputs are quality-equivalent but not bit-identical; all
+gains are for echo-heavy prompts — free-form generation runs at plain speed or below.
 
 ## Finding 7 — Self-converted models reach parity with community artifacts
 
