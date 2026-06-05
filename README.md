@@ -100,15 +100,19 @@ OpenVINO 2026.3 nightly:
 
 | Model | Weights | Modalities | Max context | Decode | TTFT | Verdict |
 |---|---|---|---|---|---|---|
-| Qwen2.5-Coder-0.5B INT4 | 0.3 GB | text | 32k | **87.6 tok/s** | 0.06 s | fastest; quality floor for autocomplete |
-| Qwen2.5-Coder-1.5B INT4 | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot candidate |
-| **Gemma 4 E2B INT4** (default chat) | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | fastest chat-quality model; very responsive in Continue |
-| Qwen2.5-Coder-3B INT4 (default autocomplete) | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
-| Gemma 4 E4B INT4 | 6.0 GB | text, image, audio¹ | 128k | 15.7 tok/s | 0.52 s | mid |
-| Qwen2.5-Coder-7B INT4 | 4.2 GB | text | 32k | 15.0 tok/s | 0.20 s | best chat quality that fits |
-| Qwen3-VL-8B INT4 | 5.5 GB | text, image, video¹ | 256k | 14.5 tok/s | 0.15 s | chat-class speed; the only vision+video model that fits |
-| ~~Qwen3-Coder-30B-A3B INT4~~ | ~~15.2 GiB~~ | ~~text~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile |
-| ~~Gemma 4 26B A4B INT4~~ | ~~14.3 GiB~~ | ~~text, image, audio¹~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM** (tested 3×): fails during weight upload even with 24 GB free RAM |
+| [Qwen2.5-Coder-0.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 0.3 GB | text | 32k | **87.6 tok/s** | 0.06 s | fastest; quality floor for autocomplete |
+| [Qwen3.5-0.8B INT4](https://huggingface.co/yangsu0423/Qwen3.5-0.8B-int4-ov) | 0.9 GB | text, image¹ | 256k | **72.7 tok/s** | 0.08 s | newest gen at near-0.5B speed; community conversion |
+| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 0.9 GB | text | 32k | **57.0 tok/s** | 0.06 s | autocomplete sweet spot candidate |
+| **[Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)** (default chat) | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | fastest chat-quality model; very responsive in Continue |
+| [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) (default autocomplete) | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | strong FIM quality |
+| [Qwen3.5-4B INT4](https://huggingface.co/yangsu0423/Qwen3.5-4B-int4-ov) | 3.3 GB | text, image¹ | 256k | 19.9 tok/s | 0.31 s | newest gen; faster than the 9B at similar quality class; community conversion |
+| [Gemma 4 E4B INT4](https://huggingface.co/OpenVINO/gemma-4-E4B-it-int4-ov) | 6.0 GB | text, image, audio¹ | 128k | 15.7 tok/s | 0.52 s | mid |
+| [Qwen2.5-Coder-7B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-7B-Instruct-int4-ov) | 4.2 GB | text | 32k | 15.0 tok/s | 0.20 s | best chat quality that fits |
+| [Qwen3-VL-8B INT4](https://huggingface.co/OpenVINO/Qwen3-VL-8B-Instruct-int4-ov) | 5.5 GB | text, image, video¹ | 256k | 14.5 tok/s | 0.15 s | chat-class speed; vision+video capable |
+| [Qwen3.5-9B INT4-asym](https://huggingface.co/droans/qwen3.5-9B-int4-asym-ov) | 5.7 GB | text, image¹ | 256k | 13.2 tok/s | 0.44 s | newest model generation; community conversion (droans) |
+| ~~[gpt-oss-20b INT4](https://huggingface.co/OpenVINO/gpt-oss-20b-int4-ov)~~ | ~~11.7 GiB~~ | ~~text~~ | ~~128k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile despite 18 GB free host RAM |
+| ~~[Qwen3-Coder-30B-A3B INT4](https://huggingface.co/OpenVINO/Qwen3-Coder-30B-A3B-Instruct-int4-ov)~~ | ~~15.2 GiB~~ | ~~text~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM**: device allocation fails at compile |
+| ~~[Gemma 4 26B A4B INT4](https://huggingface.co/Morteza89/gemma-4-26b-a4b-it-int4-ov)~~ | ~~14.3 GiB~~ | ~~text, image, audio¹~~ | ~~256k~~ | — | — | **OOM on 32 GB RAM** (tested 3×): fails during weight upload even with 24 GB free RAM |
 
 ¹ Modalities and max context are the *model's* capabilities (from each model's `config.json`).
 The server currently exposes a **text-only** API and keeps practical context well below the
@@ -121,8 +125,10 @@ memory. Multimodal IRs run fine text-only through `VLMPipeline`.
   driver — on this 32 GB machine that is 16.4 GiB (= 17.6 decimal GB, the figure Task Manager
   shows as "~18 GB" shared GPU memory; query it via `GPU_DEVICE_TOTAL_MEM_SIZE`). A 16 GB
   laptop gets ~8 GiB; a 64 GB machine ~32 GiB. Weights *plus* upload/compile buffers must fit
-  this budget, so the practical model limit on 32 GB RAM is ≈ 12–13 GiB of weights — both
-  ~14–15 GiB MoE models fail at load here, but would likely fit with 64 GB of RAM.
+  this budget, and the compile-time overhead is substantial: on 32 GB RAM the largest model
+  that loads is 6.0 GiB of weights, while 11.7 GiB (gpt-oss-20b) already fails — so the
+  practical limit lies somewhere between, well below the 16.4 GiB ceiling itself. All three
+  failed MoE models would likely fit with 64 GB of RAM.
   Unit note: "32 GB" RAM is binary (32 GiB = 34.4 decimal GB), so dividing a decimal vRAM
   figure (e.g. "17.9 GB") by it overstates the ratio — in consistent units the measured
   ceiling is 52% of RAM (17,626,103,808 bytes vs 33,777,467,392 bytes).
