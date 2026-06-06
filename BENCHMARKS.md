@@ -207,6 +207,9 @@ endurance, deep recall. Raw per-probe JSON in `bench_results/roles__*.json`.
 ¹ emits its native `<|tool_call_start|>` Pythonic tool format regardless of instructed
 format — hermes-style serving understates LFM models (RESEARCH.md finding 9).
 
+Re-validated end-of-day on the shipped serving stack (scheduler/CB pipelines, PL off for
+granite): no regressions, probe-for-probe identical or better (`roles__20260606-211052.json`).
+
 Key verdicts: **actor ≠ analyst** (granite uniquely sustains loops and byte-exact edits but
 misdiagnoses; Gemma/Qwen diagnose but can't drive loops) — the empirical basis for
 architect/executor role-split serving. `write-full` failed 0-for-10: coder roles must be

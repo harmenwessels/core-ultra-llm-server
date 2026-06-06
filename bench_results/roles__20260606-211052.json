@@ -1,0 +1,233 @@
+{
+  "HarmenWessels/granite-4.1-8b-int4-cw-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 7.7,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 3.8,
+      "detail": "calls=[('web_search', {'query': 'latest stable Python version'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 2.9,
+      "detail": "calls=[] content='API stands for **Application Programming Interface**.'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 3.8,
+      "detail": "calls=[] content='The value of **MAX_RETRIES** in `config.yaml` is **7**.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 10.0,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'retu\")]"
+    },
+    "edit-exact": {
+      "pass": true,
+      "seconds": 6.7,
+      "detail": "old-match=True old='if window < 1:'"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 15.4,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 4.6,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 16.4,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": false,
+      "seconds": 11.0,
+      "detail": "content='the test fails because the expected median value is incorrect. the test asserts that `median([4, 1, '"
+    },
+    "diagnose+think": {
+      "pass": false,
+      "seconds": 12.3,
+      "detail": "content='the test fails because the expected median value is incorrect. the test asserts that `median([4, 1, '"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 30.9,
+      "detail": "symbols=4 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": true,
+      "seconds": 33.1,
+      "detail": "symbols=4 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": true,
+      "seconds": 29.7,
+      "detail": "stopped at turn 4: edits=1 green-tests-seen=1"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 11.1,
+      "detail": "content='The deployment API key is stored in the environment variable `FROBNICATE_KEY_77`'"
+    }
+  },
+  "Echo9Zulu/Qwen3.5-2B-int4_sym-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 6.9,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 5.1,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 5.2,
+      "detail": "calls=[] content='The acronym **API** stands for **Application Programming Int'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 2.6,
+      "detail": "calls=[] content='MAX_RETRIES has a value of **7** in config.yaml.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 20.1,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'def \")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 33.3,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 68.4,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 3.6,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 16.7,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 6.0,
+      "detail": "content='the bug is in the **even case** logic: when the list length is even, the code returns `(s[mid] + s[m'"
+    },
+    "diagnose+think": {
+      "pass": true,
+      "seconds": 8.5,
+      "detail": "content='the bug is in the **even case** calculation: the code uses `s[mid + 1]` instead of `s[mid + 1]` (whi'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 11.8,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": true,
+      "seconds": 11.2,
+      "detail": "symbols=2 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 127.9,
+      "detail": "stopped at turn 1: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "content='FROBNICATE_KEY_77\\n'"
+    }
+  },
+  "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 3.3,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 3.2,
+      "detail": "calls=[('read_file', {'path': 'https://www.python.org/downloads/'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 2.5,
+      "detail": "calls=[] content='API stands for Application Programming Interface.'"
+    },
+    "result-use": {
+      "pass": false,
+      "seconds": 2.5,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})] content=''"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 3.2,
+      "detail": "calls=[('read_file', \"{'path': 'stats.py'}\")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 3.8,
+      "detail": "old-match=True old='window must be >= 1'"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 3.3,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": false,
+      "seconds": 2.4,
+      "detail": "calls=['run_tests']"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 14.6,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": false,
+      "seconds": 4.3,
+      "detail": "content='the error is that the function `median` is returning 3.5 when it should return 2.5. this is because '"
+    },
+    "diagnose+think": {
+      "pass": false,
+      "seconds": 4.1,
+      "detail": "content='the problem is that the function `median` is returning 3.5 when it should return 2.5. this is becaus'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 10.7,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": true,
+      "seconds": 10.6,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 8.2,
+      "detail": "turn 2: repeated call run_tests"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 3.3,
+      "detail": "content='The deployment API key lives in the environment variable FROBNICATE_KEY_77.'"
+    }
+  }
+}
