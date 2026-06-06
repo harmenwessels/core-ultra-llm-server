@@ -362,10 +362,13 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
 - **u8 KV hint bug (Finding 13)**: `KV_CACHE_PRECISION=u8` → paged-attention BY_CHANNEL
   block-size assertion; reproduces through nightly 22103; candidate upstream issue (clean
   one-line reproducer + source diagnosis available). No local impact — defaults already int8.
-- **NPU offload for autocomplete**: untested. 2026.0 matured NPU LLM support (AOT compile,
-  chunked prefill, NPU-side prefix caching); the FIM workload (short prompts, cw-sym-friendly
-  small model) fits its constraints exactly. Would free GPU bandwidth AND break the
-  single-gen-lock contention — first true chat∥autocomplete parallelism.
+- **NPU offload for autocomplete — blocked upstream (tested 2026-06-06)**: every
+  Qwen2.5-Coder int4 IR (official artifacts AND a fresh own export) fails NPU compile with
+  `vpux StopLocationVerifierPass: Found N duplicated names`, identically on two GenAI
+  runtimes — implicating the driver-shipped NPU compiler. Retest after an Intel NPU driver
+  update (one command; fresh 0.5B IR kept on disk). The prize remains first true
+  chat∥autocomplete parallelism by breaking the single-gen-lock. GPU baselines banked
+  meanwhile: Coder-0.5B FIM 0.49–0.53 s (2× faster than the served 1.5B).
 - **Draft-model speculative decoding**: untested. granite-4.1-3b drafting for granite-8b
   could accelerate executor decode on low-overlap outputs where prompt-lookup fails
   (agent/architect turns) — complements Finding 6's PL boundary.
