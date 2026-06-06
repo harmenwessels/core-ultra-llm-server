@@ -123,6 +123,7 @@ best validated mode; "+PL" where prompt-lookup wins).
 | **Qwen3.5-4B, no-think rt_info patch⁷** | <79.1 (unmeasured)⁷ | — | — | n/a | **19.8 ✓** | 19.8 | **✓** |
 | Gemma 4 E2B (both PTQ conversions) | 60.0 | LCB-v6 44.0 | — | n/a | 21–23 | ~23 | ✓ |
 | **Gemma 4 E2B QAT (ours)⁸** | 60.0 (≈bf16-preserved) | LCB-v6 44.0 | — | n/a | 21.7 ✓ | ~22 | **✓** |
+| **Gemma 4 E4B QAT (ours)⁸** | 69.4 (≈bf16-preserved) | LCB-v6 52.0 | — | n/a | 16.7 ✓ | ~17 | **✓** |
 | Gemma 4 E4B | **69.4** | LCB-v6 52.0 | — | n/a | 15.6 | ~16 | **✓** |
 | Granite-4.1-3b cw v2 (ours) | 49.8 | HE 81.7 / MBPP 71.2 | 82.3 | — | 31.3 | ~31 | **✓** |
 | Granite-4.1-3b int8 (ours) | 49.8 | same base | 82.3 | — | 24.6 +PL | ~15 | **✓** |

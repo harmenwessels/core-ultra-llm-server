@@ -1,0 +1,35 @@
+{
+  "model": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
+  "pipeline": "VLMPipeline",
+  "timestamp": "2026-06-06T09:34:28",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "assistant-edit": {
+      "plain": {
+        "tps": 16.694854736328125,
+        "ttft": 0.8818053588867187,
+        "wall": 19.626539499964565,
+        "text": "```python\nfrom typing import List, Dict, Any, Tuple\n\ndef process_orders(orders: List[Dict[str, Any]], inventory: Dict[str, int], prices: Dict[str, float]) -> Tuple[float, List[Dict[str, Any]], List[Dict[str, Any]]]:\n    \"\"\"Processes a list of orders against current inventory and prices.\"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      }
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 18.299516677856445,
+        "ttft": 0.8578689575195313,
+        "wall": 14.805029399925843,
+        "text": "## Function Analysis: `process_orders`\n\nThe `process_orders` function simulates the fulfillment of customer orders against a given inventory, calculates the total cost of fulfilled items, and tracks what was shipped and what remains backordered.\n\nHere is a step-by-step explanation:\n\n### 1. Initialization\nThe function starts by initializing three variables:\n*   `total = 0`: This will accumulate the total monetary cost of all items successfully shipped.\n*   `shipped = []`: A list to store details of the items that were successfully shipped to the customer.\n*   `backordered = []`: A list to store the details of orders (or portions of orders) that could not be fulfilled immediately.\n\n### 2. Iterating Through Orders\nThe function then loops through each `order` in the input list `orders`. For each order, it extracts the `item` name and the requested `qty` (quantity).\n\n### 3. Inventory Checks and Processing (The Core Logic)\n\nThe function proceeds through several conditional checks:\n\n**A. Item Not in Inventory (Edge Case 1):**\n```python\nif item not in inventory:\n    backordered.append(order)\n    continue"
+      }
+    },
+    "architect": {
+      "plain": {
+        "tps": 16.44025993347168,
+        "ttft": 0.5737061157226563,
+        "wall": 32.01571710011922,
+        "text": "This is a classic, high-throughput, distributed systems design problem. Given the scale ($\\sim 50k$ orders/day, which is $\\sim 0.58$ orders/second average, but likely much higher during peak sales) and the complexity (multi-warehouse, partial shipments), the architecture must prioritize **availability, scalability, and eventual consistency** over strict immediate consistency across all services.\n\nHere is a proposed service architecture.\n\n---\n\n## 1. High-Level Architecture Diagram\n\nThe system will be decomposed into several microservices communicating primarily via asynchronous messaging for resilience and decoupling.\n\n**(Conceptual Flow: Order Submission $\\rightarrow$ Orchestration $\\rightarrow$ Inventory Check $\\rightarrow$ Fulfillment $\\rightarrow$ Shipping)**\n\n## 2. Components (Microservices)\n\n| Component | Responsibility | Key Technology Considerations |\n| :--- | :--- | :--- |\n| **API Gateway** | Entry point for all external traffic (Webshop frontend). Handles authentication, rate limiting, and request routing. | NGINX, AWS API Gateway, Kong |\n| **Order Service** | Manages the lifecycle of an order (creation, status updates, history). The source of truth for the *Order* entity. | PostgreSQL/MySQL (Relational for ACID on order state) |\n| **Inventory Service** | Tracks stock levels across all warehouses. Handles reservations and decrements. | Redis (for fast reads/reservations) backed by a durable DB (e.g., Cassandra/DynamoDB for high write throughput). |\n| **Fulfillment Orchestrator** | The brain of the operation. Takes an order, determines which warehouses can fulfill which items, and manages the workflow (e.g., \"Order $\\rightarrow$ Pick $\\rightarrow$ Pack $\\rightarrow$ Ship\"). | Workflow Engine (e.g., Temporal, Camunda) |\n| **Warehouse Service** | Represents the physical warehouse operations. Receives fulfillment requests and confirms picking/packing completion. | Internal API, potentially integrating with WMS (Warehouse Management System). |\n| **Shipping Service** | Interfaces with external carriers (FedEx, UPS). Generates labels, tracks shipments, and updates tracking numbers. | External API integration, dedicated queue for rate limiting external calls. |\n| **Notification Service** | Handles all outbound communication (email, SMS) based on state changes in the Order Service. | Message Queue consumer, integration with SendGrid/Twilio. |\n\n## 3. Data Model ("
+      }
+    }
+  },
+  "probes": {
+    "assistant-edit": "PASS"
+  }
+}
