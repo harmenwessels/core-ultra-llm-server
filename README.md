@@ -148,10 +148,13 @@ RESEARCH.md for the template mechanics.
 ## Recommended models (measured)
 
 The pick per role, from workload-representative benchmarks with executable correctness probes
-(Core Ultra 155H Arc iGPU). **The full data — 24 characterized artifacts, the per-workload
-matrix, official quality scores, probe verdicts and the failure cases — lives in
-[BENCHMARKS.md](BENCHMARKS.md)**; the underlying findings and conversion playbook in
+plus a 15-probe **agent role-fitness suite** (tool discipline, edit precision, loop endurance,
+diagnosis, routing) — all on a Core Ultra 155H Arc iGPU. **The full data — the per-workload
+matrix, the role-fitness matrix, official quality scores, probe verdicts and failure cases —
+lives in [BENCHMARKS.md](BENCHMARKS.md)**; the underlying findings and conversion playbook in
 [RESEARCH.md](RESEARCH.md).
+
+### IDE roles (Continue.dev chat/edit/autocomplete)
 
 | Role | Model | Measured | Probe |
 |---|---|---|---|
@@ -160,14 +163,23 @@ matrix, official quality scores, probe verdicts and the failure cases — lives 
 | Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s | ✓ |
 | Chat — quality | [Gemma 4 E4B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 | ✓ |
 | Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits | ✓ |
-| Edit/tool quality, long context | [Granite-4.1-8b (ours)](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov) +PL | 27 tok/s edits, 128k ctx, IFEval 87 | ✓ |
 | Max coding quality | [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) | ~13 tok/s | ✓ |
-| Experimental fast all-rounder | [MiniCPM5-1B (ours)](https://huggingface.co/HarmenWessels/MiniCPM5-1B-int4-g128-ov) | 81 tok/s edits, 128k ctx | ✓ |
 
-Why the table looks like this: decode speed on this iGPU is memory-bandwidth-bound, usable
-model size is capped well below the driver memory ceiling by compile-time overhead, and
-quantization-recipe / speculative-decoding / thinking-mode effects are per-architecture and
-per-workload — all measured and documented in RESEARCH.md.
+### Agent roles (tool loops — Continue agent mode/CLI, Kilo CLI, orchestration)
+
+| Role | Model | Role-fitness (of 15) | Why |
+|---|---|---|---|
+| **Executor** (edit→test→verify loops) | [Granite-4.1-8b (ours)](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov), prefix-cached, **PL off** | **12** | the only byte-exact editor with clean loop endurance; keep context ≤8k; treat failing tests as ground truth in its prompts |
+| **All-rounder / agent backup** | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | **12** | ties granite at 60% of the latency (7.9 s/probe); diagnoses correctly, but loops and exact edits fail |
+| **Analyst / architect** (diagnosis, planning) | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov), prefix-cached, **no-think** | 10 | fastest correct diagnoser; near-flat prefill (16k ctx in 17 s) for big planning contexts; thinking mode adds nothing but up to 15× latency |
+| **Router** (request classification) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 6 (route 6/6) | perfect 3-way routing at ~2.4 s/decision, already resident for autocomplete |
+| **Budget executor** | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 10 | the only other loop-capable model, fastest suite run (6.4 s/probe), 1.9 GiB |
+
+No single small model both *acts* (loops, exact edits) and *analyzes* (diagnosis) — measured,
+not assumed — which is why the agent layer is role-split. Decode speed on this iGPU is
+memory-bandwidth-bound, prefill scales superlinearly per architecture (context budgets
+matter), and quantization-recipe / speculative-decoding / thinking-mode effects are
+per-architecture and per-workload — all measured and documented in RESEARCH.md.
 
 ## Repository layout
 
