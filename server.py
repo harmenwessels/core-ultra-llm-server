@@ -364,11 +364,41 @@ async def chat_completions(request: Request):
             }) + "\n\n"
 
         yield chunk({"role": "assistant", "content": ""})
+
+        # In think mode, route the reasoning phase to delta.reasoning_content
+        # (DeepSeek streaming convention) so clients never see raw think tags.
+        in_reasoning = think_mode == "think"
+        CLOSE = "</think>"
+        buf = ""  # holds back text that might be a partial closing tag
         while True:
             piece = streamer.q.get()
             if piece is QueueStreamer._DONE:
                 break
-            yield chunk({"content": piece})
+            if not in_reasoning:
+                yield chunk({"content": piece})
+                continue
+            buf += piece.replace("<think>", "")
+            if CLOSE in buf:
+                reasoning, _, rest = buf.partition(CLOSE)
+                if reasoning.strip("\n"):
+                    yield chunk({"reasoning_content": reasoning.strip("\n")})
+                in_reasoning = False
+                buf = ""
+                rest = rest.lstrip("\n")
+                if rest:
+                    yield chunk({"content": rest})
+            else:
+                # emit everything that cannot be the start of a partial CLOSE tag
+                holdback = 0
+                for k in range(min(len(CLOSE) - 1, len(buf)), 0, -1):
+                    if buf.endswith(CLOSE[:k]):
+                        holdback = k
+                        break
+                emit, buf = buf[:len(buf) - holdback], buf[len(buf) - holdback:]
+                if emit:
+                    yield chunk({"reasoning_content": emit})
+        if buf and in_reasoning:  # budget exhausted mid-thought
+            yield chunk({"reasoning_content": buf})
         yield chunk({}, finish="stop")
         yield "data: [DONE]\n\n"
 

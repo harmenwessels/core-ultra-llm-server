@@ -109,6 +109,30 @@ the model's chat template at load and enables a **per-request switch** — no re
 - `"reasoning_effort": "low" | "medium" | "high"` or `"enable_thinking": true` → thinking on;
   the reasoning is returned separately as `message.reasoning_content` (DeepSeek-style)
 
+Responses are **tag-clean in both modes**: reasoning never appears as raw `<think>` text — it
+streams as `delta.reasoning_content` chunks (DeepSeek convention, understood by Continue) and
+arrives as `message.reasoning_content` on non-streamed responses.
+
+To make the switch a dropdown in Continue, define two entries for the same served model:
+
+```yaml
+  - name: Qwen3.5 4B (fast)
+    provider: openai
+    model: yangsu0423/Qwen3.5-4B-int4-ov
+    apiBase: http://127.0.0.1:8000/v1
+    apiKey: dummy
+    roles: [chat, edit]
+  - name: Qwen3.5 4B (thinking)
+    provider: openai
+    model: yangsu0423/Qwen3.5-4B-int4-ov   # same model — same loaded instance
+    apiBase: http://127.0.0.1:8000/v1
+    apiKey: dummy
+    roles: [chat]
+    requestOptions:
+      extraBodyProperties:
+        reasoning_effort: high
+```
+
 Background: GenAI cannot pass `enable_thinking` template kwargs, so the server swaps between
 two derived template variants at generation time (single-flight makes this safe). See
 RESEARCH.md for the template mechanics.
