@@ -1,0 +1,156 @@
+{
+  "HarmenWessels/gemma-4-E2B-it-qat-int4-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "calls=[('web_search', {'query': 'latest stable python version'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 3.2,
+      "detail": "calls=[] content='The acronym API stands for **Application Programming Interfa'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is **7**.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 5.2,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'def \")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 7.3,
+      "detail": "old-match=True old='return [sum(values[i:i + window]) / window\\n       '"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 10.9,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 3.6,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 17.5,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 9.4,
+      "detail": "content='the issue is in the calculation for the even case of the median. when the list has an even number of'"
+    },
+    "diagnose+think": {
+      "pass": true,
+      "seconds": 9.4,
+      "detail": "content='the issue is in the calculation for the even case of the median. when the list has an even number of'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 8.5,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": true,
+      "seconds": 9.1,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 17.1,
+      "detail": "turn 3: repeated call run_tests"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 4.9,
+      "detail": "content='The environment variable that holds our deployment API key is **FROBNICATE_KEY_7'"
+    }
+  },
+  "HarmenWessels/gemma-4-E4B-it-qat-int4-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 4.3,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 4.2,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 3.7,
+      "detail": "calls=[] content='API stands for **Application Programming Interface**.'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 4.5,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is `7`.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 70.7,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'def \")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 4.5,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 4.6,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 4.1,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 18.1,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 8.7,
+      "detail": "content='the error is in the even case calculation: `return (s[mid] + s[mid + 1]) / 2`. when the list has an '"
+    },
+    "diagnose+think": {
+      "pass": true,
+      "seconds": 8.8,
+      "detail": "content='the error is in the even case calculation: `return (s[mid] + s[mid + 1]) / 2`. when the list has an '"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 14.1,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": true,
+      "seconds": 14.3,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 4.2,
+      "detail": "stopped at turn 0: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 6.6,
+      "detail": "content='The environment variable that holds your deployment API key is **FROBNICATE_KEY_'"
+    }
+  }
+}
