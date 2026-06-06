@@ -236,6 +236,10 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   restrictive EXAONE license before investing.
 - **Ministral-3 / `mistral3` export support** in optimum-intel: blocked upstream (gate-2
   catch-22 above).
+- **MiniCPM-V-4.6 / `minicpmv4_6`**: the "best open model under 2B" (vision-capable, Apache-2.0,
+  `qwen3_5_text` backbone) is blocked at both gates — confirmed empirically 2026-06-06
+  (transformers ≤5.5 doesn't know the type; export registry has only the older `minicpmv`).
+  Would fill the sub-2B vision niche nothing in our table covers.
 - **Gemma-4-12B / `gemma4_unified`**: the quality standout of the fitting size class
   (MMLU-Pro 77.2, LiveCodeBench 72.0 at 11.95B) is a new encoder-free architecture absent
   from both transformers ≤5.5 and optimum-intel's export registry — unconvertible today,
