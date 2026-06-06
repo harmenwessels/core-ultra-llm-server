@@ -1,0 +1,35 @@
+{
+  "model": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
+  "pipeline": "VLMPipeline",
+  "timestamp": "2026-06-06T08:33:53",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "assistant-edit": {
+      "plain": {
+        "tps": 12.870536804199219,
+        "ttft": 0.351485107421875,
+        "wall": 21.021472899941728,
+        "text": "```python\ndef process_orders(orders: list[dict], inventory: dict[str, int], prices: dict[str, float]) -> tuple[float, list[dict], list[dict]]:\n    \"\"\"Process orders against inventory and prices.\"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```\n"
+      }
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 12.841160774230957,
+        "ttft": 0.2474377899169922,
+        "wall": 20.107804900035262,
+        "text": "### Step-by-Step Explanation\n\nThis function, `process_orders`, is designed to simulate an order fulfillment system. It takes three inputs: a list of `orders`, a dictionary of available `inventory`, and a dictionary of `prices`.\n\nHere is the logical flow for each `order` in the loop:\n\n1.  **Item Lookup**: It extracts the `item` name and the requested `qty` (quantity) from the current order.\n2.  **Stock Check (Missing Item)**:\n    *   It checks if the `item` exists in the `inventory` dictionary.\n    *   **Edge Case**: If the item is **not** in inventory, the entire order is marked as `backordered` (unfulfilled), and the loop moves to the next order. No inventory is touched, and no cost is added.\n3.  **Stock Check (Sufficient Stock)**:\n    *   If the item exists and `inventory[item] >= qty`:\n        *   The full quantity is deducted from inventory.\n        *   The total cost is calculated (`price * qty`) and added to the running `total`.\n        *   A record of the shipped item (including cost) is added to"
+      }
+    },
+    "architect": {
+      "plain": {
+        "tps": 12.240235328674316,
+        "ttft": 0.49425048828125,
+        "wall": 42.313271899940446,
+        "text": "Here is a comprehensive design for a scalable order-fulfillment service tailored to your mid-sized e-commerce volume (~50k orders/day), followed by the two most critical architectural trade-offs.\n\n### 1. High-Level Architecture\n\nThe system is decomposed into distinct microservices to ensure scalability, loose coupling, and independent deployment.\n\n#### Core Services\n*   **Order Service**: The source of truth for customer orders. Handles order creation, status transitions (e.g., `CREATED` \u2192 `PAID` \u2192 `SHIPPED`), and inventory reservation.\n*   **Inventory Service**: Manages stock levels across multiple warehouses. Handles real-time stock updates, backorder logic, and warehouse-specific availability.\n*   **Fulfillment Service**: The \"brain\" of the operation. It listens for ready-to-ship orders, calculates optimal split shipments (partial fulfillment) based on warehouse location or stock availability, and generates pick/pack instructions.\n*   **Shipping/Carrier Service**: Integrates with external carriers (e.g., FedEx, DHL, Local Couriers). Generates shipping labels, calculates final shipping costs, and tracks package status.\n*   **Notification Service**: Asynchronously sends emails/SMS to customers regarding order confirmation, shipment updates, and delivery confirmations.\n*   **Analytics/Reporting Service**: Aggregates data for business intelligence (e.g., fulfillment speed, warehouse utilization, return rates).\n\n#### Data Stores\n*   **Primary Database (PostgreSQL)**: Used for transactional data requiring ACID properties (Orders, Inventory snapshots, Financial transactions).\n*   **Cache Layer (Redis)**: Used for high-frequency reads (Order details, Inventory levels) to reduce database load.\n*   **Message Queue (RabbitMQ or Kafka)**: The backbone for asynchronous communication. Used for decoupling services (e.g., Order Service publishes \"OrderCreated\" event; Fulfillment Service consumes it).\n*   **Search Index (Elasticsearch)**: Used for fast inventory search and order tracking lookups.\n\n#### API Gateway\n*   A single entry point (e.g., Kong or AWS API Gateway) that routes requests to the appropriate service, handles authentication (OAuth2/JWT), rate limiting, and logging.\n\n---\n\n### 2. Data Model Highlights\n\nTo support partial shipments and multi-warehouse logic, the data model must be normalized but optimized for query performance.\n\n*   **Order Table**:\n    *   `id`, `"
+      }
+    }
+  },
+  "probes": {
+    "assistant-edit": "PASS"
+  }
+}

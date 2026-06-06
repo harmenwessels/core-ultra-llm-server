@@ -119,13 +119,15 @@ best validated mode; "+PL" where prompt-lookup wins).
 | Qwen2.5-Coder-7B | — | **HE 88.4** / MBPP 83.5 | — | 3.64 s | 34.4 +PL | ~16 | **✓** |
 | Qwen3.5-0.8B | 29.7 | n.r. | 52.1 | n/a | 61.4 | 61.4 | ✓ |
 | Qwen3.5-2B | 55.3 | n.r. | 61.2 | n/a | 42.1 | ~40 | ✓ |
-| Qwen3.5-4B | **79.1**⁴ | LCB-v6 55.8 | 89.8 | n/a | (thinking preamble) | ~20 | ✗² |
+| Qwen3.5-4B (default template) | **79.1**⁴ | LCB-v6 55.8 | 89.8 | n/a | (thinking preamble) | ~20 | ✗² |
+| **Qwen3.5-4B, no-think rt_info patch⁷** | <79.1 (unmeasured)⁷ | — | — | n/a | **19.8 ✓** | 19.8 | **✓** |
 | Gemma 4 E2B (both conversions) | 60.0 | LCB-v6 44.0 | — | n/a | 21–23 | ~23 | ✓ |
 | Gemma 4 E4B | **69.4** | LCB-v6 52.0 | — | n/a | 15.6 | ~16 | **✓** |
 | Granite-4.1-3b cw v2 (ours) | 49.8 | HE 81.7 / MBPP 71.2 | 82.3 | — | 31.3 | ~31 | **✓** |
 | Granite-4.1-3b int8 (ours) | 49.8 | same base | 82.3 | — | 24.6 +PL | ~15 | **✓** |
 | Granite-4.1-8b cw (ours) | 56.0 | HE 85.4 / **MBPP 87.3** | **87.1** | — | 27.0 +PL | ~14 | **✓** |
 | OmniCoder-9B (base: Qwen3.5-9B⁴: MMLU-Pro 82.5, LCB-v6 65.6, IFEval 91.5) | — | GPQA-D 83.8 / TB-2.0 23.6 | — | n/a | (zero code in budget) | ~13 | ✗² |
+| **OmniCoder-9B, no-think rt_info patch⁷** | — | — | — | n/a | **12.9 ✓** | 12.8 | **✓** |
 | Qwen3-VL-8B | n.r.⁵ | n.r.⁵ | n.r.⁵ | n/a | 14.8 | ~15 | ✓ |
 | Qwen3-0.6B | n.r.⁵ | n.r.⁵ | n.r.⁵ | 1.16 s | (behavior changed) | ~84 | ✗ |
 | LFM2.5-1.2B-Thinking | 49.7 | **card warns against programming use** | 88.4 | — | (no code block) | 84.7 (137.9 architect+PL) | ✗ |
@@ -135,6 +137,12 @@ non-thinking rows (the 2B card shows the gap: 55.3 non-thinking vs 66.5 thinking
 and the thinking preamble is precisely what fails our edit-budget probe.
 ⁵ official numbers exist only in the Qwen3 tech report (tables not published on the cards in
 extractable form).
+⁷ **rt_info template patch**: GenAI reads the chat template from `openvino_tokenizer.xml`
+rt_info and cannot pass `enable_thinking`; hardcoding the no-think prefix there flips
+hybrid-thinking models into direct-answer mode (validated on MiniCPM5-1B, Qwen3.5-4B and
+OmniCoder-9B — all three edit probes went FAIL→PASS). Quality caveat: the vendors' official
+scores were measured in *thinking* mode; no-think quality is lower and locally unmeasured
+(the Qwen3.5-2B card brackets the gap: 55.3 no-think vs 66.5 thinking MMLU-Pro).
 ⁶ Two artifact-level fixes were required (full story in RESEARCH playbook): (a) the cw+AWQ
 recipe produced **degenerate garbage** at 1B scale — g128/int8 are coherent → granularity must
 scale with model size; (b) the model "thought by default" under GenAI because the chat template
@@ -162,7 +170,8 @@ LFM's architect speed carries its vendor's own warning against programming-domai
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
 | Architect (experimental) | LFM2.5-1.2B-Thinking **+PL** | 137.9 tok/s with design-aligned reasoning — but LiquidAI's own card advises against knowledge-intensive/programming use; try-and-judge with low expectations |
 | Fast edit/chat (experimental) | MiniCPM5-1B g128, no-think template (ours) | **fastest probe-passing edits measured (81.4 tok/s)**, ~83 tok/s chat, 128k ctx — 1B quality is the open question; no PL (flaky at this scale) |
-| Chat (quality tier) | Gemma 4 E4B | best validated general scores (MMLU-Pro 69.4), 15.6 tok/s, probe ✓ — when answer quality beats pace |
+| Chat/assistant (quality tier) | **Qwen3.5-4B with the no-think rt_info patch** | probe ✓ at 19.8 tok/s; thinking-mode card scores (MMLU-Pro 79.1) overstate no-think quality — A/B vs Gemma E4B (69.4, probe ✓, 15.6) to pick |
+| Max coding quality | OmniCoder-9B, no-think patch | probe ✓ at 12.9 tok/s; GPQA-D 83.8 / Terminal-Bench champion base |
 | Assistant (edit/tool quality tier) | Granite-4.1-8b cw (ours) **+PL** | IFEval 87 / MBPP 87 / BFCL 68: 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
 | Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |
