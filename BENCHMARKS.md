@@ -175,16 +175,65 @@ LFM's architect speed carries its vendor's own warning against programming-domai
 | gpt-oss-20b (11.7 GiB) | OOM: device allocation fails at compile despite free host RAM |
 | Qwen3-Coder-30B-A3B (15.2 GiB) | OOM: device allocation fails at compile |
 | Gemma 4 26B A4B (14.3 GiB) | OOM: fails during weight upload, tested 3× |
-| LFM2.5-8B-A1B (MoE) | GPU compile of the expert graph never completes (killed at 27 min) |
+| LFM2.5-8B-A1B (MoE) | GPU compile deadlocks (~5 min in, threads parked) — reproduced on a fresh own-conversion IR and two runtimes (RESEARCH.md finding 10) |
+| granite-4.0-h-tiny 7B-A1B (MoE) | GPU compile grinds unboundedly (killed at 57 min) — finding 10 |
 | LFM2.5-350M (official conversions) | runtime `ScatterNDUpdate` shape bug at inference |
-| Ministral-3-3B, Gemma-4-12B, MiniCPM-V-4.6 | architectures unsupported by the conversion toolchain (see RESEARCH.md watch items) |
+| Ministral-3-3B, Gemma-4-12B, MiniCPM-V-4.6, Mellum2-12B | architectures unsupported by the conversion toolchain (see RESEARCH.md watch items) |
 
-Root causes and full forensics: RESEARCH.md (findings 2–3 and the screening ledger).
+Root causes and full forensics: RESEARCH.md (findings 2–3, 10 and the screening ledger).
+
+## Role-fitness benchmark (agent capabilities, 2026-06-06)
+
+Tool use is a *separate capability axis* from chat/coding quality — measured with
+`scripts/bench_roles.py`: 13 executable pass/fail probes distilled from live agent-frontend
+failures (Continue CLI / Kilo CLI driving the server). v1 probes: schema-correct calls, tool
+selection, restraint, result use, repeat avoidance, byte-exact edits, full-file writes, stop
+discipline, 3-way routing. v2 probes: bug diagnosis, planning, scripted multi-turn loop
+endurance, deep recall. Raw per-probe JSON in `bench_results/roles__*.json`.
+
+| Model | v1 score | route | edit-exact | loop (chain-depth) | diagnose |
+|---|---|---|---|---|---|
+| **granite-4.1-8b cw (ours)** | **8/9** | 6/6 | **✓ (only one)** | **✓ clean stop** | ✗ blames the test |
+| Gemma 4 E2B QAT (ours) | 7/9 | 6/6 | ✗ | ✗ repeats run_tests | ✓ |
+| Qwen2.5-Coder-7B | 6/9 | 6/6 | ✗ fabricates whitespace | — | — |
+| granite-4.1-3b cw (ours) | 6/9 | 6/6 | ✗ no call | — | — |
+| Qwen2.5-Coder-3B | 6/9 | 6/6 | ✗ | — | — |
+| Qwen3.5-0.8B | 5/9 | 4/6 | ✗ | — | — |
+| Gemma 4 E4B QAT (ours) | 5/9 | 6/6 | ✗ tool-shy | — | ✓ |
+| Qwen3.5-2B | 4/9 | 6/6 | ✗ tool-shy | ✗ stalls | ✓ (fastest) |
+| Qwen2.5-Coder-1.5B | 3/9 | **6/6** | ✗ | — | — |
+| LFM2.5-1.2B-Instruct (ours) | 4/13¹ | 3/6 | ✗ | ✗ | ✗ |
+
+¹ emits its native `<|tool_call_start|>` Pythonic tool format regardless of instructed
+format — hermes-style serving understates LFM models (RESEARCH.md finding 9).
+
+Key verdicts: **actor ≠ analyst** (granite uniquely sustains loops and byte-exact edits but
+misdiagnoses; Gemma/Qwen diagnose but can't drive loops) — the empirical basis for
+architect/executor role-split serving. `write-full` failed 0-for-10: coder roles must be
+edit-first with server-side verification. Thinking mode (Qwen3.5-2B, both probes re-run with
+`reasoning_effort: high`) changed nothing at this difficulty: 4/4 both ways, equal latency.
+
+## Serving optimizations (measured, 2026-06-06)
+
+| Lever | Result | Status |
+|---|---|---|
+| **Prefix caching + chunked prefill** (`SCHEDULER_MODELS`) | warm-prefix TTFT **63 s → 0.9 s** raw, **71.5 s → 2.6 s** through the API (27×); clears granite's 16k single-allocation wall (24k+ now prefills); KV pool is *reserved at load* — budget like weights | **shipped** |
+| Prompt-lookup decoding | +92–116% on edit workloads, −14…−42% on explain/architect (finding 6) | shipped (per-model) |
+| OpenAI tool calling (hermes injection + JSON repair) | unlocks native-tool agent frontends (Kilo CLI/OpenCode, Continue agent mode) | **shipped** |
+| u8 KV-cache hint | redundant — GPU defaults to int8 KV already; explicit hint crashes (upstream bug, finding 13) | do not use |
+| NPU autocomplete offload, draft-model speculation | promising, untested | next up |
+
+Prefill cost grows superlinearly and differs per architecture (finding 11): granite-8b
+43 s @ 8k vs Qwen3.5-2B 17 s @ 16k — per-model context budgets matter more than decode rank
+for agent/long-context use.
 
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |
 |---|---|---|
+| **Agent executor (tool loops, edits)** | **granite-4.1-8b cw (ours), prefix-cached, PL off** | role suite 8/9 — only byte-exact editor + clean loop endurance; PL hurts agent turns; keep context ≤8k (prefill curve) |
+| **Agent router / classification** | Qwen2.5-Coder-1.5B | route 6/6 at ~2.4 s/decision, already resident for autocomplete |
+| **Agent architect / analysis** | Qwen3.5-2B, prefix-cached | fastest correct diagnoser; near-flat prefill (16k in 17 s) for big planning contexts |
 | Autocomplete | Qwen2.5-Coder-1.5B (+PL) | 1.07 s completions, probe ✓ |
 | Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |

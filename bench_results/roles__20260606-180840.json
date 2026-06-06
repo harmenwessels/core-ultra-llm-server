@@ -1,0 +1,69 @@
+{
+  "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 2.6,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 2.3,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": false,
+      "seconds": 2.3,
+      "detail": "calls=[] content='<|tool_call_start|>[web_search(query=\"What does the acronym '"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 2.6,
+      "detail": "calls=[] content='The value of MAX_RETRIES in config.yaml is **7**.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 3.2,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'if n\")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 2.9,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 4.5,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": false,
+      "seconds": 2.9,
+      "detail": "calls=['run_tests']"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 14.7,
+      "detail": "3/6 [chat:chat, edit:edit, design:chat, chat:edit, edit:edit, design:chat]"
+    },
+    "diagnose": {
+      "pass": false,
+      "seconds": 2.8,
+      "detail": "content='the test fails because the expected median of `[4, 1, 3, 2]` is 2.5, not 3.5.'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "symbols=2 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 2.9,
+      "detail": "stopped at turn 0: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 3.2,
+      "detail": "content='The environment variable that holds the deployment API key is **FROBNICATE_KEY_7'"
+    }
+  }
+}

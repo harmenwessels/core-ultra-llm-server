@@ -1,0 +1,17 @@
+{
+  "fit": "all three loaded",
+  "granite": {
+    "cold_8k": 62.86,
+    "warm1": 0.93,
+    "warm2": 0.76
+  },
+  "twob": {
+    "cold_8k": 9.19,
+    "warm": 0.58
+  },
+  "coder_fim_3x": [
+    1.53,
+    1.42,
+    1.41
+  ]
+}

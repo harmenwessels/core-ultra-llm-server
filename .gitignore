@@ -3,12 +3,14 @@ __pycache__/
 *.py[cod]
 .venv/
 .venv-convert/
+.venv-probe/
 
 # Models (multi-GB OpenVINO IR downloads — fetch via scripts/download_model.py)
 models/
 
 # OpenVINO compiled-blob cache (machine/driver-specific)
 .ovcache/
+.ovcache*/
 
 # Local-only / editor
 .vscode/

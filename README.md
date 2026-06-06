@@ -67,6 +67,14 @@ the cache in seconds.
 | `HOST` / `PORT` | `127.0.0.1` / `8000` | bind address |
 | `CACHE_DIR` | `./.ovcache` | compiled-blob cache location |
 | `PROMPT_LOOKUP_MODELS` | the autocomplete model | `;`-separated model ids that use prompt-lookup speculative decoding (helps FIM models, hurts general chat — see [RESEARCH.md](RESEARCH.md)) |
+| `SCHEDULER_MODELS` | `granite-4.1-8b…=4` | `model_id=GB` pairs: prefix caching + chunked prefill. Multi-turn TTFT collapses ~27× (71 s → 2.6 s on an 8k history); the GB value is a permanently reserved KV pool — budget it against iGPU memory |
+| `MAX_NEW_TOKENS_CAP` | `8192` | hard cap on client `max_tokens` (agent frontends ask for context-sized budgets) |
+
+The server also implements **OpenAI tool calling** for local models (hermes-style schema
+injection + tolerant `<tool_call>` parsing), which makes agentic frontends that require
+native function calling — Continue agent mode/CLI, Kilo CLI — work against any served model.
+Model-by-model agent fitness is measured in [BENCHMARKS.md](BENCHMARKS.md) (role-fitness
+suite): short version — granite-4.1-8b is the agent brain, small models route.
 
 Example — serve one bigger chat model instead:
 

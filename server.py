@@ -2,7 +2,11 @@ r"""Phase 3/5: lean OpenAI-compatible API server for OpenVINO GenAI on Intel Arc
 
 Serves one or more models behind the OpenAI surface Continue.dev needs:
   GET  /v1/models           -> all loaded model ids
-  POST /v1/chat/completions -> chat (routed by the request's "model" field)
+  POST /v1/chat/completions -> chat (routed by the request's "model" field),
+                               incl. OpenAI tool calling (hermes-style prompt
+                               injection + <tool_call> output parsing) so
+                               native-tool agent frontends (Kilo CLI/OpenCode)
+                               work against local models
   POST /v1/completions      -> legacy/raw completions (Continue autocomplete FIM)
 
 Design choices (see README):
@@ -20,6 +24,10 @@ Config via environment variables:
   HOST       (default: 127.0.0.1)
   PORT       (default: 8000)
   CACHE_DIR  (default: ./.ovcache)
+  SCHEDULER_MODELS ("model_id=GB" pairs, ";"-separated; default: granite-8b=4)
+             Loads listed models with prefix caching + chunked prefill.
+             Warm-prefix TTFT collapses ~60x (agent/chat-history turns);
+             the GB value is a permanently reserved KV pool — budget it.
   PROMPT_LOOKUP_MODELS (";"-separated model ids; default: Qwen2.5-Coder-1.5B-Instruct-int4-ov)
              Enables prompt-lookup speculative decoding for the listed models.
              Measured +25% decode on FIM/code-edit workloads for the coder
@@ -62,6 +70,18 @@ DEVICE = os.environ.get("DEVICE", "GPU")
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8000"))
 CACHE_DIR = pathlib.Path(os.environ.get("CACHE_DIR", ROOT / ".ovcache"))
+MAX_NEW_TOKENS_CAP = int(os.environ.get("MAX_NEW_TOKENS_CAP", "8192"))
+# Prefix caching + chunked prefill (measured: warm-prefix TTFT 63s -> 0.9s on
+# granite-8b; clears the 16k single-allocation wall). Format: "model_id=GB;..."
+# where GB is the reserved KV block pool size. The pool is held permanently —
+# budget it against the iGPU ceiling alongside model weights.
+SCHEDULER_MODELS: dict[str, int] = {}
+for _entry in os.environ.get(
+        "SCHEDULER_MODELS",
+        "HarmenWessels/granite-4.1-8b-int4-cw-ov=4").split(";"):
+    if _entry:
+        _name, _, _gb = _entry.partition("=")
+        SCHEDULER_MODELS[_name] = int(_gb or "4")
 PROMPT_LOOKUP_MODELS = set(
     m for m in os.environ.get(
         "PROMPT_LOOKUP_MODELS", "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov"
@@ -156,6 +176,143 @@ def _split_reasoning(text: str, think_mode: str = "nothink") -> tuple[str | None
     return (reasoning or None), tail.lstrip("\n")
 
 
+# --- OpenAI tool calling on local models ------------------------------------
+# GenAI applies the model's chat template, which (for our models) has no tools
+# support — so tools are injected hermes-style: definitions in the system
+# message, calls expected as <tool_call>{json}</tool_call> blocks (the exact
+# format Qwen2.5 was trained on; Gemma follows it from the instruction).
+
+_TOOLS_PROMPT = """
+
+# Tools
+
+You may call one or more functions to assist with the user query.
+
+You are provided with function signatures within <tools></tools> XML tags:
+<tools>
+{tools}
+</tools>
+
+For each function call, return a json object with function name and arguments \
+within <tool_call></tool_call> XML tags:
+<tool_call>
+{{"name": <function-name>, "arguments": <args-json-object>}}
+</tool_call>"""
+
+_TOOL_CALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
+
+
+def _lenient_tool_json(raw: str) -> dict | None:
+    """Parse a tool-call JSON object, repairing the slips small models make.
+
+    Observed in the wild (E2B, 5B-class): missing commas between pairs
+    ('"a": 1 "b": 2'), trailing commas, and argument keys at the top level
+    instead of nested under "arguments".
+    """
+    for attempt in (
+        raw,
+        re.sub(r"([\"\]}0-9e])\s+\"", r'\1, "', raw),  # missing commas
+        re.sub(r",\s*([}\]])", r"\1", raw),            # trailing commas
+        re.sub(r",\s*([}\]])", r"\1",
+               re.sub(r"([\"\]}0-9e])\s+\"", r'\1, "', raw)),  # both
+    ):
+        try:
+            obj = json.loads(attempt)
+            break
+        except json.JSONDecodeError:
+            obj = None
+    if not isinstance(obj, dict) or "name" not in obj:
+        return None
+    if "arguments" not in obj:  # args emitted at top level
+        obj = {"name": obj["name"],
+               "arguments": {k: v for k, v in obj.items() if k != "name"}}
+    return obj
+
+
+def _inject_tools(messages: list, tools: list) -> list:
+    """Return a template-safe message list with tool definitions in the system
+    message and tool-call/-result turns folded into plain assistant/user text."""
+    defs = "\n".join(json.dumps(t, ensure_ascii=False) for t in tools)
+    out: list[dict] = []
+    for m in messages:
+        role = m.get("role")
+        content = m.get("content") or ""
+        if isinstance(content, list):  # OpenAI content-parts form
+            content = "".join(
+                p.get("text", "") for p in content if p.get("type") == "text")
+        if role == "assistant" and m.get("tool_calls"):
+            blocks = []
+            for tc in m["tool_calls"]:
+                fn = tc.get("function", {})
+                args = fn.get("arguments", "{}")
+                blocks.append("<tool_call>\n"
+                              + json.dumps({"name": fn.get("name"),
+                                            "arguments": json.loads(args)
+                                            if isinstance(args, str) else args},
+                                           ensure_ascii=False)
+                              + "\n</tool_call>")
+            content = (content + "\n" if content else "") + "\n".join(blocks)
+        elif role == "tool":
+            role = "user"
+            content = f"<tool_response>\n{content}\n</tool_response>"
+        if out and out[-1]["role"] == role:  # merge consecutive same-role turns
+            out[-1]["content"] += "\n" + content  # (Gemma requires alternation)
+        else:
+            out.append({"role": role, "content": content})
+    prompt = _TOOLS_PROMPT.format(tools=defs)
+    if out and out[0]["role"] == "system":
+        out[0]["content"] += prompt
+    else:
+        out.insert(0, {"role": "system", "content": prompt.lstrip("\n")})
+    return out
+
+
+def _extract_tool_calls(text: str) -> tuple[str, list]:
+    """Split generated text into (content, OpenAI tool_calls list)."""
+    calls: list[dict] = []
+
+    def _consume(m: re.Match) -> str:
+        obj = _lenient_tool_json(m.group(1))
+        if obj is None:
+            return m.group(0)  # unrepairable: leave in content, agent will retry
+        args = obj.get("arguments", {})
+        calls.append({
+            "id": f"call_{uuid.uuid4().hex[:24]}",
+            "type": "function",
+            "function": {
+                "name": obj.get("name", ""),
+                "arguments": args if isinstance(args, str)
+                else json.dumps(args, ensure_ascii=False),
+            },
+        })
+        return ""
+
+    content = _TOOL_CALL_RE.sub(_consume, text).strip()
+    if not calls:
+        # fallback: smaller models (Coder-1.5B) emit the call JSON bare or in a
+        # ```json fence, without the <tool_call> wrapper
+        candidate = content
+        fence = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", candidate, re.DOTALL)
+        if fence:
+            candidate = fence.group(1)
+        obj = _lenient_tool_json(candidate)
+        # bare JSON is ambiguous — only treat as a call when the model clearly
+        # meant one (explicit "arguments" key), unlike wrapped <tool_call> blocks
+        if obj is not None and '"arguments"' in candidate:
+            args = obj["arguments"]
+            calls.append({
+                "id": f"call_{uuid.uuid4().hex[:24]}",
+                "type": "function",
+                "function": {
+                    "name": obj["name"],
+                    "arguments": args if isinstance(args, str)
+                    else json.dumps(args, ensure_ascii=False),
+                },
+            })
+            content = ""
+    return content, calls
+
+
 class QueueStreamer:
     """Decodes streamed tokens via ov TextStreamer into a thread-safe queue.
 
@@ -169,9 +326,12 @@ class QueueStreamer:
         self.q: queue.Queue = queue.Queue()
         self.token_count = 0
         self.first_token_time: float | None = None
+        self.cancel = False  # set by the SSE generator when the client is gone
         self.text_streamer = ov_genai.TextStreamer(tokenizer, self._on_text)
 
     def _on_text(self, text: str) -> ov_genai.StreamingStatus:
+        if self.cancel:
+            return ov_genai.StreamingStatus.CANCEL
         if self.first_token_time is None:
             self.first_token_time = time.perf_counter()
         self.token_count += 1
@@ -197,8 +357,20 @@ def _load_pipelines() -> None:
         if model_id in PROMPT_LOOKUP_MODELS and is_vlm:
             log.warning("%s: prompt lookup requested but unsupported on "
                         "VLM-shaped IRs — ignoring", model_id)
-        log.info("Loading %s from %s on %s (cache: %s, prompt_lookup: %s)",
-                 pipe_cls.__name__, model_dir, DEVICE, CACHE_DIR, use_pl)
+        pool_gb = SCHEDULER_MODELS.get(model_id)
+        if pool_gb and use_pl:
+            log.warning("%s: both prompt_lookup and scheduler requested — "
+                        "keeping prompt_lookup, ignoring scheduler", model_id)
+            pool_gb = None
+        if pool_gb:
+            sch = ov_genai.SchedulerConfig()
+            sch.enable_prefix_caching = True
+            sch.max_num_batched_tokens = 2048  # chunked prefill: clears the
+            sch.cache_size = pool_gb           # 16k single-allocation wall
+            kwargs["scheduler_config"] = sch
+        log.info("Loading %s from %s on %s (cache: %s, prompt_lookup: %s, "
+                 "prefix_caching: %s)", pipe_cls.__name__, model_dir, DEVICE,
+                 CACHE_DIR, use_pl, f"{pool_gb}GB pool" if pool_gb else False)
         t0 = time.perf_counter()
         pipe = pipe_cls(str(model_dir), DEVICE, **kwargs)
         _pipes[model_id] = pipe
@@ -209,9 +381,15 @@ def _load_pipelines() -> None:
             variants = None
         _think_variants[model_id] = variants
         if variants:
-            _apply_think_mode(model_id, pipe, "nothink")  # server default
-            log.info("%s: hybrid-thinking model — per-request mode switch enabled "
-                     "(default nothink)", model_id)
+            try:
+                _apply_think_mode(model_id, pipe, "nothink")  # server default
+                log.info("%s: hybrid-thinking model — per-request mode switch "
+                         "enabled (default nothink)", model_id)
+            except RuntimeError as e:  # e.g. VLM CB adapter: "Chat mode is not
+                _think_variants[model_id] = None  # supported" -> serve as-shipped
+                log.warning("%s: thinking-mode switching unsupported on this "
+                            "pipeline (%s) — serving template as-shipped",
+                            model_id, str(e).strip().splitlines()[-1])
         log.info("%s ready in %.1fs", model_id, time.perf_counter() - t0)
 
 
@@ -233,9 +411,11 @@ def _build_generation_config(pipe, body: dict, default_max: int = 1024,
                              model_id: str | None = None
                              ) -> ov_genai.GenerationConfig:
     cfg = pipe.get_generation_config()
-    cfg.max_new_tokens = int(
+    # cap runaway client values (agent frontends ask for model-context-sized
+    # budgets; at ~20 tok/s that is a half-hour generation)
+    cfg.max_new_tokens = min(int(
         body.get("max_completion_tokens") or body.get("max_tokens") or default_max
-    )
+    ), MAX_NEW_TOKENS_CAP)
     if model_id and _prompt_lookup_enabled.get(model_id):
         # speculative prompt-lookup decoding (measured +25% on FIM workloads)
         cfg.num_assistant_tokens = 5
@@ -259,7 +439,7 @@ def _to_chat_history(messages: list) -> ov_genai.ChatHistory:
     """Map OpenAI messages to ov ChatHistory; flatten content-part lists to text."""
     history = []
     for m in messages:
-        content = m.get("content", "")
+        content = m.get("content") or ""
         if isinstance(content, list):  # OpenAI content-parts form
             content = "".join(
                 p.get("text", "") for p in content if p.get("type") == "text"
@@ -320,11 +500,45 @@ async def chat_completions(request: Request):
         raise HTTPException(status_code=400, detail="messages is required")
 
     model_id, pipe = _resolve_pipe(body)
+    tools = body.get("tools")
+    use_tools = bool(tools) and body.get("tool_choice") != "none"
+    if use_tools:
+        messages = _inject_tools(messages, tools)
     history = _to_chat_history(messages)
-    gen_cfg = _build_generation_config(pipe, body, model_id=model_id)
+    # tool-call JSON (file edits!) must not be truncated mid-arguments
+    gen_cfg = _build_generation_config(
+        pipe, body, default_max=4096 if use_tools else 1024, model_id=model_id)
     think_mode = _requested_think_mode(body)
+    if not _think_variants.get(model_id):
+        # model has no switchable thinking — never treat output as reasoning
+        # (otherwise a no-</think> answer would be swallowed whole)
+        think_mode = "nothink"
     comp_id = _new_id("chatcmpl")
     created = int(time.time())
+    prompt_chars = sum(len(str(m.get("content") or "")) for m in messages)
+    log.info("[%s] request: %d msgs, ~%d prompt chars, max_new=%d, stream=%s, "
+             "tools=%d", model_id, len(messages), prompt_chars,
+             gen_cfg.max_new_tokens, bool(body.get("stream")),
+             len(tools or []))
+
+    def _completion_message(text: str) -> tuple[dict, str]:
+        """Build the response message dict + finish_reason from raw output."""
+        reasoning, content = _split_reasoning(text, think_mode)
+        message: dict = {"role": "assistant", "content": content}
+        finish = "stop"
+        if use_tools:
+            content, tool_calls = _extract_tool_calls(content)
+            message["content"] = content or None
+            if tool_calls:
+                message["tool_calls"] = tool_calls
+                finish = "tool_calls"
+                log.info("[%s] tool calls: %s", model_id,
+                         "; ".join(f"{c['function']['name']}("
+                                   f"{c['function']['arguments'][:80]})"
+                                   for c in tool_calls))
+        if reasoning is not None:
+            message["reasoning_content"] = reasoning
+        return message, finish
 
     if not body.get("stream", False):
         with _gen_lock:
@@ -333,11 +547,9 @@ async def chat_completions(request: Request):
             result = pipe.generate(history, generation_config=gen_cfg)
             dt = time.perf_counter() - t0
         text = result.texts[0] if hasattr(result, "texts") else str(result)
-        reasoning, content = _split_reasoning(text, think_mode)
-        log.info("[%s] non-stream done in %.2fs (mode=%s)", model_id, dt, think_mode)
-        message: dict = {"role": "assistant", "content": content}
-        if reasoning is not None:
-            message["reasoning_content"] = reasoning
+        message, finish = _completion_message(text)
+        log.info("[%s] non-stream done in %.2fs (mode=%s, finish=%s)",
+                 model_id, dt, think_mode, finish)
         return JSONResponse({
             "id": comp_id,
             "object": "chat.completion",
@@ -346,7 +558,7 @@ async def chat_completions(request: Request):
             "choices": [{
                 "index": 0,
                 "message": message,
-                "finish_reason": "stop",
+                "finish_reason": finish,
             }],
             "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
         })
@@ -363,7 +575,45 @@ async def chat_completions(request: Request):
                 "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
             }) + "\n\n"
 
+        try:
+            yield from _sse_body(chunk)
+        finally:
+            streamer.cancel = True  # client gone (or done): stop wasting GPU
+
+    def _sse_body(chunk):
         yield chunk({"role": "assistant", "content": ""})
+
+        if use_tools:
+            # Tool-call blocks must be parsed whole — aggregate, then emit.
+            # (Agent frontends act on the complete call anyway; correctness
+            # over token-level streaming UX.) SSE comment pings during
+            # aggregation keep the connection alive AND give uvicorn a yield
+            # point to detect client disconnects (-> cancel the generation).
+            parts: list[str] = []
+            last_ping = time.perf_counter()
+            while True:
+                piece = streamer.q.get()
+                if piece is QueueStreamer._DONE:
+                    break
+                parts.append(piece)
+                if time.perf_counter() - last_ping > 2.0:
+                    yield ": ping\n\n"
+                    last_ping = time.perf_counter()
+            message, finish = _completion_message("".join(parts))
+            if message.get("reasoning_content"):
+                yield chunk({"reasoning_content": message["reasoning_content"]})
+            if message.get("content"):
+                yield chunk({"content": message["content"]})
+            for i, tc in enumerate(message.get("tool_calls") or []):
+                yield chunk({"tool_calls": [{
+                    "index": i,
+                    "id": tc["id"],
+                    "type": "function",
+                    "function": tc["function"],
+                }]})
+            yield chunk({}, finish=finish)
+            yield "data: [DONE]\n\n"
+            return
 
         # In think mode, route the reasoning phase to delta.reasoning_content
         # (DeepSeek streaming convention) so clients never see raw think tags.
@@ -448,13 +698,16 @@ async def completions(request: Request):
                 "choices": [{"index": 0, "text": text, "finish_reason": finish}],
             }) + "\n\n"
 
-        while True:
-            piece = streamer.q.get()
-            if piece is QueueStreamer._DONE:
-                break
-            yield chunk(piece)
-        yield chunk("", finish="stop")
-        yield "data: [DONE]\n\n"
+        try:
+            while True:
+                piece = streamer.q.get()
+                if piece is QueueStreamer._DONE:
+                    break
+                yield chunk(piece)
+            yield chunk("", finish="stop")
+            yield "data: [DONE]\n\n"
+        finally:
+            streamer.cancel = True  # client gone (or done): stop wasting GPU
 
     return StreamingResponse(_sse(), media_type="text/event-stream")
 

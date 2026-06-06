@@ -1,0 +1,96 @@
+{
+  "HarmenWessels/gemma-4-E4B-it-qat-int4-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 4.8,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 4.2,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 4.1,
+      "detail": "calls=[] content='API stands for **Application Programming Interface**.'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 4.8,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is `7`.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 68.1,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'def \")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 4.5,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 4.9,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 4.2,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 18.6,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    }
+  },
+  "HarmenWessels/gemma-4-E2B-it-qat-int4-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 4.2,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 4.0,
+      "detail": "calls=[('web_search', {'query': 'latest stable python version'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 3.3,
+      "detail": "calls=[] content='The acronym API stands for **Application Programming Interfa'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 3.7,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is **7**.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 6.1,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'def \")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 9.4,
+      "detail": "old-match=True old='return [sum(values[i:i + window]) / window\\n       '"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 12.9,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 18.1,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    }
+  }
+}

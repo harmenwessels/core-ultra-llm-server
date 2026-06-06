@@ -1,0 +1,143 @@
+{
+  "HarmenWessels/granite-4.1-8b-int4-cw-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 5.5,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 4.3,
+      "detail": "calls=[('web_search', {'query': 'latest stable Python version'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 3.0,
+      "detail": "calls=[] content='API stands for **Application Programming Interface**.'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 4.1,
+      "detail": "calls=[] content='The value of **MAX_RETRIES** in `config.yaml` is **7**.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 9.9,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'retu\")]"
+    },
+    "edit-exact": {
+      "pass": true,
+      "seconds": 6.7,
+      "detail": "old-match=True old='if window < 1:'"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 14.8,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 4.6,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 18.0,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    }
+  },
+  "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 3.4,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 3.2,
+      "detail": "calls=[('read_file', {'path': 'https://www.python.org/downloads/'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 2.6,
+      "detail": "calls=[] content='API stands for Application Programming Interface.'"
+    },
+    "result-use": {
+      "pass": false,
+      "seconds": 2.6,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})] content=''"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 3.3,
+      "detail": "calls=[('read_file', \"{'path': 'stats.py'}\")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 3.7,
+      "detail": "old-match=True old='window must be >= 1'"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 3.3,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": false,
+      "seconds": 2.6,
+      "detail": "calls=['run_tests']"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 14.7,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    }
+  },
+  "yangsu0423/Qwen3.5-0.8B-int4-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 4.2,
+      "detail": "calls=[('read_file', {'path': '/content/config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 2.7,
+      "detail": "calls=[('web_search', {'parameters': {'query': 'what is the latest stable Python version'}})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 2.5,
+      "detail": "calls=[] content='API stands for **Application Programming Interface**.'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 2.7,
+      "detail": "calls=[] content='Based on the content of your `config.yaml`, the value for `M'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 17.2,
+      "detail": "calls=[('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\"), ('run_tests', \"{'name': 'test_stats.py'}\")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 18.2,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 34.6,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": false,
+      "seconds": 6.4,
+      "detail": "calls=['write_file', 'write_file']"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 14.9,
+      "detail": "4/6 [chat:chat, edit:edit, design:design, chat:chat, edit:chat, design:chat]"
+    }
+  }
+}

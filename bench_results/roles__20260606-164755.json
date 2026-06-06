@@ -1,0 +1,98 @@
+{
+  "HarmenWessels/granite-4.1-8b-int4-cw-ov": {
+    "diagnose": {
+      "pass": false,
+      "seconds": 14.2,
+      "detail": "content='the test fails because the expected median value is incorrect. the test asserts that `median([4, 1, '"
+    },
+    "diagnose+think": {
+      "pass": false,
+      "seconds": 12.7,
+      "detail": "content=''"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 31.7,
+      "detail": "symbols=4 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": false,
+      "seconds": 33.6,
+      "detail": "symbols=0 numbered=False code=False"
+    },
+    "chain-depth": {
+      "pass": true,
+      "seconds": 26.7,
+      "detail": "stopped at turn 3: edits=1 green-tests-seen=1"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 10.6,
+      "detail": "content='The deployment API key is stored in the environment variable `FROBNICATE_KEY_77`'"
+    }
+  },
+  "HarmenWessels/gemma-4-E2B-it-qat-int4-ov": {
+    "diagnose": {
+      "pass": true,
+      "seconds": 26.4,
+      "detail": "content='the issue is in the calculation for the even case of the median. when the list has an even number of'"
+    },
+    "diagnose+think": {
+      "pass": false,
+      "seconds": 14.2,
+      "detail": "content=''"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 10.7,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": false,
+      "seconds": 11.0,
+      "detail": "symbols=0 numbered=False code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 21.7,
+      "detail": "turn 3: repeated call run_tests"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 6.9,
+      "detail": "content='The environment variable that holds our deployment API key is **FROBNICATE_KEY_7'"
+    }
+  },
+  "Echo9Zulu/Qwen3.5-2B-int4_sym-ov": {
+    "diagnose": {
+      "pass": true,
+      "seconds": 7.9,
+      "detail": "content='the bug is in the **even case** calculation: the code uses `s[mid + 1]` instead of `s[mid + 1]` (whi'"
+    },
+    "diagnose+think": {
+      "pass": false,
+      "seconds": 8.4,
+      "detail": "content=''"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 13.3,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": false,
+      "seconds": 12.6,
+      "detail": "symbols=0 numbered=False code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 129.5,
+      "detail": "stopped at turn 1: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 3.8,
+      "detail": "content='FROBNICATE_KEY_77\\n'"
+    }
+  }
+}

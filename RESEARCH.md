@@ -164,6 +164,100 @@ therefore trusted for publication-grade artifacts. First published result:
 
 ---
 
+## Finding 8 — Agent harnesses are priced in prefill, and harness choice dominates
+
+Live experiments driving agentic CLI frontends against the server (2026-06-06) reduced to
+prompt-weight economics. Kilo CLI (OpenCode engine) sends ~67k chars (~17k tokens) of system
+prompt + 13 tool schemas before the user's request; Continue CLI sends ~8.4k chars (~2k tokens)
+for the same assignment — an 8× difference that decides usability by itself on prefill-bound
+hardware. Since the OpenAI surface is stateless, every agent turn re-prefills the whole
+conversation: we measured 13–23 s TTFT per turn for ≤10-token tool-call outputs (TTFT is ~95%
+of agent turn time). Secondary finding: native-tool engines (OpenCode) require server-side
+`tools` support — implemented hermes-style (schema injection + `<tool_call>` parsing with
+small-model JSON repair) in `server.py`; Roo-lineage extensions use text-protocol tools and
+need nothing server-side.
+
+## Finding 9 — Tool discipline is its own capability axis (and granite-8b owns it)
+
+The role-fitness suite (`scripts/bench_roles.py`, 13 executable probes: tool-call validity,
+selection, restraint, result-use, repeat-avoidance, byte-exact editing, full-file writes,
+stop discipline, routing, diagnosis, planning, scripted multi-turn loops, deep recall) over
+10 artifacts shows tool discipline correlates with *instruction-following*, not size or
+coding score:
+
+- granite-4.1-8b: 8/9 v1 probes — the **only** model in the stable that emits byte-exact
+  `edit_file` old_strings, and the only one that survives a scripted 6-turn fix-test-verify
+  loop (clean stop on green). Its BFCL/IFEval scores predicted this.
+- Qwen2.5-Coder-7B (the PL edit star) *fabricates whitespace* in edit calls — coding skill
+  ≠ tool discipline.
+- Bigger Gemma is worse: E4B answers in prose instead of calling tools at all ("tool-shy"),
+  scoring below E2B (5/9 vs 7/9).
+- Actor ≠ analyst: granite alone sustains loops but misdiagnoses a planted bug (blames the
+  test); E2B/Qwen3.5-2B diagnose correctly but cannot drive loops. No single small model does
+  both — the strongest empirical argument for role-split serving (architect/executor).
+- `write-full` is 0-for-10: no local model emits whole files inside tool-call JSON. Coder
+  roles must be edit-first with server-side old-string verification.
+- Routing (3-way classification) is easy: 8/10 pass 6/6 — the *cheapest* passing model
+  (Qwen2.5-Coder-1.5B) takes the router seat.
+- Models with strong native tool formats (LFM2.5: `<|tool_call_start|>` Pythonic) ignore
+  injected hermes instructions — the suite (and any hermes-style server) understates them;
+  a per-model tool-format adapter would be needed for a fair reading.
+
+## Finding 10 — MoE expert graphs do not build on this iGPU (two failure signatures)
+
+Despite OpenVINO 2026.0 "MoE GA" notes (validated on gpt-oss-20b / Qwen3-30B-A3B), every MoE
+we built fails GPU compile on this machine, each with a distinct, reproducible signature:
+
+| MoE | signature |
+|---|---|
+| LFM2.5-8B-A1B (own IR, fresh patcher) | thread deadlock ~5 min in: ~290 CPU-s then 60 threads parked, GPU idle, RAM paged out; reproduces on pinned and newest nightly |
+| granite-4.0-h-tiny 7B-A1B (`granitemoehybrid`) | unbounded phased grind: steady ~1-core compile with 4→20 GB RAM alloc/release cycles, no convergence after 57 min (killed) |
+
+Dense models from the same families compile in seconds (LFM2.5-1.2B: 4 s). Conversion is NOT
+the blocker — both IRs export cleanly. Verdict: MoE-on-this-iGPU is closed until an OpenVINO
+release demonstrably fixes it; this pre-judges JetBrains Mellum2 (12B-A2.5B, `mellum` arch,
+not yet in the export registry) even after gate 2 lands.
+
+## Finding 11 — Prefill scales superlinearly and sets per-model context budgets
+
+TTFT-vs-prompt-size sweeps (`scripts/bench_prefill.py`) diverge wildly by architecture —
+decode-rank does not predict prefill-rank:
+
+| ~tokens | granite-8b | Gemma E2B (VLM) | Qwen3.5-2B (VLM) | Qwen2.5-Coder-1.5B |
+|---|---|---|---|---|
+| 1k | 6 s | 3.7 s | 3.0 s | — |
+| 8k | 43 s | 19 s | 7.3 s | 14 s (16k: 22 s) |
+| 16k | OOM¹ | 67 s | **17 s** | |
+
+¹ not total-memory exhaustion: a **single-allocation cap** (one ~4.1 GiB buffer request) —
+chunked prefill clears it (see Finding 12). Qwen3.5-2B's near-flat curve makes it the
+long-context seat of the lineup regardless of its mid-pack decode speed.
+
+## Finding 12 — Prefix caching collapses warm TTFT ~27–60× (shipped)
+
+`SchedulerConfig(enable_prefix_caching=True, max_num_batched_tokens=2048)` on the GenAI
+pipeline (works through both LLMPipeline and VLMPipeline CB paths):
+
+- granite-8b, 8k shared prefix: 63 s cold → **0.9 s warm** standalone; 71.5 s → **2.6 s**
+  through the full server API (27×). Qwen3.5-2B: 9.2 s → 0.6 s.
+- Chunked prefill clears the 16k single-allocation wall: granite now prefills 24k+ (at ~2×
+  cold-prefill overhead; the 2B pays ~25% and is *faster* at 16k than unchunked).
+- Cost model: the KV block pool (`cache_size` GB) is **reserved at load, permanently** —
+  budget it against the ceiling like model weights. Validated co-resident: granite+4GB pool,
+  2B+2GB pool, coder+PL ≈ 12.6 GiB standing, all serving, warm hits intact.
+- Shipped as `SCHEDULER_MODELS` env in `server.py`. Every multi-turn shape (chat history,
+  agent loops) now pays full prefill once per conversation, not once per turn.
+
+## Finding 13 — The GPU already quantizes KV cache to int8; the explicit hint is broken
+
+Compiled-model introspection shows `KV_CACHE_PRECISION: int8_t` *by default* (plugin
+"dynamic" mode) — the memory saving usually sought via u8-KV hints already exists on this
+stack. Setting `KV_CACHE_PRECISION=u8` explicitly is both redundant and broken: it flips the
+paged-attention kernel into BY_CHANNEL quant mode expecting metadata-extended KV blocks
+(`block_size + block_size/16×4` = 20) while the GenAI allocator hands it plain 16-token
+blocks → `Incorrect block size ... Expected 20, but got 12`. Reproduces through nightly
+build 22103; found by us, not publicly reported. Action: never set the hint.
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`
@@ -196,8 +290,14 @@ Hard-won rules:
    excluding a thinking-capable model.
 1. **transformers version must match the target architecture** — and the requirements differ
    per model: granite wants 4.57.x; gemma4 wants exactly 5.5.0 (5.10 renamed an attention
-   attribute and breaks the trace); Qwen3.5 wants 5.x. Swap per export; pip's dependency
-   warnings against optimum's pins are expected and harmless.
+   attribute and breaks the trace); Qwen3.5 wants 5.x; **lfm2/lfm2_moe wants 5.0.x exactly**
+   (the OV patcher imports `Lfm2HybridConvCache`, removed in 5.5's cache refactor, while
+   ≤4.57.6 predates `lfm2_moe`; 5.4 has both symbols but a drifted sdpa-mask signature breaks
+   tracing). Swap per export; pip's dependency warnings against optimum's pins are expected
+   and harmless.
+1b. **Believe the declared pin first.** optimum-intel master declares `transformers<5.1` —
+   that pointer would have found the lfm2 window immediately; symbol-probing across versions
+   found it the slow way. Read the installed package's requirements before bisecting.
 2. **Every working conversion ships its recipe**: `openvino_config.json` in any HF conversion
    records the exact transformers version and quantization parameters used. Read it before
    reinventing.
@@ -223,6 +323,9 @@ architecture, ≤ ~6 GiB int4, permissive license, quality above incumbents). Sc
 | GLM-4-9B-0414, Phi-4-mini, Falcon-3, OLMo-3, Hunyuan-7B | dated or dominated by incumbents at equal size |
 | DeepSeek-R1 distills | thinking-default (edit-budget failures) |
 | MiniCPM5-1B | converted & tested: coherent at g128 (~82–87 tok/s) but thinks by default under the OV chat template → no role won vs Qwen3.5-0.8B; also produced the granularity-vs-scale finding (playbook rule 0) |
+| LFM2.5-8B-A1B (agentic flagship: IFEval 91.8, Tau²-Telecom 88.1, 1.5B active) | own IR converts cleanly (transformers 5.0.x window) but MoE GPU compile deadlocks — Finding 10; top retest candidate |
+| granite-4.0-h-tiny 7B-A1B | converted as the MoE-discriminator experiment; compile grinds unboundedly — Finding 10 |
+| LFM2.5-1.2B-Instruct | converted & role-tested: 4/13 — emits its native `<|tool_call_start|>` Pythonic format over instructed hermes (Finding 9 caveat), route 3/6, no seat; ~90 tok/s chat is its only niche |
 
 Conclusion: as of 2026-06-06 the served lineup is at the practical optimum for this hardware —
 every higher-quality candidate is upstream-blocked or unreleased, not effort-blocked.
@@ -249,8 +352,26 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
 - **Gemma 4 E2B coding finetunes**: exist only as GGUF (e.g. `Gemma-4-e2bxOpus-4.7-turbo`);
   a safetensors release would enable converting the only curve-breaking architecture with
   coding tuning — the most valuable potential artifact for this hardware.
-- **LFM2.5 fixes**: 350M `ScatterNDUpdate` runtime bug and the MoE compile hang may resolve
-  in newer OpenVINO nightlies.
+- **MoE-on-iGPU (Finding 10)**: both blocked IRs are kept on disk for one-command retests per
+  OpenVINO release (`LFM2.5-8B-A1B-int4-ov` — deadlock; `granite-4.0-h-tiny-int4-ov` —
+  unbounded grind). 350M `ScatterNDUpdate` runtime bug unchanged. Retest monthly.
+- **JetBrains Mellum2 12B-A2.5B** (`mellum`, Apache-2.0, LCB 69.9, FIM lineage, explicit
+  "focal model for routing/sub-agent tasks"): transformers ≥5.10 knows the arch; optimum-intel
+  export config missing (released 2026-06-02); and it is MoE — all three gates must clear.
+  The single most interesting watch item for the agent-serving direction.
+- **u8 KV hint bug (Finding 13)**: `KV_CACHE_PRECISION=u8` → paged-attention BY_CHANNEL
+  block-size assertion; reproduces through nightly 22103; candidate upstream issue (clean
+  one-line reproducer + source diagnosis available). No local impact — defaults already int8.
+- **NPU offload for autocomplete**: untested. 2026.0 matured NPU LLM support (AOT compile,
+  chunked prefill, NPU-side prefix caching); the FIM workload (short prompts, cw-sym-friendly
+  small model) fits its constraints exactly. Would free GPU bandwidth AND break the
+  single-gen-lock contention — first true chat∥autocomplete parallelism.
+- **Draft-model speculative decoding**: untested. granite-4.1-3b drafting for granite-8b
+  could accelerate executor decode on low-overlap outputs where prompt-lookup fails
+  (agent/architect turns) — complements Finding 6's PL boundary.
+- **Per-model tool-format adapters** (Finding 9): parse LFM's `<|tool_call_start|>` Pythonic
+  format (and similar native protocols) server-side so strong-native-format models get a
+  fair agentic reading.
 - **Linux**: the ~50%-of-RAM ceiling is Windows driver policy; the same laptop under native
   Ubuntu might load the 12–16 GiB models that OOM here. Untested.
 - ~~Server enhancement — per-request thinking mode~~ **SHIPPED 2026-06-06**: the server derives
