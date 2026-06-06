@@ -156,14 +156,17 @@ lives in [BENCHMARKS.md](BENCHMARKS.md)**; the underlying findings and conversio
 
 ### IDE roles (Continue.dev chat/edit/autocomplete)
 
-| Role | Model | Measured | Probe |
-|---|---|---|---|
-| Autocomplete (default) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) +PL | ~1.1 s/completion, TTFT 0.05 s | ✓ |
-| Chat (default) | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | ~22 tok/s, int4 quality ≈ bf16 | ✓ |
-| Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s | ✓ |
-| Chat — quality | [Gemma 4 E4B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 | ✓ |
-| Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits | ✓ |
-| Max coding quality | [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) | ~13 tok/s | ✓ |
+Every model below passes the executable correctness probes (its generated code *runs and
+behaves correctly*) — artifacts that fail are documented in BENCHMARKS.md, not recommended.
+
+| Role | Model | Measured |
+|---|---|---|
+| Autocomplete (default) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) +PL | ~1.1 s/completion, TTFT 0.05 s |
+| Chat (default) | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | ~22 tok/s, int4 quality ≈ bf16 |
+| Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s |
+| Chat — quality | [Gemma 4 E4B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 |
+| Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits |
+| Max coding quality | [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) | ~13 tok/s |
 
 ### Agent roles (tool loops — Continue agent mode/CLI, Kilo CLI, orchestration)
 
