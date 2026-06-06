@@ -362,13 +362,19 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
 - **u8 KV hint bug (Finding 13)**: `KV_CACHE_PRECISION=u8` → paged-attention BY_CHANNEL
   block-size assertion; reproduces through nightly 22103; candidate upstream issue (clean
   one-line reproducer + source diagnosis available). No local impact — defaults already int8.
-- **NPU offload for autocomplete — blocked upstream (tested 2026-06-06)**: every
-  Qwen2.5-Coder int4 IR (official artifacts AND a fresh own export) fails NPU compile with
-  `vpux StopLocationVerifierPass: Found N duplicated names`, identically on two GenAI
-  runtimes — implicating the driver-shipped NPU compiler. Retest after an Intel NPU driver
-  update (one command; fresh 0.5B IR kept on disk). The prize remains first true
-  chat∥autocomplete parallelism by breaking the single-gen-lock. GPU baselines banked
-  meanwhile: Coder-0.5B FIM 0.49–0.53 s (2× faster than the served 1.5B).
+- **NPU offload for autocomplete — VALIDATED (2026-06-06): the single-gen-lock is breakable.**
+  The earlier "driver compiler blocked" hypothesis was wrong: official cw artifacts compile
+  fine; the `vpux StopLocationVerifierPass: duplicated names` failure is triggered by
+  **group-wise (g128) quantization layout — the NPU requires channel-wise-sym int4**
+  (playbook addendum). A fresh `--sym --group-size -1` Coder-0.5B export compiles on NPU and
+  emits correct FIM code. Measured: NPU FIM 1.8 s solo, **2.1–2.2 s while granite-8b
+  generates on the GPU** (GPU job pays ~20%, DRAM sharing) — vs queueing tens of seconds
+  behind the gen lock today. GPU baselines: same model 0.49–0.53 s when the GPU is free.
+  Remaining before serving: certify the cw-0.5B with the autocomplete probe (cw at 0.5B is
+  granularity-rule territory; the FIM sample is coherent), and add per-model device targeting
+  to server.py (`MODEL_DEVICES` env) with its own NPU request path outside the GPU lock.
+  Caveat for others: official Phi-3-mini cw runs on NPU but emits degenerate output on this
+  stack — NPU quality is artifact-specific, probe before trusting.
 - **Draft-model speculative decoding**: untested. granite-4.1-3b drafting for granite-8b
   could accelerate executor decode on low-overlap outputs where prompt-lookup fails
   (agent/architect turns) — complements Finding 6's PL boundary.
