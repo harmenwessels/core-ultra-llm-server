@@ -1,0 +1,35 @@
+{
+  "model": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
+  "pipeline": "VLMPipeline",
+  "timestamp": "2026-06-06T08:46:45",
+  "openvino": "2026.3.0-22085-bdf4a17d222",
+  "profiles": {
+    "assistant-edit": {
+      "plain": {
+        "tps": 21.67890739440918,
+        "ttft": 0.4967325134277344,
+        "wall": 15.22252509999089,
+        "text": "```python\nfrom typing import List, Dict, Any, Tuple\n\ndef process_orders(orders: List[Dict[str, Any]], inventory: Dict[str, int], prices: Dict[str, float]) -> Tuple[float, List[Dict[str, Any]], List[Dict[str, Any]]]:\n    \"\"\"Processes orders against inventory, calculating total cost, shipped items, and backordered items.\"\"\"\n    total = 0\n    shipped = []\n    backordered = []\n    for order in orders:\n        item = order[\"item\"]\n        qty = order[\"qty\"]\n        if item not in inventory:\n            backordered.append(order)\n            continue\n        if inventory[item] >= qty:\n            inventory[item] -= qty\n            cost = prices.get(item, 0) * qty\n            total += cost\n            shipped.append({\"item\": item, \"qty\": qty, \"cost\": cost})\n        else:\n            available = inventory[item]\n            if available > 0:\n                inventory[item] = 0\n                cost = prices.get(item, 0) * available\n                total += cost\n                shipped.append({\"item\": item, \"qty\": available, \"cost\": cost})\n                backordered.append({\"item\": item, \"qty\": qty - available})\n            else:\n                backordered.append(order)\n    return total, shipped, backordered\n```"
+      }
+    },
+    "assistant-explain": {
+      "plain": {
+        "tps": 22.234661102294922,
+        "ttft": 0.4967349853515625,
+        "wall": 11.966734500136226,
+        "text": "## Step-by-Step Explanation of `process_orders`\n\nThe function `process_orders` simulates the process of fulfilling customer orders based on current inventory and item prices. It calculates the total cost of shipped items, tracks what has been shipped, and identifies any orders that could not be fully met.\n\nHere is a breakdown of the steps:\n\n1. **Initialization:**\n   - `total = 0`: Initializes a variable to keep track of the cumulative cost of all items shipped.\n   - `shipped = []`: Initializes an empty list to store details of successfully fulfilled orders.\n   - `backordered = []`: Initializes an empty list to store details of orders that could not be fully fulfilled.\n\n2. **Iterate Through Orders:**\n   - The function loops through each `order` in the input `orders` list.\n   - For each order, it extracts the `item` name and the requested `qty`.\n\n3. **Check for Item Existence (Inventory Check 1):**\n   - `if item not in inventory:`: It first checks if the requested item exists in the `inventory` dictionary.\n     - **If the item is missing:** The entire order is immediately added to the `back"
+      }
+    },
+    "architect": {
+      "plain": {
+        "tps": 22.74933433532715,
+        "ttft": 0.39586849975585936,
+        "wall": 22.81225929991342,
+        "text": "This is a classic, high-throughput, distributed systems design problem. Given the scale ($\\sim 50k$ orders/day), the requirements (multiple warehouses, partial shipments), and the nature of e-commerce (inventory accuracy, order integrity), we need a robust, asynchronous, and scalable architecture.\n\nHere is a proposed service architecture.\n\n---\n\n## Proposed Service Architecture: Order Fulfillment System\n\nThe architecture will follow a **Microservices** pattern, leveraging **Event-Driven Architecture (EDA)** for decoupling and scalability.\n\n### 1. Components\n\n| Component | Responsibility | Technology Consideration |\n| :--- | :--- | :--- |\n| **Order Ingestion Service (API Gateway)** | Receives new orders, validates basic structure, and publishes the order event. | REST/gRPC, Load Balancer |\n| **Order Management Service (OMS)** | The source of truth for the order lifecycle (Pending $\\rightarrow$ Processing $\\rightarrow$ Shipped $\\rightarrow$ Delivered). Manages order state transitions. | Relational DB (PostgreSQL) for ACID compliance on order state. |\n| **Inventory Service** | Manages real-time stock levels across all warehouses. Handles reservations and decrements. | In-memory store (Redis) for fast reads/reservations; durable DB for final counts. |\n| **Warehouse Management Service (WMS)** | Manages warehouse-specific logic: picking, packing, and shipment creation. | Microservice, potentially using specialized workflow engines (e.g., Camunda, Temporal). |\n| **Shipment Orchestration Service** | Coordinates the fulfillment process. Decides *which* warehouse fulfills *which* part of the order (handling partial shipments). | Event-driven workflow engine. |\n| **Notification Service** | Handles communication (Email, SMS) to customers about order status changes. | Message Queue consumer. |\n| **Message Broker (Event Bus)** | The central nervous system for asynchronous communication. Decouples services. | Kafka (for high throughput, durability, and replayability). |\n| **Data Stores** | **Order DB:** PostgreSQL (Transactional). **Inventory DB:** Redis (Fast access) + PostgreSQL (Source of Truth). **Log/Audit:** Time-series DB or Data Lake. | Polyglot persistence based on service needs. |\n\n### 2. Data Model (Simplified Core Entities)\n\nThe data model must support transactional integrity for orders while allowing high-speed, eventual consistency for inventory updates"
+      }
+    }
+  },
+  "probes": {
+    "assistant-edit": "PASS"
+  }
+}
