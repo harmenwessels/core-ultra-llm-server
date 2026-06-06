@@ -370,11 +370,15 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   emits correct FIM code. Measured: NPU FIM 1.8 s solo, **2.1–2.2 s while granite-8b
   generates on the GPU** (GPU job pays ~20%, DRAM sharing) — vs queueing tens of seconds
   behind the gen lock today. GPU baselines: same model 0.49–0.53 s when the GPU is free.
-  Remaining before serving: certify the cw-0.5B with the autocomplete probe (cw at 0.5B is
-  granularity-rule territory; the FIM sample is coherent), and add per-model device targeting
-  to server.py (`MODEL_DEVICES` env) with its own NPU request path outside the GPU lock.
-  Caveat for others: official Phi-3-mini cw runs on NPU but emits degenerate output on this
-  stack — NPU quality is artifact-specific, probe before trusting.
+  Probe certification (the gate that matters): **NPU numerics flip tokens** — the cw-0.5B
+  passes the executable autocomplete probe on GPU but FAILS the identical greedy run on NPU
+  (completions start identical, diverge mid-stream); the **cw-1.5B passes on both devices**
+  (5.6 s/96-tok NPU, 1.25 s GPU). Same-IR-different-device probe runs are mandatory before
+  trusting any NPU artifact — this also explains official Phi-3-mini-cw's degenerate NPU
+  output. Serving trade-off, measured: GPU ~0.9 s but queues 30 s+ behind the gen lock;
+  NPU ~3–5.6 s, never queues, certified. Remaining build: per-model device targeting in
+  server.py (`MODEL_DEVICES`) with the NPU path outside the GPU lock; hybrid GPU-idle/NPU-busy
+  routing as the endgame.
 - **Draft-model speculative decoding**: untested. granite-4.1-3b drafting for granite-8b
   could accelerate executor decode on low-overlap outputs where prompt-lookup fails
   (agent/architect turns) — complements Finding 6's PL boundary.
