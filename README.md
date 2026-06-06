@@ -137,56 +137,29 @@ Background: GenAI cannot pass `enable_thinking` template kwargs, so the server s
 two derived template variants at generation time (single-flight makes this safe). See
 RESEARCH.md for the template mechanics.
 
-## Measured results
+## Recommended models (measured)
 
-Core Ultra 155H (Meteor Lake), Arc iGPU, 32 GB LPDDR5x, driver 32.0.101.8724,
-OpenVINO 2026.3 nightly:
+The pick per role, from workload-representative benchmarks with executable correctness probes
+(Core Ultra 155H Arc iGPU). **The full data — 24 characterized artifacts, the per-workload
+matrix, official quality scores, probe verdicts and the failure cases — lives in
+[BENCHMARKS.md](BENCHMARKS.md)**; the underlying findings and conversion playbook in
+[RESEARCH.md](RESEARCH.md).
 
-| Model | Base released² | Weights | Modalities | Max context | Decode | TTFT | PL edits³ | Verdict |
-|---|---|---|---|---|---|---|---|---|
-| [Qwen2.5-Coder-0.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 2024-11 | 0.3 GB | text | 32k | 87.6 tok/s | 0.06 s | 131.0 | fastest; quality floor for autocomplete |
-| [LFM2.5-1.2B-Thinking INT4](https://huggingface.co/Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov) | 2026-01 | 0.6 GB | text | 128k | 87.6 tok/s | 0.08 s | — | hybrid conv/attention; reasoning model (thinking tokens add latency); community conversion |
-| [Qwen3.5-0.8B INT4](https://huggingface.co/yangsu0423/Qwen3.5-0.8B-int4-ov) | 2026-02 | 0.9 GB | text, image¹ | 256k | 72.7 tok/s | 0.08 s | — | newest gen at near-0.5B speed; community conversion |
-| [Qwen3-0.6B INT4](https://huggingface.co/OpenVINO/Qwen3-0.6B-int4-ov) | 2025-04 | 0.4 GB | text | 40k | 62.7 tok/s | 0.10 s | 53.5 ↓ | slower than the newer, similar-size Qwen3.5-0.8B |
-| [Qwen2.5-Coder-1.5B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (default autocomplete) | 2024-09 | 0.9 GB | text | 32k | 57.0 tok/s | 0.06 s | 70.0 | autocomplete sweet spot: FIM-trained, 2.4× faster than the 3B |
-| [Ministral-3b-instruct INT4](https://huggingface.co/Echo9Zulu/Ministral-3b-instruct-int4_asym-ov) | 2024-03 | 1.7 GB | text | 128k | 36.0 tok/s | 0.07 s | — | community Mistral derivative (not official Mistral AI); 2024-era quality |
-| [Qwen3.5-2B INT4](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | 2026-02 | 2.0 GB | text, image¹ | 256k | 34.6 tok/s | 0.17 s | — | fastest chat-quality model; community conversion |
-| [Gemma 4 E2B INT4](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov) (default chat) | 2026-03 | 4.1 GB | text, image, audio¹ | 128k | 29.9 tok/s | 0.23 s | — | very responsive in Continue |
-| [Granite-4.1-3b INT4-cw](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-ov) (our conversion) | 2026-04 | 1.7 GB | text | 128k | 27.4 tok/s | 0.13 s | 47.1 | newest Granite; first OV IR of 4.1; channel-wise recipe is 2.1× faster than the int4 default here (RESEARCH.md) |
-| [Qwen3-4B INT4](https://huggingface.co/OpenVINO/Qwen3-4B-int4-ov) | 2025-04 | 2.1 GB | text | 40k | 24.9 tok/s | 0.10 s | 17.3 ↓ | same speed as Coder-3B with a newer base |
-| [Granite-4.0-micro INT4](https://huggingface.co/llmware/granite-4-micro-ov) | 2025-09 | 2.2 GB | text | 128k | 24.6 tok/s | 0.16 s | — | IBM; 128k context at 3B-class speed; community conversion (llmware) |
-| [Qwen2.5-Coder-3B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 2024-11 | 2.1 GB | text | 32k | 24.0 tok/s | 0.15 s | 57.2 | strong FIM quality |
-| [Qwen3.5-4B INT4](https://huggingface.co/yangsu0423/Qwen3.5-4B-int4-ov) | 2026-02 | 3.3 GB | text, image¹ | 256k | 19.9 tok/s | 0.31 s | — | newest gen; faster than the 9B at similar quality class; community conversion |
-| [Gemma 4 E4B INT4](https://huggingface.co/OpenVINO/gemma-4-E4B-it-int4-ov) | 2026-03 | 6.0 GB | text, image, audio¹ | 128k | 15.7 tok/s | 0.52 s | — | mid |
-| [Qwen2.5-Coder-7B INT4](https://huggingface.co/OpenVINO/Qwen2.5-Coder-7B-Instruct-int4-ov) | 2024-09 | 4.2 GB | text | 32k | 15.0 tok/s | 0.20 s | **41.8** | best chat quality that fits; with prompt-lookup, the strongest edit-workload model |
-| [Qwen3-8B INT4](https://huggingface.co/OpenVINO/Qwen3-8B-int4-ov) | 2025-04 | 4.6 GB | text | 40k | 15.0 tok/s | 0.13 s | 12.4 ↓ | Coder-7B speed with a newer base |
-| [Qwen3-VL-8B INT4](https://huggingface.co/OpenVINO/Qwen3-VL-8B-Instruct-int4-ov) | 2025-10 | 5.5 GB | text, image, video¹ | 256k | 14.5 tok/s | 0.15 s | — | chat-class speed; vision+video capable |
-| [Qwen3.5-9B INT4-asym](https://huggingface.co/droans/qwen3.5-9B-int4-asym-ov) | 2026-02 | 5.7 GB | text, image¹ | 256k | ≈13 tok/s | 0.46 s | — | newest model generation; community conversion (droans) |
-| [OmniCoder-9B INT4](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 2026-03 | 5.7 GB | text, image¹ | 256k | ≈13 tok/s | 0.50 s | — | coding finetune of Qwen3.5-9B — strongest coding model that fits; community conversion |
-| ~~[LFM2.5-350M INT8/FP16](https://huggingface.co/OpenVINO/LFM2.5-350M-int8-ov)~~ | ~~2026-03~~ | ~~0.4 GB~~ | ~~text~~ | — | — | — | — | **runtime bug** (`ScatterNDUpdate` shape validation, both official variants) |
-| ~~[LFM2.5-8B-A1B INT4](https://huggingface.co/Echo9Zulu/LFM2.5-8B-A1B-int4_sym-awq-ov)~~ | ~~2026-05~~ | ~~4.5 GB~~ | ~~text~~ | — | — | — | — | **GPU compile never completes** (MoE expert graph; the dense-hybrid 1.2B works fine) |
-| ~~[gpt-oss-20b INT4](https://huggingface.co/OpenVINO/gpt-oss-20b-int4-ov)~~ | ~~2025-08~~ | ~~11.7 GiB~~ | ~~text~~ | ~~128k~~ | — | — | — | **OOM on 32 GB RAM**: device allocation fails at compile despite 18 GB free host RAM |
-| ~~[Qwen3-Coder-30B-A3B INT4](https://huggingface.co/OpenVINO/Qwen3-Coder-30B-A3B-Instruct-int4-ov)~~ | ~~2025-07~~ | ~~15.2 GiB~~ | ~~text~~ | ~~256k~~ | — | — | — | **OOM on 32 GB RAM**: device allocation fails at compile |
-| ~~[Gemma 4 26B A4B INT4](https://huggingface.co/Morteza89/gemma-4-26b-a4b-it-int4-ov)~~ | ~~2026-03~~ | ~~14.3 GiB~~ | ~~text, image, audio¹~~ | ~~256k~~ | — | — | — | **OOM on 32 GB RAM** (tested 3×): fails during weight upload even with 24 GB free RAM |
+| Role | Model | Measured | Probe |
+|---|---|---|---|
+| Autocomplete (default) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) +PL | ~1.1 s/completion, TTFT 0.05 s | ✓ |
+| Chat (recommended; server default is the [PTQ build](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)) | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | ~22 tok/s, int4 quality ≈ bf16 | ✓ |
+| Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s | ✓ |
+| Chat — quality | [Gemma 4 E4B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 | ✓ |
+| Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits | ✓ |
+| Edit/tool quality, long context | [Granite-4.1-8b (ours)](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov) +PL | 27 tok/s edits, 128k ctx, IFEval 87 | ✓ |
+| Max coding quality | [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) | ~13 tok/s | ✓ |
+| Experimental fast all-rounder | [MiniCPM5-1B (ours)](https://huggingface.co/HarmenWessels/MiniCPM5-1B-int4-g128-ov) | 81 tok/s edits, 128k ctx | ✓ |
 
-³ "PL edits" = decode with **prompt-lookup speculative decoding** on an echo-heavy code-edit
-prompt. Measured with a *different prompt* than the Decode column — compare PL values with each
-other, not against Decode. ↓ = slower than plain decoding on the same prompt (thinking-mode and
-low-echo models lose; see RESEARCH.md Finding 6). "—" = not measured or unsupported (VLM-shaped).
-
-² "Base released" is the Hugging Face creation date of the *original base model* repo (e.g.
-`google/gemma-4-E2B-it`, `Qwen/Qwen2.5-Coder-1.5B-Instruct`), not the OpenVINO conversion date.
-
-¹ Modalities and max context are the *model's* capabilities (from each model's `config.json`).
-The server currently exposes a **text-only** API and keeps practical context well below the
-maximum — KV-cache grows with context and competes with weights for the same shared iGPU
-memory. Multimodal IRs run fine text-only through `VLMPipeline`.
-
-The short version of *why* the table looks like this: decode speed on this iGPU is
-memory-bandwidth-bound (smaller weights = proportionally faster), the usable model size is
-capped well below the driver's ≈50%-of-RAM memory ceiling by compile-time overhead, and
-quantization recipe / speculative decoding gains are architecture- and workload-specific.
-The full methodology, measurements and conversion playbook live in [RESEARCH.md](RESEARCH.md).
+Why the table looks like this: decode speed on this iGPU is memory-bandwidth-bound, usable
+model size is capped well below the driver memory ceiling by compile-time overhead, and
+quantization-recipe / speculative-decoding / thinking-mode effects are per-architecture and
+per-workload — all measured and documented in RESEARCH.md.
 
 ## Repository layout
 
