@@ -40,11 +40,11 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe scripts\check_gpu.py
 
 # 2. Download the default models (~5 GB total; requires `hf auth login`)
-.\.venv\Scripts\python.exe scripts\download_model.py --repo gregor160300/gemma-4-E2B-it-int4-ov
+.\.venv\Scripts\python.exe scripts\download_model.py --repo HarmenWessels/gemma-4-E2B-it-qat-int4-ov
 .\.venv\Scripts\python.exe scripts\download_model.py --repo OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
 
 # 3. Optional: benchmark a model (TTFT + decode tok/s)
-.\.venv\Scripts\python.exe scripts\bench.py --model-dir models\gregor160300\gemma-4-E2B-it-int4-ov
+.\.venv\Scripts\python.exe scripts\bench.py --model-dir models\HarmenWessels\gemma-4-E2B-it-qat-int4-ov
 
 # 4. Start the server on http://127.0.0.1:8000/v1
 .\.venv\Scripts\python.exe server.py
@@ -52,7 +52,7 @@ py -3.12 -m venv .venv
 
 Models live under `models/<owner>/<name>`, mirroring their Hugging Face repo ids, and the served
 model id is the same `owner/name` string. The server loads **two models by default** and routes by
-the request's `model` field: `gregor160300/gemma-4-E2B-it-int4-ov` (chat) and
+the request's `model` field: `HarmenWessels/gemma-4-E2B-it-qat-int4-ov` (chat — Google's QAT weights, int4 quality ≈ bf16) and
 `OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov` (autocomplete via `/v1/completions` with FIM).
 The first launch per model pays a one-time compile cost (~30–70 s); subsequent launches load from
 the cache in seconds.
@@ -79,9 +79,9 @@ $env:MODEL_DIR = "models\OpenVINO\Qwen2.5-Coder-7B-Instruct-int4-ov"
 
 ```yaml
 models:
-  - name: Gemma 4 E2B (local OpenVINO)
+  - name: Gemma 4 E2B QAT (local OpenVINO)
     provider: openai
-    model: gregor160300/gemma-4-E2B-it-int4-ov
+    model: HarmenWessels/gemma-4-E2B-it-qat-int4-ov
     apiBase: http://127.0.0.1:8000/v1
     apiKey: dummy
     roles:
@@ -148,7 +148,7 @@ matrix, official quality scores, probe verdicts and the failure cases — lives 
 | Role | Model | Measured | Probe |
 |---|---|---|---|
 | Autocomplete (default) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) +PL | ~1.1 s/completion, TTFT 0.05 s | ✓ |
-| Chat (recommended; server default is the [PTQ build](https://huggingface.co/gregor160300/gemma-4-E2B-it-int4-ov)) | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | ~22 tok/s, int4 quality ≈ bf16 | ✓ |
+| Chat (default) | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | ~22 tok/s, int4 quality ≈ bf16 | ✓ |
 | Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s | ✓ |
 | Chat — quality | [Gemma 4 E4B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 | ✓ |
 | Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits | ✓ |

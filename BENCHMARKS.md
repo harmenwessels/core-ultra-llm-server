@@ -168,6 +168,19 @@ following / MBPP / tool calling with the fastest validated quality-tier edits (2
 **Coder-7B** edges raw HumanEval, **Qwen3.5-2B** is the chat speed/quality balance point, and
 LFM's architect speed carries its vendor's own warning against programming-domain use.
 
+## Not benchmarkable on this hardware (separate from results — these never ran)
+
+| Model | Why it cannot run |
+|---|---|
+| gpt-oss-20b (11.7 GiB) | OOM: device allocation fails at compile despite free host RAM |
+| Qwen3-Coder-30B-A3B (15.2 GiB) | OOM: device allocation fails at compile |
+| Gemma 4 26B A4B (14.3 GiB) | OOM: fails during weight upload, tested 3× |
+| LFM2.5-8B-A1B (MoE) | GPU compile of the expert graph never completes (killed at 27 min) |
+| LFM2.5-350M (official conversions) | runtime `ScatterNDUpdate` shape bug at inference |
+| Ministral-3-3B, Gemma-4-12B, MiniCPM-V-4.6 | architectures unsupported by the conversion toolchain (see RESEARCH.md watch items) |
+
+Root causes and full forensics: RESEARCH.md (findings 2–3 and the screening ledger).
+
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |
