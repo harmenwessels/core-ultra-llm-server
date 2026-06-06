@@ -11,6 +11,7 @@ Run: .venv/Scripts/python.exe scripts/bench_roles.py [model_id ...]
 """
 
 import json
+import os
 import pathlib
 import sys
 import time
@@ -449,6 +450,8 @@ PROBES = [
 ]
 
 THINK_AXIS = {"diagnose", "plan"}  # probes rerun with reasoning_effort=high
+if os.environ.get("THINK_AXIS_ALL"):  # full think-steering sweep (hybrids only)
+    THINK_AXIS = {n for n, _ in PROBES}
 
 
 def main():
@@ -491,8 +494,15 @@ def main():
                                        "detail": detail}
                 print(f"  {key:<17} {'PASS' if ok else 'FAIL':<5} "
                       f"{dt:6.1f}s  {detail[:90]}")
-        passed = sum(r["pass"] for r in results[model].values())
-        print(f"  -> {passed}/{len(results[model])}")
+        probes_run = [r for r in results[model].values()]
+        passed = sum(r["pass"] for r in probes_run)
+        total_s = sum(r["seconds"] for r in probes_run)
+        avg_s = total_s / len(probes_run) if probes_run else 0
+        results[model]["_summary"] = {"passed": passed, "of": len(probes_run),
+                                      "avg_seconds": round(avg_s, 1),
+                                      "total_seconds": round(total_s, 0)}
+        print(f"  -> {passed}/{len(probes_run)} "
+              f"(avg {avg_s:.1f}s/probe, total {total_s:.0f}s)")
     OUT_DIR.mkdir(exist_ok=True)
     out = OUT_DIR / f"roles__{stamp}.json"
     out.write_text(json.dumps(results, indent=2), encoding="utf-8")

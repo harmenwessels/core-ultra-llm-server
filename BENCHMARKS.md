@@ -194,29 +194,41 @@ endurance, deep recall. Raw per-probe JSON in `bench_results/roles__*.json`.
 Full 15-probe matrix on the shipped serving stack (end-of-day reruns,
 `roles__20260606-21*.json`):
 
-| Model | total | loop (chain-depth) | edit-exact | diagnose | route |
-|---|---|---|---|---|---|
-| **granite-4.1-8b cw (ours)** | **12/15** | **✓ clean stop** | **✓** | ✗ blames the test² | 6/6 |
-| **Gemma 4 E2B QAT (ours)** | **12/15** | ✗ repeats run_tests | ✗ | ✓ | 6/6 |
-| Qwen2.5-Coder-7B | 11/15 | ✗ | ✗ fabricates whitespace | ✓ | 6/6 |
-| Qwen3.5-2B | 10/15 | ✗ stalls | ✗ | ✓ (fastest) | 6/6 |
-| Gemma 4 E4B QAT (ours) | 10/15 | ✗ | ✗ tool-shy | ✓ | 6/6 |
-| granite-4.1-3b cw (ours) | 10/15 | ✗ | ✗ | ✓ | 6/6 |
-| Qwen2.5-Coder-3B | 10/15 | **✓ (2nd loop-capable)** | ✗ isolated / ✓ in-loop | ✗ | 6/6 |
-| Qwen2.5-Coder-1.5B | 6/15 | ✗ | ✗ | ✗ | **6/6** |
-| Qwen3.5-0.8B | 5/9 (v1 only) | — | ✗ | — | 4/6 |
-| LFM2.5-1.2B-Instruct (ours) | 4/13¹ | ✗ | ✗ | ✗ | 3/6 |
+| Model | total | avg s/probe³ | loop (chain-depth) | edit-exact | diagnose | route |
+|---|---|---|---|---|---|---|
+| **granite-4.1-8b cw (ours)** | **12/15** | 13.3 | **✓ clean stop** | **✓** | ✗ blames the test² | 6/6 |
+| **Gemma 4 E2B QAT (ours)** | **12/15** | **7.9** | ✗ repeats run_tests | ✗ | ✓ | 6/6 |
+| Qwen2.5-Coder-7B | 11/15 | 10.2 | ✗ | ✗ fabricates whitespace | ✓ | 6/6 |
+| Qwen3.5-2B | 10/15 | 22.1⁴ | ✗ stalls | ✗ | ✓ (fastest) | 6/6 |
+| Gemma 4 E4B QAT (ours) | 10/15 | 11.7 | ✗ | ✗ tool-shy | ✓ | 6/6 |
+| granite-4.1-3b cw (ours) | 10/15 | 7.1 | ✗ | ✗ | ✓ | 6/6 |
+| Qwen2.5-Coder-3B | 10/15 | **6.4** | **✓ (2nd loop-capable)** | ✗ isolated / ✓ in-loop | ✗ | 6/6 |
+| Qwen2.5-Coder-1.5B | 6/15 | 5.3 | ✗ | ✗ | ✗ | **6/6** |
+| Qwen3.5-0.8B | 5/9 (v1 only) | — | — | ✗ | — | 4/6 |
+| LFM2.5-1.2B-Instruct (ours) | 4/13¹ | — | ✗ | ✗ | ✗ | 3/6 |
 
 ¹ emits its native `<|tool_call_start|>` Pythonic tool format regardless of instructed
 format — hermes-style serving understates LFM models (RESEARCH.md finding 9).
 ² an anomaly, not a family trait: granite-3b and five other models diagnose the planted bug
 correctly — the 8B uniquely argues with the test. Prompt-engineering consequence: treat
 failing tests as ground truth in instructions to granite-8b.
+³ mean wall-clock per probe (failure time included — a stalling model pays for it here);
+quality first, latency as the tiebreaker between equal scores.
+⁴ skewed by a 128 s chain-depth stall; its analysis probes run 6–12 s.
 
 granite-8b and E2B tie at 12/15 with exactly complementary failures (executor core vs
 analysis) — the cleanest evidence for role-split serving. Qwen2.5-Coder-3B is the surprise
 budget-executor candidate: the only other model to complete the scripted fix-test-stop loop
 (1.9 GiB), though it re-calls tools instead of reading results outside the loop harness.
+
+**Think-steering sweep** (all 13 probes × think/nothink on the hybrid-thinking models,
+`roles__20260606-214914.json`): thinking is quality-neutral-to-harmful at this scale.
+Qwen3.5-2B: one verdict improved, otherwise identical — at up to **15× latency** on
+uncertainty-heavy probes (call-restraint 5.3 → 82 s). MiniCPM5-1B: actively destructive
+(plan/diagnose collapse, reasoning budget exhausted mid-thought; full profile 7/26 — no
+role seat), with one exception: *recall precision* — thinking recovered an exact identifier
+that no-think hallucinated. Operational rule: never default `reasoning_effort: high` on
+≤2B models; thinking earns its cost only on exact-recall tasks.
 
 Key verdicts: **actor ≠ analyst** (granite uniquely sustains loops and byte-exact edits but
 misdiagnoses; Gemma/Qwen diagnose but can't drive loops) — the empirical basis for
