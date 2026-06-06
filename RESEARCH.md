@@ -258,6 +258,41 @@ paged-attention kernel into BY_CHANNEL quant mode expecting metadata-extended KV
 blocks → `Incorrect block size ... Expected 20, but got 12`. Reproduces through nightly
 build 22103; found by us, not publicly reported. Action: never set the hint.
 
+## Finding 14 — The NPU is a 1–2B express lane, and quantization damage is task-selective
+
+Overnight NPU campaign (2026-06-06/07), after the cw-sym discovery unblocked compilation:
+
+- **Size/latency law** (96-token FIM, warm): 0.5B → 2.9 s, 1.5B → 5.6 s, 3B → 7.9 s,
+  granite-3b → 11.9 s. The autocomplete-usable band ends at ~1.5B.
+- **Quantization damage is task-selective**: the cw-sym Coder-1.5B passes the executable
+  FIM probe but drops routing from 6/6 (g128) to 3/6 — *on both devices*, so it is the
+  quantization, not NPU numerics. Certify per role, not per artifact. (And data-free cw
+  broke the Coder-3B's FIM outright — the granite AWQ lesson, reproduced on qwen.)
+- **NPU optimization knobs are null on this stack**: GENERATE_HINT/PYRAMID/NPUW prefix
+  caching moved nothing (±1%); NPUW_LLM_ENABLE_PREFIX_CACHING shows zero warm-prefix
+  benefit (watch item). The one real lever: the `CACHE_DIR` blob cache (load 16 s → 3 s).
+- **Concurrency is real and shipped**: per-device generation locks (`MODEL_DEVICES`) +
+  moving non-stream generates off the event loop (`asyncio.to_thread` — a long non-stream
+  generate used to freeze the whole HTTP server) give lock-free NPU autocomplete at
+  ~7 s while the GPU runs multi-stage agent turns.
+- Final NPU lineup verdict: exactly one seat — FIM autocomplete on the certified
+  cw-1.5B. Routing candidates all failed (Instruct-cw 4/6, LFM-cw 0/6); ≥3B too slow.
+
+## Finding 15 — The virtual model: measured role-split serving, shipped
+
+`virtual/agent` (server.py) routes each turn to the best measured brain from the
+role-fitness suite: router (Coder-1.5B g128, 6/6) classifies fresh requests; architect
+(Qwen3.5-2B, prefix-cached, no-think) analyzes and plans with read-only tools; executor
+(granite-4.1-8b, prefix-cached, PL off) runs edit→test→verify loops with full tools.
+Stateless across requests: tool continuations route via role-encoded call ids
+(`call_arch_…`/`call_exec_…`); a plan marker in history switches the conversation to
+execution phase. Server-side guards encode the measured failure modes: a loop-breaker
+(identical-call hash → corrective note + one retry) and edit old_string verification
+against file content seen in-conversation. No-tools design requests run plan→implement
+in one response, with the architect's plan streamed as `reasoning_content` (renders as a
+thinking block in Continue). Validated end-to-end with NPU autocomplete serving
+concurrently throughout.
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`

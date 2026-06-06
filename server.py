@@ -40,6 +40,7 @@ Run:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -71,6 +72,17 @@ HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8000"))
 CACHE_DIR = pathlib.Path(os.environ.get("CACHE_DIR", ROOT / ".ovcache"))
 MAX_NEW_TOKENS_CAP = int(os.environ.get("MAX_NEW_TOKENS_CAP", "8192"))
+# Per-model device targeting ("model_id=NPU;..."). NPU models get their own
+# generation lock, so autocomplete on NPU never queues behind GPU chat/agent
+# turns (measured: ~2.1s FIM during a granite generation vs 30s+ queued).
+# NPU requires channel-wise-sym int4 IRs and a per-device probe pass
+# (RESEARCH.md) — serve only certified artifacts there.
+MODEL_DEVICES: dict[str, str] = {}
+for _entry in os.environ.get("MODEL_DEVICES", "").split(";"):
+    if _entry:
+        _name, _, _dev = _entry.partition("=")
+        MODEL_DEVICES[_name] = (_dev or "GPU").upper()
+NPU_MAX_PROMPT_LEN = int(os.environ.get("NPU_MAX_PROMPT_LEN", "4096"))
 # Prefix caching + chunked prefill (measured: warm-prefix TTFT 63s -> 0.9s on
 # granite-8b; clears the 16k single-allocation wall). Format: "model_id=GB;..."
 # where GB is the reserved KV block pool size. The pool is held permanently —
@@ -106,7 +118,15 @@ _pipes: dict[str, object] = {}  # model id -> pipeline
 _prompt_lookup_enabled: dict[str, bool] = {}  # model id -> PL active
 _think_variants: dict[str, dict | None] = {}  # model id -> {think, nothink} templates
 _think_mode: dict[str, str] = {}  # model id -> currently applied mode
-_gen_lock = threading.Lock()  # single-flight generation across all models
+_model_device: dict[str, str] = {}  # model id -> device it is served on
+# single-flight generation PER DEVICE: GPU stays serialized (bandwidth-bound),
+# but an NPU model generates concurrently with it
+_device_locks: dict[str, threading.Lock] = {}
+
+
+def _lock_for(model_id: str) -> threading.Lock:
+    dev = _model_device.get(model_id, DEVICE)
+    return _device_locks.setdefault(dev, threading.Lock())
 
 _NOTHINK_PREFIX = "<think>\n\n</think>\n\n"
 _THINK_PREFIX = "<think>\n"
@@ -267,8 +287,13 @@ def _inject_tools(messages: list, tools: list) -> list:
     return out
 
 
-def _extract_tool_calls(text: str) -> tuple[str, list]:
-    """Split generated text into (content, OpenAI tool_calls list)."""
+def _extract_tool_calls(text: str, id_prefix: str = "call_") -> tuple[str, list]:
+    """Split generated text into (content, OpenAI tool_calls list).
+
+    id_prefix lets the virtual-model layer encode the active role into call
+    ids ("call_arch_…"), which is how a tool-result continuation is routed
+    back to the same brain statelessly.
+    """
     calls: list[dict] = []
 
     def _consume(m: re.Match) -> str:
@@ -277,7 +302,7 @@ def _extract_tool_calls(text: str) -> tuple[str, list]:
             return m.group(0)  # unrepairable: leave in content, agent will retry
         args = obj.get("arguments", {})
         calls.append({
-            "id": f"call_{uuid.uuid4().hex[:24]}",
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
             "type": "function",
             "function": {
                 "name": obj.get("name", ""),
@@ -301,7 +326,7 @@ def _extract_tool_calls(text: str) -> tuple[str, list]:
         if obj is not None and '"arguments"' in candidate:
             args = obj["arguments"]
             calls.append({
-                "id": f"call_{uuid.uuid4().hex[:24]}",
+                "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
                 "type": "function",
                 "function": {
                     "name": obj["name"],
@@ -351,7 +376,14 @@ def _load_pipelines() -> None:
         pipe_cls = ov_genai.VLMPipeline if is_vlm else ov_genai.LLMPipeline
         kwargs: dict = {"CACHE_DIR": str(CACHE_DIR)}
         model_id = _model_id(model_dir)
+        device = MODEL_DEVICES.get(model_id, DEVICE)
+        if device == "NPU":
+            kwargs["MAX_PROMPT_LEN"] = NPU_MAX_PROMPT_LEN
         use_pl = model_id in PROMPT_LOOKUP_MODELS and not is_vlm
+        if device == "NPU" and use_pl:
+            log.warning("%s: prompt lookup unsupported on NPU — ignoring",
+                        model_id)
+            use_pl = False
         if use_pl:
             kwargs["prompt_lookup"] = True
         if model_id in PROMPT_LOOKUP_MODELS and is_vlm:
@@ -362,6 +394,10 @@ def _load_pipelines() -> None:
             log.warning("%s: both prompt_lookup and scheduler requested — "
                         "keeping prompt_lookup, ignoring scheduler", model_id)
             pool_gb = None
+        if pool_gb and device == "NPU":
+            log.warning("%s: scheduler/prefix-caching config is GPU-path only "
+                        "— NPU uses NPUW properties instead; ignoring", model_id)
+            pool_gb = None
         if pool_gb:
             sch = ov_genai.SchedulerConfig()
             sch.enable_prefix_caching = True
@@ -369,11 +405,12 @@ def _load_pipelines() -> None:
             sch.cache_size = pool_gb           # 16k single-allocation wall
             kwargs["scheduler_config"] = sch
         log.info("Loading %s from %s on %s (cache: %s, prompt_lookup: %s, "
-                 "prefix_caching: %s)", pipe_cls.__name__, model_dir, DEVICE,
+                 "prefix_caching: %s)", pipe_cls.__name__, model_dir, device,
                  CACHE_DIR, use_pl, f"{pool_gb}GB pool" if pool_gb else False)
         t0 = time.perf_counter()
-        pipe = pipe_cls(str(model_dir), DEVICE, **kwargs)
+        pipe = pipe_cls(str(model_dir), device, **kwargs)
         _pipes[model_id] = pipe
+        _model_device[model_id] = device
         _prompt_lookup_enabled[model_id] = use_pl
         try:
             variants = _derive_think_variants(pipe.get_tokenizer().chat_template)
@@ -458,7 +495,7 @@ def _run_streaming(pipe, model_id: str, inputs, gen_cfg,
     streamer = QueueStreamer(pipe.get_tokenizer())
 
     def _generate() -> None:
-        with _gen_lock:
+        with _lock_for(model_id):
             if think_mode is not None:
                 _apply_think_mode(model_id, pipe, think_mode)
             t0 = time.perf_counter()
@@ -481,15 +518,269 @@ def _run_streaming(pipe, model_id: str, inputs, gen_cfg,
     return streamer
 
 
+# --- virtual model: per-turn role router ------------------------------------
+# One model id (default virtual/agent) that routes each turn to the best
+# measured brain (BENCHMARKS.md role-fitness): a router classifies fresh
+# requests, the architect analyzes/plans (read-only tools), the executor
+# does edit->test->verify loops (full tools). Stateless across requests:
+# tool-result continuations are routed by the role encoded in our call ids;
+# once a plan marker exists in history, turns go to the executor.
+
+VIRTUAL_MODEL_ID = os.environ.get("VIRTUAL_MODEL", "virtual/agent")
+VIRTUAL_ROLES: dict[str, str] = {}
+for _entry in os.environ.get(
+        "VIRTUAL_ROLES",
+        "router=OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov;"
+        "architect=Echo9Zulu/Qwen3.5-2B-int4_sym-ov;"
+        "executor=HarmenWessels/granite-4.1-8b-int4-cw-ov").split(";"):
+    if _entry:
+        _role, _, _mid = _entry.partition("=")
+        VIRTUAL_ROLES[_role] = _mid
+
+_PLAN_MARKER = "<!--virtual:plan-->"
+_READONLY_TOOLS = re.compile(
+    r"read|grep|glob|search|fetch|list|view|cat|find|web", re.IGNORECASE)
+
+_ROLE_PROMPTS = {
+    "architect": (
+        "You are the analyst of a role-split coding agent. Investigate and "
+        "diagnose using the available read-only tools, then produce a short "
+        "numbered plan (3-6 steps) naming the exact files, functions and "
+        "changes for an executor to implement. Plan only — no code, no "
+        "file modifications."),
+    "executor": (
+        "You are the executor of a role-split coding agent. Implement the "
+        "requested change using the available tools, then verify by running "
+        "tests. Rules: edits must copy old_string EXACTLY from file content "
+        "you have read in this conversation. A failing test is ground truth "
+        "— fix the code, never argue with the test. Never repeat a tool call "
+        "you already made with identical arguments. When tests pass, stop "
+        "calling tools and summarize what changed."),
+}
+
+
+def _virtual_ready() -> bool:
+    return all(mid in _pipes for mid in VIRTUAL_ROLES.values())
+
+
+def _route_request(messages: list) -> str:
+    """Classify the latest user request via the router brain."""
+    last_user = next((m.get("content") or "" for m in reversed(messages)
+                      if m.get("role") == "user"), "")
+    if isinstance(last_user, list):
+        last_user = "".join(p.get("text", "") for p in last_user
+                            if p.get("type") == "text")
+    router_id = VIRTUAL_ROLES["router"]
+    pipe = _pipes[router_id]
+    cfg = pipe.get_generation_config()
+    cfg.max_new_tokens = 24
+    cfg.do_sample = False
+    if _prompt_lookup_enabled.get(router_id):  # PL pipelines require these
+        cfg.num_assistant_tokens = 5
+        cfg.max_ngram_size = 3
+    prompt = ('Classify the user request. Reply with ONLY a JSON object: '
+              '{"route": "chat"} for questions/explanations, '
+              '{"route": "edit"} for direct code changes, '
+              '{"route": "design"} for architecture/planning/multi-step work.'
+              f"\n\nUser request: {last_user[:2000]}\nJSON:")
+    with _lock_for(router_id):
+        out = pipe.generate(prompt, generation_config=cfg)
+    text = out.texts[0] if hasattr(out, "texts") else str(out)
+    try:
+        route = json.loads(text[text.index("{"):text.rindex("}") + 1]).get("route")
+    except Exception:  # noqa: BLE001
+        route = None
+    return route if route in ("chat", "edit", "design") else "design"
+
+
+def _detect_role(messages: list) -> tuple[str, str]:
+    """Return (role, reason) for this turn — stateless reconstruction."""
+    # 1) continuation of a tool round-trip -> same brain that asked
+    for m in reversed(messages):
+        if m.get("role") == "tool":
+            cid = str(m.get("tool_call_id", ""))
+            if cid.startswith("call_arch"):
+                return "architect", "tool-continuation"
+            if cid.startswith("call_exec"):
+                return "executor", "tool-continuation"
+            break
+        if m.get("role") != "tool":
+            break
+    # 2) a plan already exists -> execution phase
+    if any(_PLAN_MARKER in str(m.get("content") or "") for m in messages
+           if m.get("role") == "assistant"):
+        return "executor", "plan-exists"
+    # 3) fresh request -> ask the router
+    route = _route_request(messages)
+    if route == "edit":
+        return "executor", "routed:edit"
+    return "architect", f"routed:{route}"
+
+
+def _seen_file_content(messages: list) -> str:
+    """Concatenated tool results — the file content the executor has seen."""
+    return "\n".join(str(m.get("content") or "") for m in messages
+                     if m.get("role") == "tool")
+
+
+def _prior_call_signatures(messages: list) -> set:
+    sigs = set()
+    for m in messages:
+        for tc in (m.get("tool_calls") or []) if m.get("role") == "assistant" else []:
+            fn = tc.get("function", {})
+            sigs.add(f"{fn.get('name')}:{fn.get('arguments')}")
+    return sigs
+
+
+def _virtual_guard(role: str, message: dict, messages: list) -> str | None:
+    """Return a corrective note if the executor output violates a rule."""
+    if role != "executor":
+        return None
+    calls = message.get("tool_calls") or []
+    prior = _prior_call_signatures(messages)
+    for tc in calls:
+        fn = tc["function"]
+        if f"{fn['name']}:{fn['arguments']}" in prior:
+            return (f"You already called {fn['name']} with those exact "
+                    "arguments — its result is above. Take the next step "
+                    "instead of repeating it.")
+        if fn["name"].lower() in ("edit_file", "edit", "str_replace"):
+            try:
+                old = json.loads(fn["arguments"]).get("old_string", "")
+            except Exception:  # noqa: BLE001
+                old = ""
+            if old and old not in _seen_file_content(messages):
+                return ("Your edit's old_string does not match any file "
+                        "content you have read in this conversation. Re-read "
+                        "the file and copy the exact current text.")
+    return None
+
+
+def _role_call(role: str, messages: list, tools: list | None, body: dict
+               ) -> tuple[dict, str]:
+    """One internal completion on the role's brain; returns (message, finish)."""
+    model_id = VIRTUAL_ROLES[role]
+    pipe = _pipes[model_id]
+    msgs = list(messages)
+    sys_prompt = _ROLE_PROMPTS[role]
+    if msgs and msgs[0].get("role") == "system":
+        msgs[0] = {"role": "system",
+                   "content": f"{sys_prompt}\n\n{msgs[0].get('content') or ''}"}
+    else:
+        msgs.insert(0, {"role": "system", "content": sys_prompt})
+    scoped = tools
+    if tools and role == "architect":
+        scoped = [t for t in tools
+                  if _READONLY_TOOLS.search(t.get("function", {}).get("name", ""))]
+    use_tools = bool(scoped)
+    if use_tools:
+        msgs = _inject_tools(msgs, scoped)
+    history = _to_chat_history(msgs)
+    gen_cfg = _build_generation_config(
+        pipe, body, default_max=4096 if use_tools else 2048, model_id=model_id)
+    with _lock_for(model_id):
+        _apply_think_mode(model_id, pipe, "nothink")
+        result = pipe.generate(history, generation_config=gen_cfg)
+    text = result.texts[0] if hasattr(result, "texts") else str(result)
+    _, content = _split_reasoning(text, "nothink")
+    message: dict = {"role": "assistant", "content": content}
+    finish = "stop"
+    if use_tools:
+        prefix = "call_arch_" if role == "architect" else "call_exec_"
+        content, tool_calls = _extract_tool_calls(content, id_prefix=prefix)
+        message["content"] = content or None
+        if tool_calls:
+            message["tool_calls"] = tool_calls
+            finish = "tool_calls"
+    return message, finish
+
+
 @app.get("/v1/models")
 def list_models() -> dict:
+    ids = list(_pipes)
+    if _virtual_ready():
+        ids.append(VIRTUAL_MODEL_ID)
     return {
         "object": "list",
         "data": [
             {"id": mid, "object": "model", "created": 0, "owned_by": "local"}
-            for mid in _pipes
+            for mid in ids
         ],
     }
+
+
+def _virtual_compute(body: dict) -> tuple[dict, str, str | None]:
+    """All blocking work of a virtual turn (runs in a worker thread)."""
+    messages = body["messages"]
+    tools = body.get("tools")
+    role, reason = _detect_role(messages)
+    log.info("[%s] turn -> %s (%s)", VIRTUAL_MODEL_ID, role, reason)
+
+    reasoning: str | None = None
+    if not tools and role == "architect" and reason == "routed:design":
+        # no-tools design request: plan (architect) then implement (executor)
+        plan_msg, _ = _role_call("architect", messages, None, body)
+        reasoning = plan_msg.get("content") or ""
+        exec_msgs = messages + [{
+            "role": "assistant", "content": f"{_PLAN_MARKER}\n{reasoning}"},
+            {"role": "user", "content": "Implement the plan above."}]
+        message, finish = _role_call("executor", exec_msgs, None, body)
+    else:
+        message, finish = _role_call(role, messages, tools, body)
+        note = _virtual_guard(role, message, messages)
+        if note:
+            log.info("[%s] guard tripped: %s", VIRTUAL_MODEL_ID, note[:60])
+            retry_msgs = messages + [{"role": "user", "content": note}]
+            message, finish = _role_call(role, retry_msgs, tools, body)
+        if role == "architect" and tools and finish == "stop" \
+                and message.get("content"):
+            # final architect answer in an agentic flow = the plan; mark it so
+            # the next turn routes to the executor
+            message["content"] = f"{_PLAN_MARKER}\n{message['content']}"
+    return message, finish, reasoning
+
+
+async def _virtual_chat(body: dict):
+    """The virtual model: route this turn to the best brain, guard, respond."""
+    message, finish, reasoning = await asyncio.to_thread(_virtual_compute, body)
+
+    comp_id = _new_id("chatcmpl")
+    created = int(time.time())
+    if reasoning:
+        message["reasoning_content"] = reasoning
+
+    if not body.get("stream", False):
+        return JSONResponse({
+            "id": comp_id, "object": "chat.completion", "created": created,
+            "model": VIRTUAL_MODEL_ID,
+            "choices": [{"index": 0, "message": message,
+                         "finish_reason": finish}],
+            "usage": {"prompt_tokens": 0, "completion_tokens": 0,
+                      "total_tokens": 0},
+        })
+
+    def _sse():
+        def chunk(delta: dict, fin: str | None = None) -> str:
+            return "data: " + json.dumps({
+                "id": comp_id, "object": "chat.completion.chunk",
+                "created": created, "model": VIRTUAL_MODEL_ID,
+                "choices": [{"index": 0, "delta": delta,
+                             "finish_reason": fin}],
+            }) + "\n\n"
+
+        yield chunk({"role": "assistant", "content": ""})
+        if message.get("reasoning_content"):
+            yield chunk({"reasoning_content": message["reasoning_content"]})
+        if message.get("content"):
+            yield chunk({"content": message["content"]})
+        for i, tc in enumerate(message.get("tool_calls") or []):
+            yield chunk({"tool_calls": [{"index": i, "id": tc["id"],
+                                         "type": "function",
+                                         "function": tc["function"]}]})
+        yield chunk({}, fin=finish)
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(_sse(), media_type="text/event-stream")
 
 
 @app.post("/v1/chat/completions")
@@ -498,6 +789,12 @@ async def chat_completions(request: Request):
     messages = body.get("messages")
     if not messages:
         raise HTTPException(status_code=400, detail="messages is required")
+
+    if body.get("model") == VIRTUAL_MODEL_ID:
+        if not _virtual_ready():
+            raise HTTPException(status_code=503, detail=(
+                f"virtual model needs all role models loaded: {VIRTUAL_ROLES}"))
+        return await _virtual_chat(body)
 
     model_id, pipe = _resolve_pipe(body)
     tools = body.get("tools")
@@ -541,11 +838,14 @@ async def chat_completions(request: Request):
         return message, finish
 
     if not body.get("stream", False):
-        with _gen_lock:
-            _apply_think_mode(model_id, pipe, think_mode)
-            t0 = time.perf_counter()
-            result = pipe.generate(history, generation_config=gen_cfg)
-            dt = time.perf_counter() - t0
+        def _blocking_generate():
+            with _lock_for(model_id):
+                _apply_think_mode(model_id, pipe, think_mode)
+                t0 = time.perf_counter()
+                res = pipe.generate(history, generation_config=gen_cfg)
+                return res, time.perf_counter() - t0
+        # off the event loop: a long generate must not freeze the server
+        result, dt = await asyncio.to_thread(_blocking_generate)
         text = result.texts[0] if hasattr(result, "texts") else str(result)
         message, finish = _completion_message(text)
         log.info("[%s] non-stream done in %.2fs (mode=%s, finish=%s)",
@@ -674,8 +974,10 @@ async def completions(request: Request):
     created = int(time.time())
 
     if not body.get("stream", False):
-        with _gen_lock:
-            result = pipe.generate(prompt, generation_config=gen_cfg)
+        def _blocking_generate():
+            with _lock_for(model_id):
+                return pipe.generate(prompt, generation_config=gen_cfg)
+        result = await asyncio.to_thread(_blocking_generate)
         text = result.texts[0] if hasattr(result, "texts") else str(result)
         return JSONResponse({
             "id": comp_id,

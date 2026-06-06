@@ -69,6 +69,19 @@ the cache in seconds.
 | `PROMPT_LOOKUP_MODELS` | the autocomplete model | `;`-separated model ids that use prompt-lookup speculative decoding (helps FIM models, hurts general chat — see [RESEARCH.md](RESEARCH.md)) |
 | `SCHEDULER_MODELS` | `granite-4.1-8b…=4` | `model_id=GB` pairs: prefix caching + chunked prefill. Multi-turn TTFT collapses ~27× (71 s → 2.6 s on an 8k history); the GB value is a permanently reserved KV pool — budget it against iGPU memory |
 | `MAX_NEW_TOKENS_CAP` | `8192` | hard cap on client `max_tokens` (agent frontends ask for context-sized budgets) |
+| `MODEL_DEVICES` | — | `model_id=NPU` pairs: per-model device with **per-device generation locks** — NPU autocomplete keeps answering (~7 s) while the GPU runs chat/agent turns. NPU needs channel-wise-sym int4 IRs, probe-certified per device ([RESEARCH.md](RESEARCH.md) finding 14) |
+| `VIRTUAL_ROLES` | the measured casting | role=model_id triples for the **virtual model** (below) |
+
+### The virtual model (`virtual/agent`)
+
+One model id that routes every turn to the best measured brain (see the agent role table):
+a router classifies the request, the **architect** (Qwen3.5-2B) investigates and plans with
+read-only tools, the **executor** (granite-8b) implements with edit→test→verify loops —
+with server-side guards for the failure modes the role-fitness suite measured (tool-call
+loops, non-matching edits). Design requests return the plan as `reasoning_content` (a
+collapsible thinking block in Continue) with the implementation as the answer. Works
+identically from Continue chat, Continue CLI (`cn`), or any OpenAI-compatible frontend —
+the orchestration lives server-side.
 
 The server also implements **OpenAI tool calling** for local models (hermes-style schema
 injection + tolerant `<tool_call>` parsing), which makes agentic frontends that require
