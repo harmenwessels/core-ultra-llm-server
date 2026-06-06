@@ -252,6 +252,13 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   in newer OpenVINO nightlies.
 - **Linux**: the ~50%-of-RAM ceiling is Windows driver policy; the same laptop under native
   Ubuntu might load the 12–16 GiB models that OOM here. Untested.
+- ~~Server enhancement — per-request thinking mode~~ **SHIPPED 2026-06-06**: the server derives
+  think/nothink template variants at load and swaps them per request via
+  `set_chat_template` under the generation lock (`reasoning_effort` / `enable_thinking`
+  request fields; reasoning returned as `message.reasoning_content`). Observation from
+  testing: 1B-scale thinking can *loop* on trivial problems (MiniCPM5 spent 500 tokens
+  re-adding 460+161 and never finished, while no-think answered instantly and correctly) —
+  thinking is not a free quality knob at small scale.
 - **Server enhancement — per-request prompt-lookup**: PL is per-workload (+92% edits, −14%
   explain for the same model), but `PROMPT_LOOKUP_MODELS` toggles per model. A finer policy —
   enable PL only on `/v1/completions`, or when the chat prompt contains a code block — would

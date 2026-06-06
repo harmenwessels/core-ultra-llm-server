@@ -37,6 +37,7 @@ import logging
 import os
 import pathlib
 import queue
+import re
 import threading
 import time
 import uuid
@@ -83,7 +84,76 @@ app = FastAPI(title="openvino-windows-openai-api")
 
 _pipes: dict[str, object] = {}  # model id -> pipeline
 _prompt_lookup_enabled: dict[str, bool] = {}  # model id -> PL active
+_think_variants: dict[str, dict | None] = {}  # model id -> {think, nothink} templates
+_think_mode: dict[str, str] = {}  # model id -> currently applied mode
 _gen_lock = threading.Lock()  # single-flight generation across all models
+
+_NOTHINK_PREFIX = "<think>\n\n</think>\n\n"
+_THINK_PREFIX = "<think>\n"
+
+
+def _derive_think_variants(template: str) -> dict | None:
+    """For hybrid-thinking models, build think/nothink template variants.
+
+    Handles the two patterns seen in the wild:
+      A) our hardcoded no-think prefix (rt_info-patched artifacts)
+      B) the vendor `enable_thinking` conditional (unusable through GenAI,
+         which cannot pass template kwargs)
+    Returns None for models without thinking support (e.g. Gemma).
+    """
+    if _NOTHINK_PREFIX in template:  # pattern A
+        return {
+            "nothink": template,
+            "think": template.replace(_NOTHINK_PREFIX, _THINK_PREFIX),
+        }
+    if "enable_thinking" in template and "<think>" in template:  # pattern B
+        cond = re.compile(
+            r"\{%- if enable_thinking is defined.*?\{%- endif %\}", re.DOTALL)
+        if cond.search(template):
+            nothink = cond.sub("{{- '" + _NOTHINK_PREFIX.replace("\n", "\\n") + "' }}",
+                               template)
+            think = cond.sub("{{- '" + _THINK_PREFIX.replace("\n", "\\n") + "' }}",
+                             template)
+            return {"nothink": nothink, "think": think}
+    return None
+
+
+def _apply_think_mode(model_id: str, pipe, mode: str) -> None:
+    """Swap the chat template if the requested mode differs. Call under _gen_lock."""
+    variants = _think_variants.get(model_id)
+    if not variants or _think_mode.get(model_id) == mode:
+        return
+    template = variants[mode]
+    if hasattr(pipe, "set_chat_template"):  # VLMPipeline
+        pipe.set_chat_template(template)
+    else:  # LLMPipeline: via its tokenizer (verified to propagate)
+        pipe.get_tokenizer().set_chat_template(template)
+    _think_mode[model_id] = mode
+    log.info("[%s] thinking mode -> %s", model_id, mode)
+
+
+def _requested_think_mode(body: dict) -> str:
+    """OpenAI-style: reasoning_effort 'none' (or absent) -> nothink; any other
+    value, or enable_thinking=true, -> think."""
+    if body.get("enable_thinking") is True:
+        return "think"
+    effort = body.get("reasoning_effort")
+    if effort and str(effort).lower() != "none":
+        return "think"
+    return "nothink"
+
+
+def _split_reasoning(text: str, think_mode: str = "nothink") -> tuple[str | None, str]:
+    """Split '<think>...</think>' (or an unopened '...</think>') prefix into
+    (reasoning_content, content). In think mode, an output that never closed
+    its think block is all reasoning (budget ran out mid-thought)."""
+    if "</think>" not in text:
+        if think_mode == "think":
+            return text.replace("<think>", "").strip("\n") or None, ""
+        return None, text
+    head, _, tail = text.partition("</think>")
+    reasoning = head.replace("<think>", "").strip("\n")
+    return (reasoning or None), tail.lstrip("\n")
 
 
 class QueueStreamer:
@@ -130,8 +200,18 @@ def _load_pipelines() -> None:
         log.info("Loading %s from %s on %s (cache: %s, prompt_lookup: %s)",
                  pipe_cls.__name__, model_dir, DEVICE, CACHE_DIR, use_pl)
         t0 = time.perf_counter()
-        _pipes[model_id] = pipe_cls(str(model_dir), DEVICE, **kwargs)
+        pipe = pipe_cls(str(model_dir), DEVICE, **kwargs)
+        _pipes[model_id] = pipe
         _prompt_lookup_enabled[model_id] = use_pl
+        try:
+            variants = _derive_think_variants(pipe.get_tokenizer().chat_template)
+        except Exception:  # noqa: BLE001 — template introspection is best-effort
+            variants = None
+        _think_variants[model_id] = variants
+        if variants:
+            _apply_think_mode(model_id, pipe, "nothink")  # server default
+            log.info("%s: hybrid-thinking model — per-request mode switch enabled "
+                     "(default nothink)", model_id)
         log.info("%s ready in %.1fs", model_id, time.perf_counter() - t0)
 
 
@@ -192,12 +272,15 @@ def _new_id(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:24]}"
 
 
-def _run_streaming(pipe, model_id: str, inputs, gen_cfg) -> QueueStreamer:
+def _run_streaming(pipe, model_id: str, inputs, gen_cfg,
+                   think_mode: str | None = None) -> QueueStreamer:
     """Start a generation thread that feeds a QueueStreamer; returns the streamer."""
     streamer = QueueStreamer(pipe.get_tokenizer())
 
     def _generate() -> None:
         with _gen_lock:
+            if think_mode is not None:
+                _apply_think_mode(model_id, pipe, think_mode)
             t0 = time.perf_counter()
             try:
                 pipe.generate(inputs, generation_config=gen_cfg,
@@ -239,16 +322,22 @@ async def chat_completions(request: Request):
     model_id, pipe = _resolve_pipe(body)
     history = _to_chat_history(messages)
     gen_cfg = _build_generation_config(pipe, body, model_id=model_id)
+    think_mode = _requested_think_mode(body)
     comp_id = _new_id("chatcmpl")
     created = int(time.time())
 
     if not body.get("stream", False):
         with _gen_lock:
+            _apply_think_mode(model_id, pipe, think_mode)
             t0 = time.perf_counter()
             result = pipe.generate(history, generation_config=gen_cfg)
             dt = time.perf_counter() - t0
         text = result.texts[0] if hasattr(result, "texts") else str(result)
-        log.info("[%s] non-stream done in %.2fs", model_id, dt)
+        reasoning, content = _split_reasoning(text, think_mode)
+        log.info("[%s] non-stream done in %.2fs (mode=%s)", model_id, dt, think_mode)
+        message: dict = {"role": "assistant", "content": content}
+        if reasoning is not None:
+            message["reasoning_content"] = reasoning
         return JSONResponse({
             "id": comp_id,
             "object": "chat.completion",
@@ -256,13 +345,13 @@ async def chat_completions(request: Request):
             "model": model_id,
             "choices": [{
                 "index": 0,
-                "message": {"role": "assistant", "content": text},
+                "message": message,
                 "finish_reason": "stop",
             }],
             "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
         })
 
-    streamer = _run_streaming(pipe, model_id, history, gen_cfg)
+    streamer = _run_streaming(pipe, model_id, history, gen_cfg, think_mode=think_mode)
 
     def _sse():
         def chunk(delta: dict, finish: str | None = None) -> str:

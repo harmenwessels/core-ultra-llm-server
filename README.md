@@ -100,6 +100,19 @@ models:
 `/v1/chat/completions` and `/v1/completions` (the latter serves raw/FIM prompts with the chat
 template disabled — required for autocomplete to work).
 
+### Thinking mode (hybrid-reasoning models)
+
+For hybrid-thinking models (Qwen3.5, MiniCPM5, …) the server detects the thinking control in
+the model's chat template at load and enables a **per-request switch** — no reload needed:
+
+- default: thinking **off** (direct answers; best for coding workloads)
+- `"reasoning_effort": "low" | "medium" | "high"` or `"enable_thinking": true` → thinking on;
+  the reasoning is returned separately as `message.reasoning_content` (DeepSeek-style)
+
+Background: GenAI cannot pass `enable_thinking` template kwargs, so the server swaps between
+two derived template variants at generation time (single-flight makes this safe). See
+RESEARCH.md for the template mechanics.
+
 ## Measured results
 
 Core Ultra 155H (Meteor Lake), Arc iGPU, 32 GB LPDDR5x, driver 32.0.101.8724,
