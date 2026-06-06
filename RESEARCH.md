@@ -185,6 +185,14 @@ Hard-won rules:
    recipe for ~3B–8B (validated on Granite 4.1), but at ≤1B it produces *degenerate output*
    (MiniCPM5-1B: repetition loops; int8 and g128 of the same model are coherent). For tiny
    models use g128 or int8 and always run a coherence probe before benchmarking speed.
+0b. **Hybrid-thinking models are controlled via the tokenizer IR's rt_info template.** GenAI
+   cannot pass `enable_thinking`, and it reads the chat template from `openvino_tokenizer.xml`
+   **rt_info** — not from `chat_template.jinja` (patching that file is a no-op). Hardcoding the
+   no-think prefix (`<think>\n\n</think>\n\n` after the assistant header) in rt_info switched
+   MiniCPM5-1B from preamble-failing to the fastest probe-passing edit model measured
+   (81.4 tok/s). Corollary: "thinks by default" verdicts on other models (Qwen3 family) reflect
+   their conversions' baked templates and may be flippable the same way — re-test before
+   excluding a thinking-capable model.
 1. **transformers version must match the target architecture** — and the requirements differ
    per model: granite wants 4.57.x; gemma4 wants exactly 5.5.0 (5.10 renamed an attention
    attribute and breaks the trace); Qwen3.5 wants 5.x. Swap per export; pip's dependency

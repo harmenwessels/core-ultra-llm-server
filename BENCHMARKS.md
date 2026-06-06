@@ -51,7 +51,7 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 | Gemma 4 E2B (our conversion) | n/a (VLM) | 21.5 ✓ | n/a | 23.3 | n/a | 24.5 | n/a |
 | Qwen3-0.6B (thinking) | 1.16 s (0.05) ✓ | 86.7 ✗ behavior | 56.5 (−35%) ✗ | 85.2 | 47.6 (−44%) | 79.6 | 53.1 (−33%) |
 | LFM2.5-1.2B-Thinking | 1.19 s (0.05) ✗¹ | 83.9 ✗ no code | 92.7 (+10%) ✗ | 84.7 | 101.6 (+20%) | 84.7 | **137.9 (+63%)** |
-| MiniCPM5-1B g128 (ours)⁶ | 1.21 s (0.04) ✗¹ | 81.9 ✗ no code | 79.0 (−3%) ✗ | 82.9 | 55.0 (−34%) | 86.9 | 65.9 (−24%) |
+| MiniCPM5-1B g128 (ours, no-think template)⁶ | 1.25 s (0.04) ✗¹ | **81.4 ✓** | 95.9 (+18%) ✗ PL-flaky | 82.6 | 59.1 (−28%) | 83.9 | 77.1 (−8%) |
 | **Granite-4.1-8b cw (AWQ+SE, ours)** | 6.94 s (0.20) ✗¹ | 14.1 **✓** | **27.0 (+92%) ✓** | 14.1 | 12.2 (−14%) | 14.2 | 11.9 (−16%) |
 
 ¹ raw-continuation probe artifact (no stop criterion), not a verified failure.
@@ -135,10 +135,13 @@ non-thinking rows (the 2B card shows the gap: 55.3 non-thinking vs 66.5 thinking
 and the thinking preamble is precisely what fails our edit-budget probe.
 ⁵ official numbers exist only in the Qwen3 tech report (tables not published on the cards in
 extractable form).
-⁶ MiniCPM5-1B thinks by default under its embedded OV chat template (despite the card's
-`enable_thinking=False` default in Python) → edit-budget failures and PL hostility. Quantization
-note: the cw+AWQ recipe produced **degenerate garbage** at this 1B scale (repetition loops) —
-the same recipe that works at 3B/8B; g128 and int8 are coherent. See RESEARCH playbook.
+⁶ Two artifact-level fixes were required (full story in RESEARCH playbook): (a) the cw+AWQ
+recipe produced **degenerate garbage** at 1B scale — g128/int8 are coherent → granularity must
+scale with model size; (b) the model "thought by default" under GenAI because the chat template
+**baked into `openvino_tokenizer.xml` rt_info** leaves thinking to the model when
+`enable_thinking` is unpassable — hardcoding the no-think prefix there (not in the ignored
+`.jinja`) flipped the edit probe from FAIL to PASS and is the row shown. PL remains unusable at
+1B (correctness coin-flip, as with Coder-0.5B).
 
 Reading across the axes: on raw scores the **Qwen3.5-4B/9B generation leads everything**
 (MMLU-Pro 79–83, LCB 56–66) — but those are thinking-mode numbers, and the thinking preamble
@@ -158,6 +161,7 @@ LFM's architect speed carries its vendor's own warning against programming-domai
 | Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
 | Architect (experimental) | LFM2.5-1.2B-Thinking **+PL** | 137.9 tok/s with design-aligned reasoning — but LiquidAI's own card advises against knowledge-intensive/programming use; try-and-judge with low expectations |
+| Fast edit/chat (experimental) | MiniCPM5-1B g128, no-think template (ours) | **fastest probe-passing edits measured (81.4 tok/s)**, ~83 tok/s chat, 128k ctx — 1B quality is the open question; no PL (flaky at this scale) |
 | Chat (quality tier) | Gemma 4 E4B | best validated general scores (MMLU-Pro 69.4), 15.6 tok/s, probe ✓ — when answer quality beats pace |
 | Assistant (edit/tool quality tier) | Granite-4.1-8b cw (ours) **+PL** | IFEval 87 / MBPP 87 / BFCL 68: 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
