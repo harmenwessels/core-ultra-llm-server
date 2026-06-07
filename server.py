@@ -708,6 +708,12 @@ _READONLY_TOOLS = re.compile(
     r"read|grep|glob|search|fetch|list|view|cat|find|web", re.IGNORECASE)
 
 _ROLE_PROMPTS = {
+    "reviewer": (
+        "You are the reviewer of a role-split coding agent. You are given a "
+        "plan and an implementation. Check: does the implementation follow "
+        "the plan, and is the code correct (logic, edge cases)? If it is "
+        "acceptable, reply with exactly OK. Otherwise reply with a short "
+        "numbered list of concrete defects to fix — no praise, no rewrite."),
     "architect": (
         "You are the analyst of a role-split coding agent. Investigate and "
         "diagnose using the available read-only tools, then produce a short "
@@ -891,6 +897,29 @@ def _virtual_compute(body: dict) -> tuple[dict, str, str | None]:
             "role": "assistant", "content": f"{_PLAN_MARKER}\n{reasoning}"},
             {"role": "user", "content": "Implement the plan above."}]
         message, finish = _role_call("executor", exec_msgs, None, body)
+        # review phase — OPT-IN per request ("review": true). Tournament
+        # verdict (castings.jsonl): six reviewed cells, zero catches; LLM
+        # review at this scale doesn't earn its latency — execution is the
+        # only reviewer that works. ONE corrective pass max when enabled.
+        want_review = bool(body.get("review", False))
+        if want_review and VIRTUAL_ROLES.get("reviewer") in _pipes:
+            review_msgs = [{"role": "user", "content":
+                            f"PLAN:\n{reasoning}\n\nIMPLEMENTATION:\n"
+                            f"{message.get('content') or ''}"}]
+            verdict_msg, _ = _role_call("reviewer", review_msgs, None, body)
+            verdict = (verdict_msg.get("content") or "").strip()
+            if verdict and not verdict.upper().startswith("OK"):
+                log.info("[%s] reviewer found issues -> one corrective pass",
+                         VIRTUAL_MODEL_ID)
+                fix_msgs = exec_msgs + [
+                    {"role": "assistant",
+                     "content": message.get("content") or ""},
+                    {"role": "user", "content":
+                     "A reviewer found these defects — fix them and output "
+                     f"the corrected implementation:\n{verdict[:2000]}"}]
+                message, finish = _role_call("executor", fix_msgs, None, body)
+                reasoning = (reasoning or "") + \
+                    f"\n\n[review]\n{verdict[:1200]}"
     else:
         message, finish = _role_call(role, messages, tools, body)
         note = _virtual_guard(role, message, messages)

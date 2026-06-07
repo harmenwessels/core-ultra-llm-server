@@ -275,6 +275,18 @@ Prefill cost grows superlinearly and differs per architecture (finding 11): gran
 43 s @ 8k vs Qwen3.5-2B 17 s @ 16k — per-model context budgets matter more than decode rank
 for agent/long-context use.
 
+## Casting tournament (virtual/agent, 2026-06-07, `castings.jsonl`)
+
+Three castings × two design tasks × reviewer on/off, scored by executing the returned
+code: **A (3-brain: 2B architect + granite executor)** — both easy-task passes at 25-40 s,
+hard task fails with broken output. **B (Qwen3-8B architect + granite)** — easy passes at
+~55 s; hard task fails *close* (clean running code, one boundary bug). **C (Qwen3-8B every
+seat)** — same results as B at 2-4× the latency, including the *identical* boundary bug.
+Verdicts: A stays the production default (best economics); B is the one-line registry swap
+for design-heavy work; C is dominated. **The LLM reviewer caught nothing in six cells**
+(once it changed the failure instead of fixing it) — review is opt-in (`"review": true`),
+and execution remains the only reviewer that works at this scale.
+
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |

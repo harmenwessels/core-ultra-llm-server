@@ -74,3 +74,6 @@ virtual:
                                 # faster than NPU even under full GPU load)
     architect: qwen3.5-2b
     executor: granite-8b
+    reviewer: qwen3.5-2b        # OPT-IN ("review": true in the request):
+                                # tournament measured 0 catches in 6 cells —
+                                # execution is the only reviewer that works

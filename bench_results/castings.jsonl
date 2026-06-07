@@ -1,0 +1,12 @@
+{"casting": "A-3brain-2Barch", "task": "merge-intervals", "review": false, "probe": "PASS", "seconds": 40.0}
+{"casting": "A-3brain-2Barch", "task": "merge-intervals", "review": true, "probe": "PASS", "seconds": 25.5}
+{"casting": "A-3brain-2Barch", "task": "rate-limiter", "review": false, "probe": "FAIL (IndentationError: unexpected indent (<string>, line 21))", "seconds": 224.9}
+{"casting": "A-3brain-2Barch", "task": "rate-limiter", "review": true, "probe": "FAIL (ModuleNotFoundError: No module named 'sliding_window_limiter')", "seconds": 53.2}
+{"casting": "B-2brain-8Barch", "task": "merge-intervals", "review": false, "probe": "PASS", "seconds": 58.1}
+{"casting": "B-2brain-8Barch", "task": "merge-intervals", "review": true, "probe": "PASS", "seconds": 52.7}
+{"casting": "B-2brain-8Barch", "task": "rate-limiter", "review": false, "probe": "FAIL (_seq() -> [True, False, False, True])", "seconds": 67.0}
+{"casting": "B-2brain-8Barch", "task": "rate-limiter", "review": true, "probe": "FAIL (_seq() -> [True, False, False, True])", "seconds": 62.7}
+{"casting": "C-1brain-q38b", "task": "merge-intervals", "review": false, "probe": "PASS", "seconds": 140.5}
+{"casting": "C-1brain-q38b", "task": "merge-intervals", "review": true, "probe": "PASS", "seconds": 210.2}
+{"casting": "C-1brain-q38b", "task": "rate-limiter", "review": false, "probe": "FAIL (_seq() -> [True, False, False, True])", "seconds": 71.5}
+{"casting": "C-1brain-q38b", "task": "rate-limiter", "review": true, "probe": "FAIL (_seq() -> [True, False, False, True])", "seconds": 143.7}
