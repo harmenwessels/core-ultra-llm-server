@@ -275,8 +275,15 @@ Overnight NPU campaign (2026-06-06/07), after the cw-sym discovery unblocked com
   moving non-stream generates off the event loop (`asyncio.to_thread` — a long non-stream
   generate used to freeze the whole HTTP server) give lock-free NPU autocomplete at
   ~7 s while the GPU runs multi-stage agent turns.
-- Final NPU lineup verdict: exactly one seat — FIM autocomplete on the certified
-  cw-1.5B. Routing candidates all failed (Instruct-cw 4/6, LFM-cw 0/6); ≥3B too slow.
+- **Correction (2026-06-07, via a community-shared doc note): the Series-1 NPU constraint
+  is SYMMETRY, not channel-wise layout** — sym cw *and* sym group-wise int4 are supported;
+  asym is what trips the `vpux` verifier (all our failing g128 artifacts were asym). The
+  untested **sym-g128** recipe threads the needle: Coder-1.5B-symg128 compiles on NPU,
+  routes **6/6 on both devices** (3.0 s/dec NPU) AND passes the FIM probe — one artifact
+  now holds both NPU seats (autocomplete + router), superseding the cw build that had
+  sacrificed routing. The virtual model's router runs on NPU: classification costs zero
+  GPU contention. Earlier verdict, superseded: "exactly one seat — cw-1.5B autocomplete;
+  routing candidates all failed" (that ladder tested cw and asym builds only).
 - **There is no numerics-safe size threshold** (Qwen3-1.7B paired test, 2026-06-07):
   the same cw IR routes 4/6 on GPU and 5/6 on NPU *with different errors*, and recall
   returns empty on NPU — device numerics shift near-threshold behaviors in both

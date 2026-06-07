@@ -35,13 +35,15 @@ models:
     thinking: none
     roles: [autocomplete, router]   # route 6/6; g128 build (cw damaged routing)
 
-  - dir: models/HarmenWessels/Qwen2.5-Coder-1.5B-int4-cw-ov
+  - dir: models/HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov
     alias: coder-1.5b-npu
     device: NPU                     # own gen lock: never queues behind GPU
     max_prompt_len: 4096            # NPU static-shape ceiling
     thinking: none
-    roles: [autocomplete-npu]       # probe-certified on NPU; cw broke routing
-                                    # (quantization damage is task-selective)
+    roles: [autocomplete-npu, router-npu]
+    # sym-g128: the Series-1 NPU needs SYMMETRIC int4 (cw OR group-wise) —
+    # asym g128 trips the vpux verifier; data-free cw broke routing. sym-g128
+    # threads the needle: route 6/6 + FIM probe PASS on both devices.
 
 # Models with adapters but no (undisputed) seat — uncomment to serve:
 #  - dir: models/HarmenWessels/gemma-4-E4B-it-qat-int4-ov
@@ -62,6 +64,7 @@ models:
 virtual:
   id: virtual/agent
   roles:
-    router: coder-1.5b
+    router: coder-1.5b-npu      # classification runs on the NPU — zero GPU
+                                # contention while the executor generates
     architect: qwen3.5-2b
     executor: granite-8b
