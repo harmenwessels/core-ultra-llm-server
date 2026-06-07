@@ -1,0 +1,75 @@
+{
+  "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 3.6,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 3.6,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 3.7,
+      "detail": "calls=[] content='<think>\\nOkay, the user is asking what the acronym API stands'"
+    },
+    "result-use": {
+      "pass": false,
+      "seconds": 3.5,
+      "detail": "calls=[] content=\"<think>\\nOkay, let's see. The user is asking what the value o\""
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 13.0,
+      "detail": "calls=[]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 13.6,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 19.1,
+      "detail": "exec/assert failed: '(' was never closed (<string>, line 4)"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 4.9,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 16.2,
+      "detail": "0/6 [chat:None, edit:None, design:None, chat:None, edit:None, design:None]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 12.8,
+      "detail": "content=\"<think> okay, let's see what's wrong here. the user provided a test failure where the median of [4,1\""
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 13.4,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 22.1,
+      "detail": "stopped at turn 0: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": false,
+      "seconds": 3.6,
+      "detail": "content='<think> Okay, let\\'s tackle this question: \"Which environment variable holds our '"
+    },
+    "_summary": {
+      "passed": 4,
+      "of": 13,
+      "avg_seconds": 10.2,
+      "total_seconds": 133.0
+    }
+  }
+}

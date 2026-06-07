@@ -233,6 +233,13 @@ thinking changing a quality outcome. LFM remains hermes-served (its template hid
 protocol from the detector) — still understated. Executor seat now contested:
 granite-8b 12/15 vs E4B-native 13/15 — pending a virtual-model A/B.
 
+**LFM2.5-1.2B variant pair** (2026-06-07, native adapter, `roles__20260607-09*.json`):
+a clean natural experiment — Instruct 7/13 vs Thinking 4/13. The Thinking variant is the
+only 1.2B-class artifact to pass `diagnose` (thinking-training buys analysis) but its
+reasoning preamble collapses every operational probe (route 0/6, result-use/recall fail,
+2.4× latency). Variant choice is a profile choice, not a quality knob; neither earns a
+seat.
+
 **Think-steering sweep** (all 13 probes × think/nothink on the hybrid-thinking models,
 `roles__20260606-214914.json`): thinking is quality-neutral-to-harmful at this scale.
 Qwen3.5-2B: one verdict improved, otherwise identical — at up to **15× latency** on
