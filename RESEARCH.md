@@ -309,6 +309,16 @@ with nested braces (v1 limitation); (d) LFM's template hides its protocol from
 literal-string detection — still served hermes, still understated. Registry
 (`models.yaml`) carries `tool_format` per model so the language is pinned, not guessed.
 
+Full-fleet template survey (2026-06-07, round 2): granite's "native" format **is**
+hermes (its template builds the `<tools>`/`<tool_call>` block verbatim) — injection was
+correct all along, and faithful native rendering measured 1pt *worse* (empty old_string
+emission under native framing) → granite pinned `tool_format: hermes` in the registry.
+LFM's declaration mechanism found (`List of tools: [...]` in the system prompt) and the
+full adapter landed: **LFM2.5-1.2B 4/13 → 7/13** — its honest score (call probes pass;
+remaining failures are 1.2B capability limits, not protocol). Qwen/MiniCPM/OmniCoder
+templates are natively hermes. Net language map: gemma → native adapter (big win),
+lfm → native adapter (fair reading), everything else → hermes (correct by training).
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`

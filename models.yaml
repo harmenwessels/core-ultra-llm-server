@@ -11,9 +11,11 @@ models:
     scheduler:                      # prefix caching + chunked prefill
       kv_pool_gb: 4                 # reserved at load — budget vs iGPU ceiling
     prompt_lookup: false            # PL hurts agent/explain turns (finding 6)
+    tool_format: hermes             # PINNED: granite's training format IS
+                                    # hermes; native render measured 1pt worse
     thinking: none                  # no switchable thinking machinery
     context_budget: 8192            # prefill curve: 43s @ 8k, wall above (finding 11)
-    roles: [executor, chat]         # role-fitness 12/15: only byte-exact looper
+    roles: [executor, chat]         # role-fitness 12/15: byte-exact looper
 
   - dir: models/Echo9Zulu/Qwen3.5-2B-int4_sym-ov
     alias: qwen3.5-2b

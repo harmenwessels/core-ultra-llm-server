@@ -257,8 +257,12 @@ def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
         fmt = "hermes"
         if "declaration:" in template and "<|tool" in template:
             fmt = "gemma"
-        elif "<|tool_call_start|>" in template:
+        elif "<|tool_call_start|>" in template or "List of tools:" in template:
             fmt = "lfm"
+        elif re.search(r"\{%-?\s*(?:if|for)[^%]*tools", template):
+            # template natively renders hermes-style tools (granite, qwen,
+            # minicpm): render natively for faithful placement, parse hermes
+            fmt = "native-hermes"
     if fmt != "hermes":
         try:
             import jinja2
@@ -362,7 +366,12 @@ def _parse_lfm_calls(text: str, tools: list, id_prefix: str
     return content, calls
 
 
-_NATIVE_PARSERS = {"gemma": _parse_gemma_calls, "lfm": _parse_lfm_calls}
+_NATIVE_PARSERS = {
+    "gemma": _parse_gemma_calls,
+    "lfm": _parse_lfm_calls,
+    "native-hermes": lambda text, tools, id_prefix:
+        _extract_tool_calls(text, id_prefix),
+}
 
 
 def _lenient_tool_json(raw: str) -> dict | None:
