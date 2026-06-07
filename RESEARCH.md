@@ -398,9 +398,15 @@ Hard-won rules:
    on `contextual` calibrated a *coding* model's precision against image-chat activations →
    **3/12 vs the data-free build's 8,7/12** (two greedy breadth blocks each), failing by
    syntax-truncation. For a code model, the only available VLM calibration domain is a net
-   loss; the data-free build was already near-optimal. Don't AWQ+SE a VLM-shaped coding model
-   through this path — there is no code-domain option short of the hand-rolled Python-API
-   route (feed text embeddings to nncf directly, bypassing the predefined-dataset gate).
+   loss; the data-free build was already near-optimal. The hand-rolled code-domain route was
+   then tested (`scripts/convert_omni_awqse_codecalib.py`: fp16 export → feed text→embeds +
+   4-row mrope position_ids + beam_idx to `nncf.compress_weights` on the stateful LM, same
+   cw INT4_SYM+AWQ+SE recipe, only domain changed). Worked first try; scored **5/12 greedy**
+   — vs data-free **8,7** and image-chat **3,3**. So domain matters (+2 over image-chat) but
+   **AWQ+SE is net-negative for Omni regardless of domain** — the method, not just the domain,
+   is ruled out here. Lesson: when a data-free build is already well-matched there is no
+   damage to repair and calibration is mostly downside. The direct-NNCF path itself is sound
+   and reusable for any VLM whose LM needs text-domain calibration.
 0d. **Data-free int4_sym is the right call for QAT checkpoints — the exception to rule 0.**
    Google's Gemma-4 QAT weights are trained onto the Q4_0 lattice; converting data-free with
    the *matching* grid (`sym: true, group_size: 32` = Q4_0 geometry) snaps weights onto the
@@ -442,6 +448,7 @@ architecture, ≤ ~6 GiB int4, permissive license, quality above incumbents). Sc
 | GLM-4.7-Flash | MoE (`glm4_moe_lite`), unsupported type, too big |
 | Qwen3.6-27B / Mistral-Small-4 / Gemma-4-31B / EXAONE-4.5-33B / Codestral | over the memory ceiling |
 | Qwen3.6 small dense / Qwen3.5-Coder / EXAONE-4.5 ≤8B | not released yet |
+| **OmniCoder-2-9B** (Tesslate, qwen3_5 VLM) | **base repo pulled — `Tesslate/OmniCoder-2-9B` 404 (2026-06-07).** Survives only as GGUF (`mradermacher/OmniCoder-2-9B-GGUF`, incl. f16 + mmproj-f16). No safetensors anywhere. **Watch item**: if the base is republished in safetensors it slots into the V1 fp16-export→AWQ+SE pipeline; otherwise GGUF→HF reconstruction for a VLM is high-effort/fragile and not worth it speculatively (no V2 benchmarks; V1 data-free already 9/12) |
 | Seed-Coder-8B | 2025-05 vintage — matched/beaten by granite-4.1-8b (already published) |
 | EXAONE-4.0 family | gated + restrictive license |
 | GLM-4-9B-0414, Phi-4-mini, Falcon-3, OLMo-3, Hunyuan-7B | dated or dominated by incumbents at equal size |

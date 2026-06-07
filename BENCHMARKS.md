@@ -321,7 +321,31 @@ calibration domain is a net loss. Corollary (rule 0 addendum): data-free int4_sy
 universally damaging — it is near-optimal for **QAT checkpoints** whose weights were trained
 onto the target lattice (our Gemma-4 E2B/E4B QAT builds: sym g32 = Q4_0 geometry, int4 ≈
 bf16 by construction). The damaging case is data-free quant of a *non-QAT* model at coarse
-granularity. The AWQ+SE artifact was deleted after the verdict.
+granularity.
+
+**Follow-up — code-domain AWQ+SE via a hand-rolled NNCF path (2026-06-08).** To separate
+*method* from *domain*, the experiment was redone calibrating on **Python code** instead of
+image-chat. optimum-intel's VLM path can't do this (predefined `contextual` only), so the LM
+IR was compressed directly: `scripts/convert_omni_awqse_codecalib.py` exports the source at
+fp16, builds calibration inputs from code (text → `text_embeddings` IR → `inputs_embeds`,
+plus the 4-row Qwen3.5 mrope `position_ids`, mask, `beam_idx`), and runs
+`nncf.compress_weights(INT4_SYM, cw, awq, scale_estimation)` on the stateful LM — recipe and
+grouping identical to the granite repair, only the domain changed. **It worked on the first
+try (the mrope inputs + stateful-LM dataset were accepted by NNCF — a reusable capability)
+and scored 5/12 greedy.** Three-domain picture, same model/recipe:
+
+| Calibration domain | greedy |
+|---|---|
+| none (data-free) | 8, 7/12 |
+| **Python code** | **5/12** |
+| image-chat (`contextual`) | 3, 3/12 |
+
+**Verdict: domain matters (code +2 over image-chat) but AWQ+SE is net-negative for Omni
+regardless — it never reaches the data-free baseline.** Omni's data-free build was already
+well-matched (little damage to repair), so calibration is mostly downside — the rule-0c
+"lottery, not a lever" reading, now with the method itself ruled out for this model, not just
+one domain. Both AWQ+SE artifacts and the fp16/bf16 scratch were deleted; the data-free
+build keeps the seat.
 
 **Decoding condition matters — the solo leaderboard was measured greedy, off every Qwen-
 family card's advice (2026-06-07).** Discovered while auditing Omni: identical greedy
