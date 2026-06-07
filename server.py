@@ -155,6 +155,13 @@ def _derive_think_variants(template: str) -> dict | None:
             think = cond.sub("{{- '" + _THINK_PREFIX.replace("\n", "\\n") + "' }}",
                              template)
             return {"nothink": nothink, "think": think}
+    if "enable_thinking" in template and "<|think|>" in template:  # pattern C:
+        # Gemma 4 — thinking is gated on an enable_thinking kwarg GenAI cannot
+        # pass; force the gate per variant instead
+        gate = "enable_thinking is defined and enable_thinking"
+        if gate in template:
+            return {"nothink": template.replace(gate, "false"),
+                    "think": template.replace(gate, "true")}
     return None
 
 

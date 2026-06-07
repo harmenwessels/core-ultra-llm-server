@@ -419,7 +419,22 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   (agent/architect turns) — complements Finding 6's PL boundary.
 - **Per-model tool-format adapters** (Finding 9): parse LFM's `<|tool_call_start|>` Pythonic
   format (and similar native protocols) server-side so strong-native-format models get a
-  fair agentic reading.
+  fair agentic reading. **Gemma 4 is the second motivating case (found 2026-06-07)**: its
+  chat template ships a complete native tool protocol (schema-formatting macros,
+  `<tool_response|>` tokens) that hermes injection bypasses — the E4B "tool-shy" verdict
+  likely measures the format mismatch, not the capability.
+- **Gemma 4 thinking — switchable, historically never engaged (2026-06-07)**: the template
+  gates thinking on an `enable_thinking` kwarg GenAI cannot pass → all our Gemma numbers
+  are nothink. Pattern C in `_derive_think_variants` (force the gate true/false) now
+  switches it per request: validated on E2B QAT (think = structured `thought` deliberation,
+  36 s vs 13 s on the diagnose task, both correct). Caveat: Gemma's reasoning has no
+  textual end-delimiter in decoded output (the boundary token is consumed by the
+  detokenizer) — `reasoning_content` separation needs token-level handling; served default
+  remains nothink.
+- **FluidInference/helenai NPU catalogs screened (2026-06-07)**: qwen3-1.7b-int4-ov-npu
+  compiles and runs on NPU but routes 1/6 (thinking-default burns the budget; 3/6 with
+  `/no_think`) — no router seat; NPU remains autocomplete-only. The catalogs stay relevant
+  as ready-made NPU artifacts for future candidates.
 - **Linux**: the ~50%-of-RAM ceiling is Windows driver policy; the same laptop under native
   Ubuntu might load the 12–16 GiB models that OOM here. Untested.
 - ~~Server enhancement — per-request thinking mode~~ **SHIPPED 2026-06-06**: the server derives
