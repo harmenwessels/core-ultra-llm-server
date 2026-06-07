@@ -845,13 +845,24 @@ def _role_call(role: str, messages: list, tools: list | None, body: dict
         scoped = [t for t in tools
                   if _READONLY_TOOLS.search(t.get("function", {}).get("name", ""))]
     use_tools = bool(scoped)
-    if use_tools:
-        msgs = _inject_tools(msgs, scoped)
-    history = _to_chat_history(msgs)
+    # speak the brain's native tool language (same dispatch as the direct
+    # path): native-format models get their own template rendered server-side
+    native_fmt = _TOOL_FORMATS.get(model_id, "hermes") \
+        if (use_tools or model_id in _NATIVE_TEMPLATES) else "hermes"
+    if native_fmt != "hermes":
+        history = _render_native(model_id, msgs, scoped if use_tools else None,
+                                 think=False)
+    else:
+        if use_tools:
+            msgs = _inject_tools(msgs, scoped)
+        history = _to_chat_history(msgs)
     gen_cfg = _build_generation_config(
         pipe, body, default_max=4096 if use_tools else 2048, model_id=model_id)
+    if native_fmt != "hermes":
+        gen_cfg.apply_chat_template = False
     with _lock_for(model_id):
-        _apply_think_mode(model_id, pipe, "nothink")
+        if native_fmt == "hermes":
+            _apply_think_mode(model_id, pipe, "nothink")
         result = pipe.generate(history, generation_config=gen_cfg)
     text = result.texts[0] if hasattr(result, "texts") else str(result)
     _, content = _split_reasoning(text, "nothink")
@@ -859,7 +870,11 @@ def _role_call(role: str, messages: list, tools: list | None, body: dict
     finish = "stop"
     if use_tools:
         prefix = "call_arch_" if role == "architect" else "call_exec_"
-        content, tool_calls = _extract_tool_calls(content, id_prefix=prefix)
+        if native_fmt != "hermes":
+            content, tool_calls = _NATIVE_PARSERS[native_fmt](
+                content, scoped, prefix)
+        else:
+            content, tool_calls = _extract_tool_calls(content, id_prefix=prefix)
         message["content"] = content or None
         if tool_calls:
             message["tool_calls"] = tool_calls
