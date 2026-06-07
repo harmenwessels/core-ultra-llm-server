@@ -25,6 +25,7 @@ CASTING = sys.argv[1]
 REVIEW = "--review" in sys.argv
 TEMP = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--temp=")), None)
 TOP_P = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--top-p=")), None)
+TOP_K = next((int(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--top-k=")), None)
 
 TASKS = {
     "merge-intervals": {
@@ -172,6 +173,8 @@ def ask_virtual(prompt: str) -> tuple[str, float]:
         body["temperature"] = TEMP
         if TOP_P is not None:
             body["top_p"] = TOP_P
+        if TOP_K is not None:
+            body["top_k"] = TOP_K
     req = urllib.request.Request(f"{BASE}/chat/completions",
                                  data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
@@ -196,6 +199,7 @@ if __name__ == "__main__":
             if TEMP is not None:
                 row["temperature"] = TEMP
                 row["top_p"] = TOP_P
+                row["top_k"] = TOP_K
             print(json.dumps(row), flush=True)
             with OUT.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(row) + "\n")

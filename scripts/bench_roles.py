@@ -466,6 +466,12 @@ def main():
     if "--think" in args:
         think_axis = True
         args.remove("--think")
+    sample_base: dict = {}
+    if "--sample" in args:  # card operating point: --sample temp,top_p,top_k
+        i = args.index("--sample")
+        t, p, k = args[i + 1].split(",")
+        sample_base = {"temperature": float(t), "top_p": float(p), "top_k": int(k)}
+        del args[i:i + 2]
     with urllib.request.urlopen(f"{BASE}/models") as r:
         loaded = [m["id"] for m in json.load(r)["data"]]
     models = args or loaded
@@ -483,7 +489,7 @@ def main():
                 variants.append(("+think", {"reasoning_effort": "high",
                                             "max_tokens": 3072}))
             for suffix, extra in variants:
-                EXTRA_BODY = extra
+                EXTRA_BODY = {**sample_base, **extra}
                 try:
                     ok, dt, detail = fn(model)
                 except Exception as e:  # noqa: BLE001
@@ -503,8 +509,10 @@ def main():
                                       "total_seconds": round(total_s, 0)}
         print(f"  -> {passed}/{len(probes_run)} "
               f"(avg {avg_s:.1f}s/probe, total {total_s:.0f}s)")
+    results["_run"] = {"sampling": sample_base or "greedy", "think_axis": think_axis}
     OUT_DIR.mkdir(exist_ok=True)
-    out = OUT_DIR / f"roles__{stamp}.json"
+    tag = "card" if sample_base else "greedy"
+    out = OUT_DIR / f"roles__{tag}__{stamp}.json"
     out.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"\nsaved: {out}")
 

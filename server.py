@@ -625,11 +625,16 @@ def _build_generation_config(pipe, body: dict, default_max: int = 1024,
         cfg.max_ngram_size = 3
     temperature = body.get("temperature")
     top_p = body.get("top_p")
+    top_k = body.get("top_k")
     if temperature is not None and temperature > 0:
         cfg.do_sample = True
         cfg.temperature = float(temperature)
         if top_p is not None:
             cfg.top_p = float(top_p)
+        # top_k completes the per-model card operating point (Qwen=20, Gemma=64);
+        # GenAI ignores top_k unless do_sample is on, so it lives in this branch
+        if top_k is not None and int(top_k) > 0:
+            cfg.top_k = int(top_k)
     else:
         cfg.do_sample = False
     stop = body.get("stop")
