@@ -39,23 +39,27 @@ py -3.12 -m venv .venv
 # 1. Verify the Arc iGPU is visible to OpenVINO
 .\.venv\Scripts\python.exe scripts\check_gpu.py
 
-# 2. Download the default models (~5 GB total; requires `hf auth login`)
-.\.venv\Scripts\python.exe scripts\download_model.py --repo HarmenWessels/gemma-4-E2B-it-qat-int4-ov
+# 2. Download the registry's models (~7 GB; requires `hf auth login`)
+.\.venv\Scripts\python.exe scripts\download_model.py --repo HarmenWessels/granite-4.1-8b-int4-cw-ov
+.\.venv\Scripts\python.exe scripts\download_model.py --repo Echo9Zulu/Qwen3.5-2B-int4_sym-ov
 .\.venv\Scripts\python.exe scripts\download_model.py --repo OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
 
 # 3. Optional: benchmark a model (TTFT + decode tok/s)
-.\.venv\Scripts\python.exe scripts\bench.py --model-dir models\HarmenWessels\gemma-4-E2B-it-qat-int4-ov
+.\.venv\Scripts\python.exe scripts\bench.py --model-dir models\HarmenWessels\granite-4.1-8b-int4-cw-ov
 
-# 4. Start the server on http://127.0.0.1:8000/v1
+# 4. Start the server on http://127.0.0.1:8000/v1 (config: models.yaml)
 .\.venv\Scripts\python.exe server.py
 ```
 
-Models live under `models/<owner>/<name>`, mirroring their Hugging Face repo ids, and the served
-model id is the same `owner/name` string. The server loads **two models by default** and routes by
-the request's `model` field: `HarmenWessels/gemma-4-E2B-it-qat-int4-ov` (chat — Google's QAT weights, int4 quality ≈ bf16) and
-`OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov` (autocomplete via `/v1/completions` with FIM).
-The first launch per model pays a one-time compile cost (~30–70 s); subsequent launches load from
-the cache in seconds.
+Models live under `models/<owner>/<name>`, mirroring their Hugging Face repo ids.
+`models.yaml` defines what gets served: by default **granite-8b** (chat/edit + agent
+executor, prefix-cached), **qwen3.5-2b** (fast chat + analyst, prefix-cached) and
+**coder-1.5b** (autocomplete via `/v1/completions` with FIM, prompt-lookup), plus the
+**`virtual/agent`** orchestrating model id. Registry entries whose directories are missing
+are skipped with a warning (the NPU autocomplete entry requires a self-converted cw-sym
+artifact — one `optimum-cli` command, see [RESEARCH.md](RESEARCH.md)). The first launch
+per model pays a one-time compile cost (~30–70 s); subsequent launches load from the
+cache in seconds.
 
 ### Configuration
 
@@ -92,13 +96,16 @@ collapsible thinking block in Continue) with the implementation as the answer. W
 identically from Continue chat, Continue CLI (`cn`), or any OpenAI-compatible frontend —
 the orchestration lives server-side.
 
-The server also implements **OpenAI tool calling** for local models (hermes-style schema
-injection + tolerant `<tool_call>` parsing), which makes agentic frontends that require
-native function calling — Continue agent mode/CLI, Kilo CLI — work against any served model.
-Model-by-model agent fitness is measured in [BENCHMARKS.md](BENCHMARKS.md) (role-fitness
-suite): short version — granite-4.1-8b is the agent brain, small models route.
+The server also implements **OpenAI tool calling** for local models — speaking each
+model family's **native function-calling language** (Gemma's declaration/`call:` protocol
+and LFM's Pythonic calls via server-side rendering of the model's own chat template;
+hermes-style injection for families trained on it, e.g. Qwen and granite). This makes
+agentic frontends that require native function calling — Continue agent mode/CLI,
+Kilo CLI — work against any served model, fairly. Model-by-model agent fitness is
+measured in [BENCHMARKS.md](BENCHMARKS.md) (role-fitness suite); format mismatch
+measurably suppresses scores, so the language is pinned per model in `models.yaml`.
 
-Example — serve one bigger chat model instead:
+Example — serve one bigger chat model instead (env overrides the registry):
 
 ```powershell
 $env:MODEL_DIR = "models\OpenVINO\Qwen2.5-Coder-7B-Instruct-int4-ov"
@@ -107,19 +114,30 @@ $env:MODEL_DIR = "models\OpenVINO\Qwen2.5-Coder-7B-Instruct-int4-ov"
 
 ### Continue.dev config (`~/.continue/config.yaml`)
 
+Model ids match the registry aliases (or `owner/name` when no alias is set):
+
 ```yaml
 models:
-  - name: Gemma 4 E2B QAT (local OpenVINO)
+  - name: virtual agent (router/architect/executor)
     provider: openai
-    model: HarmenWessels/gemma-4-E2B-it-qat-int4-ov
+    model: virtual/agent
+    apiBase: http://127.0.0.1:8000/v1
+    apiKey: dummy
+    roles:
+      - chat
+    capabilities:
+      - tool_use
+  - name: granite-8b (local chat/edit)
+    provider: openai
+    model: granite-8b
     apiBase: http://127.0.0.1:8000/v1
     apiKey: dummy
     roles:
       - chat
       - edit
-  - name: Qwen2.5 Coder 1.5B (local autocomplete)
+  - name: Qwen Coder 1.5B (local autocomplete)
     provider: openai
-    model: OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
+    model: coder-1.5b
     apiBase: http://127.0.0.1:8000/v1
     apiKey: dummy
     roles:
@@ -184,27 +202,31 @@ behaves correctly*) — artifacts that fail are documented in BENCHMARKS.md, not
 | Role | Model | Measured |
 |---|---|---|
 | Autocomplete (default) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) +PL | ~1.1 s/completion, TTFT 0.05 s |
-| Chat (default) | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | ~22 tok/s, int4 quality ≈ bf16 |
+| Chat (default) | [Gemma 4 E2B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | ~22 tok/s, int4 quality ≈ bf16 |
 | Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s |
-| Chat — quality | [Gemma 4 E4B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 |
+| Chat — quality | [Gemma 4 E4B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 |
 | Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits |
 | Max coding quality | [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) | ~13 tok/s |
 
 ### Agent roles (tool loops — Continue agent mode/CLI, Kilo CLI, orchestration)
 
+Scores assume each model is served in its **native tool language** (see Configuration —
+format mismatch cost E4B three points before the adapters existed).
+
 | Role | Model | Role-fitness (of 15) | Why |
 |---|---|---|---|
-| **Executor** (edit→test→verify loops) | [Granite-4.1-8b (ours)](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov), prefix-cached, **PL off** | **12** | the only byte-exact editor with clean loop endurance; keep context ≤8k; treat failing tests as ground truth in its prompts |
-| **All-rounder / agent backup** | [Gemma 4 E2B QAT (ours)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | **12** | ties granite at 60% of the latency (7.9 s/probe); diagnoses correctly, but loops and exact edits fail |
-| **Analyst / architect** (diagnosis, planning) | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov), prefix-cached, **no-think** | 10 | fastest correct diagnoser; near-flat prefill (16k ctx in 17 s) for big planning contexts; thinking mode adds nothing but up to 15× latency |
-| **Router** (request classification) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 6 (route 6/6) | perfect 3-way routing at ~2.4 s/decision, already resident for autocomplete |
-| **Budget executor** | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 10 | the only other loop-capable model, fastest suite run (6.4 s/probe), 1.9 GiB |
+| **Executor** (edit→test→verify loops) — *seat contested* | [Granite-4.1-8b (self-converted)](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov), prefix-cached, PL off — **or** [Gemma 4 E4B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov), native tool language | 12 vs **13** | both do byte-exact edits + clean loops; granite is lighter (keep its context ≤8k, treat failing tests as ground truth); E4B additionally diagnoses correctly *with thinking enabled* |
+| **All-rounder / agent backup** | [Gemma 4 E2B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov), native tool language | 11 | fast (7.9 s/probe hermes-era; executor skills appear in native mode, routing drops) |
+| **Analyst / architect** (diagnosis, planning) | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov), prefix-cached, no-think | 10 | fastest correct diagnoser; near-flat prefill (16k ctx in 17 s) for big planning contexts; thinking adds latency, not quality, at this scale |
+| **Router** (request classification) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (g128 build) | 6 (route 6/6) | 3-way routing at ~2.4 s/decision, already resident for autocomplete; the cw build loses routing (quantization damage is task-selective) |
+| **Autocomplete, lock-free** | Qwen2.5-Coder-1.5B int4-**cw** (self-converted) on **NPU** | FIM probe ✓ | ~7 s completions that never queue behind GPU chat/agent turns; NPU requires cw-sym IRs, probe-certified per device |
+| **Budget executor** | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 10 | loop-capable, fastest suite run (6.4 s/probe), 1.9 GiB |
 
 No single small model both *acts* (loops, exact edits) and *analyzes* (diagnosis) — measured,
 not assumed — which is why the agent layer is role-split. Decode speed on this iGPU is
 memory-bandwidth-bound, prefill scales superlinearly per architecture (context budgets
-matter), and quantization-recipe / speculative-decoding / thinking-mode effects are
-per-architecture and per-workload — all measured and documented in RESEARCH.md.
+matter), and quantization-recipe / tool-language / speculative-decoding / thinking-mode
+effects are per-architecture and per-workload — all measured and documented in RESEARCH.md.
 
 ## Repository layout
 

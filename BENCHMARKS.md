@@ -37,7 +37,7 @@ Decode tok/s (TTFT in parentheses); probe verdicts inline.
 |---|---|---|---|---|---|---|---|
 | Qwen2.5-Coder-1.5B | **1.07 s** (0.05) probe ✓ | 58.9 ✗syntax | 67.1 (+14%) ✗ | 58.1 | 37.6 (−35%) | 58.4 | 37.3 (−36%) |
 | Qwen2.5-Coder-7B | 3.64 s (0.15) probe ✓ | 16.1 **✓** | **34.4 (+114%) ✓** | 16.1 | 12.7 (−21%) | 16.1 | 15.1 (−6%) |
-| Granite-4.1-3b-cw (ours) | 3.27 s (0.07) probe ✗¹ | 28.8 **✗ behavior changed** | 42.3 (+47%) **✗ syntax** | 29.5 | 17.1 (−42%) | 29.6 | 17.9 (−39%) |
+| Granite-4.1-3b-cw (self-converted) | 3.27 s (0.07) probe ✗¹ | 28.8 **✗ behavior changed** | 42.3 (+47%) **✗ syntax** | 29.5 | 17.1 (−42%) | 29.6 | 17.9 (−39%) |
 | Qwen3.5-2B | n/a (VLM) | **42.1 ✓** | n/a | **37.2** | n/a | **43.2** | n/a |
 | Gemma 4 E2B (default chat) | n/a (VLM) | 23.1 ✓ | n/a | 22.9 | n/a | 23.0 | n/a |
 | Qwen2.5-Coder-3B | 1.79 s (0.10) probe ✓ | 29.2 **✓** | **63.2 (+116%) ✓** | 29.2 | 21.7 (−26%) | 29.6 | 25.8 (−13%) |
@@ -122,12 +122,12 @@ best validated mode; "+PL" where prompt-lookup wins).
 | Qwen3.5-4B (default template) | **79.1**⁴ | LCB-v6 55.8 | 89.8 | n/a | (thinking preamble) | ~20 | ✗² |
 | **Qwen3.5-4B, no-think rt_info patch⁷** | <79.1 (unmeasured)⁷ | — | — | n/a | **19.8 ✓** | 19.8 | **✓** |
 | Gemma 4 E2B (both PTQ conversions) | 60.0 | LCB-v6 44.0 | — | n/a | 21–23 | ~23 | ✓ |
-| **Gemma 4 E2B QAT (ours)⁸** | 60.0 (≈bf16-preserved) | LCB-v6 44.0 | — | n/a | 21.7 ✓ | ~22 | **✓** |
-| **Gemma 4 E4B QAT (ours)⁸** | 69.4 (≈bf16-preserved) | LCB-v6 52.0 | — | n/a | 16.7 ✓ | ~17 | **✓** |
+| **Gemma 4 E2B QAT (self-converted)⁸** | 60.0 (≈bf16-preserved) | LCB-v6 44.0 | — | n/a | 21.7 ✓ | ~22 | **✓** |
+| **Gemma 4 E4B QAT (self-converted)⁸** | 69.4 (≈bf16-preserved) | LCB-v6 52.0 | — | n/a | 16.7 ✓ | ~17 | **✓** |
 | Gemma 4 E4B | **69.4** | LCB-v6 52.0 | — | n/a | 15.6 | ~16 | **✓** |
-| Granite-4.1-3b cw v2 (ours) | 49.8 | HE 81.7 / MBPP 71.2 | 82.3 | — | 31.3 | ~31 | **✓** |
-| Granite-4.1-3b int8 (ours) | 49.8 | same base | 82.3 | — | 24.6 +PL | ~15 | **✓** |
-| Granite-4.1-8b cw (ours) | 56.0 | HE 85.4 / **MBPP 87.3** | **87.1** | — | 27.0 +PL | ~14 | **✓** |
+| Granite-4.1-3b cw v2 (self-converted) | 49.8 | HE 81.7 / MBPP 71.2 | 82.3 | — | 31.3 | ~31 | **✓** |
+| Granite-4.1-3b int8 (self-converted) | 49.8 | same base | 82.3 | — | 24.6 +PL | ~15 | **✓** |
+| Granite-4.1-8b cw (self-converted) | 56.0 | HE 85.4 / **MBPP 87.3** | **87.1** | — | 27.0 +PL | ~14 | **✓** |
 | OmniCoder-9B (base: Qwen3.5-9B⁴: MMLU-Pro 82.5, LCB-v6 65.6, IFEval 91.5) | — | GPQA-D 83.8 / TB-2.0 23.6 | — | n/a | (zero code in budget) | ~13 | ✗² |
 | **OmniCoder-9B, no-think rt_info patch⁷** | — | — | — | n/a | **12.9 ✓** | 12.8 | **✓** |
 | Qwen3-VL-8B | n.r.⁵ | n.r.⁵ | n.r.⁵ | n/a | 14.8 | ~15 | ✓ |
@@ -194,18 +194,22 @@ endurance, deep recall. Raw per-probe JSON in `bench_results/roles__*.json`.
 Full 15-probe matrix on the shipped serving stack (end-of-day reruns,
 `roles__20260606-21*.json`):
 
+Each model is scored in its measured-best tool language (ᴺ = native adapter; others
+hermes, which is the native training format for Qwen and granite):
+
 | Model | total | avg s/probe³ | loop (chain-depth) | edit-exact | diagnose | route |
 |---|---|---|---|---|---|---|
-| **granite-4.1-8b cw (ours)** | **12/15** | 13.3 | **✓ clean stop** | **✓** | ✗ blames the test² | 6/6 |
-| **Gemma 4 E2B QAT (ours)** | **12/15** | **7.9** | ✗ repeats run_tests | ✗ | ✓ | 6/6 |
+| **Gemma 4 E4B QAT ᴺ (self-converted)** | **13/15** | 16.1 | **✓ clean stop** | **✓** | ✗ nothink / **✓ think** | 6/6 |
+| **granite-4.1-8b cw (self-converted)** | **12/15** | 13.3 | **✓ clean stop** | **✓** | ✗ blames the test² | 6/6 |
+| Gemma 4 E2B QAT ᴺ (self-converted) | 11/15 | 7.9 | ✓ | ✓ mechanics, fix wrong | ✓ | 4/6 |
 | Qwen2.5-Coder-7B | 11/15 | 10.2 | ✗ | ✗ fabricates whitespace | ✓ | 6/6 |
 | Qwen3.5-2B | 10/15 | 22.1⁴ | ✗ stalls | ✗ | ✓ (fastest) | 6/6 |
-| Gemma 4 E4B QAT (ours) | 10/15 | 11.7 | ✗ | ✗ tool-shy | ✓ | 6/6 |
-| granite-4.1-3b cw (ours) | 10/15 | 7.1 | ✗ | ✗ | ✓ | 6/6 |
-| Qwen2.5-Coder-3B | 10/15 | **6.4** | **✓ (2nd loop-capable)** | ✗ isolated / ✓ in-loop | ✗ | 6/6 |
+| granite-4.1-3b cw (self-converted) | 10/15 | 7.1 | ✗ | ✗ | ✓ | 6/6 |
+| Qwen2.5-Coder-3B | 10/15 | **6.4** | ✓ | ✗ isolated / ✓ in-loop | ✗ | 6/6 |
+| LFM2.5-1.2B-Instruct ᴺ (self-converted) | 7/13 | 4.2 | ✗ | ✗ | ✗ | 3/6 |
 | Qwen2.5-Coder-1.5B | 6/15 | 5.3 | ✗ | ✗ | ✗ | **6/6** |
 | Qwen3.5-0.8B | 5/9 (v1 only) | — | — | ✗ | — | 4/6 |
-| LFM2.5-1.2B-Instruct (ours) | 4/13¹ | — | ✗ | ✗ | ✗ | 3/6 |
+| LFM2.5-1.2B-Thinking | 4/13 | 10.2 | ✗ | ✗ | **✓ (only 1B-class pass)** | 0/6 |
 
 ¹ emits its native `<|tool_call_start|>` Pythonic tool format regardless of instructed
 format — hermes-style serving understates LFM models (RESEARCH.md finding 9).
@@ -261,9 +265,11 @@ edit-first with server-side verification. Thinking mode (Qwen3.5-2B, both probes
 |---|---|---|
 | **Prefix caching + chunked prefill** (`SCHEDULER_MODELS`) | warm-prefix TTFT **63 s → 0.9 s** raw, **71.5 s → 2.6 s** through the API (27×); clears granite's 16k single-allocation wall (24k+ now prefills); KV pool is *reserved at load* — budget like weights | **shipped** |
 | Prompt-lookup decoding | +92–116% on edit workloads, −14…−42% on explain/architect (finding 6) | shipped (per-model) |
-| OpenAI tool calling (hermes injection + JSON repair) | unlocks native-tool agent frontends (Kilo CLI/OpenCode, Continue agent mode) | **shipped** |
+| OpenAI tool calling, **per-family native languages** (gemma/lfm template rendering, hermes injection + JSON repair elsewhere) | unlocks native-tool agent frontends fairly; format mismatch cost E4B 3 points (finding 16) | **shipped** |
 | u8 KV-cache hint | redundant — GPU defaults to int8 KV already; explicit hint crashes (upstream bug, finding 13) | do not use |
-| NPU autocomplete offload, draft-model speculation | promising, untested | next up |
+| **NPU autocomplete offload** (`MODEL_DEVICES`, per-device gen locks) | cw-sym 1.5B probe-certified on NPU; ~7 s completions that never queue behind GPU turns (finding 14) | **shipped** |
+| `models.yaml` registry | every per-model setting above pinned in one config | **shipped** |
+| Draft-model speculation, EAGLE-3 | promising, untested | next up |
 
 Prefill cost grows superlinearly and differs per architecture (finding 11): granite-8b
 43 s @ 8k vs Qwen3.5-2B 17 s @ 16k — per-model context budgets matter more than decode rank
@@ -273,16 +279,16 @@ for agent/long-context use.
 
 | Role | Recommendation | Why |
 |---|---|---|
-| **Agent executor (tool loops, edits)** | **granite-4.1-8b cw (ours), prefix-cached, PL off** | role suite 8/9 — only byte-exact editor + clean loop endurance; PL hurts agent turns; keep context ≤8k (prefill curve) |
-| **Agent router / classification** | Qwen2.5-Coder-1.5B | route 6/6 at ~2.4 s/decision, already resident for autocomplete |
-| **Agent architect / analysis** | Qwen3.5-2B, prefix-cached | fastest correct diagnoser; near-flat prefill (16k in 17 s) for big planning contexts |
+| **Agent executor (tool loops, edits)** | **granite-4.1-8b cw, prefix-cached, PL off — contested by Gemma E4B QAT (native tool language)** | granite 12/15 (lighter, ≤8k context, treat failing tests as ground truth); E4B 13/15 native (byte-exact edits + loops, diagnose fixable with thinking) — A/B pending |
+| **Agent router / classification** | Qwen2.5-Coder-1.5B (g128 build) | route 6/6 at ~2.4 s/decision, already resident for autocomplete; the cw build drops to 3/6 — quantization damage is task-selective |
+| **Agent architect / analysis** | Qwen3.5-2B, prefix-cached, no-think | fastest correct diagnoser; near-flat prefill (16k in 17 s) for big planning contexts |
 | Autocomplete | Qwen2.5-Coder-1.5B (+PL) | 1.07 s completions, probe ✓ |
+| **Autocomplete, lock-free (NPU)** | Qwen2.5-Coder-1.5B int4-cw (self-converted) on NPU | probe-certified; ~7 s, never queues behind GPU chat/agent turns |
 | Assistant (edit-heavy) | **Qwen2.5-Coder-3B with PL** | 63.2 tok/s, all probes ✓; Coder-7B+PL (34.4, probes ✓) when max quality matters |
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
-| Architect (experimental) | LFM2.5-1.2B-Thinking **+PL** | 137.9 tok/s with design-aligned reasoning — but LiquidAI's own card advises against knowledge-intensive/programming use; try-and-judge with low expectations |
-| Fast edit/chat (experimental) | MiniCPM5-1B g128, no-think template (ours) | **fastest probe-passing edits measured (81.4 tok/s)**, ~83 tok/s chat, 128k ctx — 1B quality is the open question; no PL (flaky at this scale) |
+| Fast edit/chat (experimental) | MiniCPM5-1B g128, no-think template (self-converted) | **fastest probe-passing edits measured (81.4 tok/s)**, ~83 tok/s chat, 128k ctx — 1B quality is the open question; no PL (flaky at this scale) |
 | Chat/assistant (quality tier) | **Qwen3.5-4B with the no-think rt_info patch** | probe ✓ at 19.8 tok/s; thinking-mode card scores (MMLU-Pro 79.1) overstate no-think quality — A/B vs Gemma E4B (69.4, probe ✓, 15.6) to pick |
 | Max coding quality | OmniCoder-9B, no-think patch | probe ✓ at 12.9 tok/s; GPQA-D 83.8 / Terminal-Bench champion base |
-| Assistant (edit/tool quality tier) | Granite-4.1-8b cw (ours) **+PL** | IFEval 87 / MBPP 87 / BFCL 68: 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
+| Assistant (edit/tool quality tier) | Granite-4.1-8b cw (self-converted) **+PL** | IFEval 87 / MBPP 87 / BFCL 68: 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
 | Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |

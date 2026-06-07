@@ -523,7 +523,10 @@ class QueueStreamer:
 def _load_pipelines() -> None:
     for model_dir in MODEL_DIRS:
         if not model_dir.exists():
-            raise SystemExit(f"model dir not found: {model_dir}")
+            # registry entries may reference not-yet-downloaded/-converted
+            # artifacts — serve what exists rather than refuse to start
+            log.warning("model dir not found, skipping: %s", model_dir)
+            continue
         is_vlm = (model_dir / "openvino_vision_embeddings_model.xml").exists()
         pipe_cls = ov_genai.VLMPipeline if is_vlm else ov_genai.LLMPipeline
         kwargs: dict = {"CACHE_DIR": str(CACHE_DIR)}
@@ -1246,4 +1249,7 @@ def _load_models_config() -> None:
 if __name__ == "__main__":
     _load_models_config()
     _load_pipelines()
+    if not _pipes:
+        raise SystemExit("no models could be loaded — check models.yaml / "
+                         "MODEL_DIRS and download models first")
     uvicorn.run(app, host=HOST, port=PORT, log_level="info")

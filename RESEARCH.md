@@ -443,12 +443,11 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
 - **Draft-model speculative decoding**: untested. granite-4.1-3b drafting for granite-8b
   could accelerate executor decode on low-overlap outputs where prompt-lookup fails
   (agent/architect turns) — complements Finding 6's PL boundary.
-- **Per-model tool-format adapters** (Finding 9): parse LFM's `<|tool_call_start|>` Pythonic
-  format (and similar native protocols) server-side so strong-native-format models get a
-  fair agentic reading. **Gemma 4 is the second motivating case (found 2026-06-07)**: its
-  chat template ships a complete native tool protocol (schema-formatting macros,
-  `<tool_response|>` tokens) that hermes injection bypasses — the E4B "tool-shy" verdict
-  likely measures the format mismatch, not the capability.
+- ~~Per-model tool-format adapters~~ **SHIPPED 2026-06-07 (Finding 16)**: native template
+  rendering + per-family parsers (gemma, lfm, hermes); fleet-wide language survey done;
+  formats pinned per model in `models.yaml`. Remaining refinement: Gemma's brace-delimited
+  arg parser breaks on code content with nested braces, and Gemma `reasoning_content`
+  separation needs token-level boundary handling.
 - **Gemma 4 thinking — switchable, historically never engaged (2026-06-07)**: the template
   gates thinking on an `enable_thinking` kwarg GenAI cannot pass → all our Gemma numbers
   are nothink. Pattern C in `_derive_think_variants` (force the gate true/false) now

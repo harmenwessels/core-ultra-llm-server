@@ -43,16 +43,21 @@ models:
     roles: [autocomplete-npu]       # probe-certified on NPU; cw broke routing
                                     # (quantization damage is task-selective)
 
-# Models with adapters but no current seat — uncomment to serve:
+# Models with adapters but no (undisputed) seat — uncomment to serve:
+#  - dir: models/HarmenWessels/gemma-4-E4B-it-qat-int4-ov
+#    alias: gemma-e4b
+#    tool_format: gemma              # native protocol (auto-detected)
+#    thinking: switchable            # pattern C; think FIXES its diagnosis
+#    roles: [executor-candidate]     # 13/15 native — contests granite's seat
 #  - dir: models/HarmenWessels/gemma-4-E2B-it-qat-int4-ov
 #    alias: gemma-e2b
-#    tool_format: gemma              # native template protocol (auto-detected)
-#    thinking: switchable            # pattern C (enable_thinking gate);
-#                                    # reasoning has no decodable end-delimiter
-#    roles: [chat, all-rounder]      # 12/15 hermes-era; native retest pending
+#    tool_format: gemma
+#    thinking: switchable
+#    roles: [chat, all-rounder]      # 11/15 native (executor skills appear,
+#                                    # routing drops vs 12/15 hermes-era)
 #  - dir: models/HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov
 #    alias: lfm-1.2b
-#    tool_format: lfm                # Pythonic <|tool_call_start|> protocol
+#    tool_format: lfm                # 'List of tools:' + Pythonic calls; 7/13
 
 virtual:
   id: virtual/agent
