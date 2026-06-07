@@ -58,5 +58,13 @@ if __name__ == "__main__":
     model = OVModelForCausalLM.from_pretrained(
         MODEL_ID, export=True, quantization_config=qcfg, compile=False)
     model.save_pretrained(OUT_DIR)
-    AutoTokenizer.from_pretrained(MODEL_ID).save_pretrained(OUT_DIR)
+    hf_tok = AutoTokenizer.from_pretrained(MODEL_ID)
+    hf_tok.save_pretrained(OUT_DIR)
+    # GenAI needs the OpenVINO tokenizer IRs (the CLI exports these
+    # automatically; the Python API does not)
+    import openvino as ov
+    from openvino_tokenizers import convert_tokenizer
+    ov_tok, ov_detok = convert_tokenizer(hf_tok, with_detokenizer=True)
+    ov.save_model(ov_tok, f"{OUT_DIR}/openvino_tokenizer.xml")
+    ov.save_model(ov_detok, f"{OUT_DIR}/openvino_detokenizer.xml")
     print(f"saved: {OUT_DIR}", flush=True)

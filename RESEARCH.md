@@ -356,6 +356,13 @@ Hard-won rules:
    ≤4.57.6 predates `lfm2_moe`; 5.4 has both symbols but a drifted sdpa-mask signature breaks
    tracing). Swap per export; pip's dependency warnings against optimum's pins are expected
    and harmless.
+0c. **Calibration domain matters — at the margins that matter.** Same recipe, same model,
+   only the AWQ/scale-estimation dataset changed (wikitext2 prose → 128 chunks of real
+   Python sampled from this machine, seed-pinned): granite-4.1-3b flipped `chain-depth`
+   from never-acting to a clean edit→test→stop loop (role suite 8/13 → 9/13, all else
+   identical, greedy/deterministic). Coarse pass/fail probes (edit, autocomplete,
+   diagnose) saw no difference — the effect lives in the sharper agentic probes.
+   Calibrate on the distribution you serve (`scripts/convert_code_calibrated.py`).
 1b. **Believe the declared pin first.** optimum-intel master declares `transformers<5.1` —
    that pointer would have found the lfm2 window immediately; symbol-probing across versions
    found it the slow way. Read the installed package's requirements before bisecting.
