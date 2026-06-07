@@ -293,6 +293,17 @@ defects (tuple-vs-list, hallucinated import), zero logic bugs** — a spec-confo
 checker, opt-in (`"review": true`), worthwhile with qwen-family executors in design flows;
 execution remains the only *logic* reviewer that works at this scale.
 
+**Breadth confirmation (6 tasks × 2 phrasings, exec-probed, `castings.jsonl`)**: the
+2-task tournament numbers did not survive breadth — **A (production ensemble) 3/12;
+A-Q38B + review 6/12; OmniCoder-9B solo 8/12 (nothink, leading)**. Omni also profiles as
+an analyst++ in the role suite (route 6/6, diagnose ✓ in 15.6 s — its think mode gives the
+same answer in 262 s, plan ✓✓, recall ✓); its tool-emission rows were invalidated by a
+server-side native-render bug (fixed: render failures now fall back to hermes injection).
+Omni's quantization is data-free int4_sym — the recipe class that measurably damaged
+granite-3b — making an AWQ+SE re-quantization the highest-value open quality experiment.
+Load-ceiling addendum: Qwen3-14B int4 (~8 GiB) compiles (62 s) and decodes at 6.4 tok/s —
+the single-model wall lies between 8 and 11.7 GiB.
+
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |

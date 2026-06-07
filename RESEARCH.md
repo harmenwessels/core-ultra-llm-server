@@ -442,10 +442,17 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   (transformers ≤5.5 doesn't know the type; export registry has only the older `minicpmv`).
   Would fill the sub-2B vision niche nothing in our table covers.
 - **Gemma-4-12B / `gemma4_unified`**: the quality standout of the fitting size class
-  (MMLU-Pro 77.2, LiveCodeBench 72.0 at 11.95B) is a new encoder-free architecture absent
-  from both transformers ≤5.5 and optimum-intel's export registry — unconvertible today,
-  which explains why no OV IR of it exists. High-value re-check when support lands
-  (~6.7 GiB int4 would also probe the load ceiling).
+  (MMLU-Pro 77.2, LiveCodeBench 72.0 at 11.95B). **Gate 1 opened 2026-06-07** (transformers
+  5.10 knows the arch); optimum-intel export config still missing. The load-ceiling
+  concern is retired: Qwen3-14B int4 (~8 GiB) compiles and runs (6.4 tok/s) — the
+  single-model wall sits between 8 and 11.7 GiB. Re-check optimum-intel monthly.
+- **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
+  breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
+  int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
+  repaired it. A calibrated own conversion directly targets its failure margin
+  (syntax/format slips). Needs the original safetensors repo (~18 GB) + ~2 h conversion.
+- **Qwen3-14B breadth block**: compiles, generalist, thinking-default (pattern B
+  switchable), 6.4 tok/s — its monolith audition is queued but slow (~2 h).
 - **Gemma 4 E2B coding finetunes**: exist only as GGUF (e.g. `Gemma-4-e2bxOpus-4.7-turbo`);
   a safetensors release would enable converting the only curve-breaking architecture with
   coding tuning — the most valuable potential artifact for this hardware.

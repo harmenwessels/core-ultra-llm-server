@@ -850,9 +850,14 @@ def _role_call(role: str, messages: list, tools: list | None, body: dict
     native_fmt = _TOOL_FORMATS.get(model_id, "hermes") \
         if (use_tools or model_id in _NATIVE_TEMPLATES) else "hermes"
     if native_fmt != "hermes":
-        history = _render_native(model_id, msgs, scoped if use_tools else None,
-                                 think=False)
-    else:
+        try:
+            history = _render_native(model_id, msgs,
+                                     scoped if use_tools else None, think=False)
+        except Exception as e:  # noqa: BLE001 — degrade, never crash the turn
+            log.warning("[virtual:%s] native render failed (%s) — hermes "
+                        "fallback", role, str(e)[:80])
+            native_fmt = "hermes"
+    if native_fmt == "hermes":
         if use_tools:
             msgs = _inject_tools(msgs, scoped)
         history = _to_chat_history(msgs)
@@ -1015,9 +1020,14 @@ async def chat_completions(request: Request):
     if native_fmt != "hermes":
         # native tool language: render the model's OWN template server-side
         # (tools + enable_thinking + tool-role turns), generate raw
-        history = _render_native(model_id, messages, tools if use_tools
-                                 else None, think_mode == "think")
-    else:
+        try:
+            history = _render_native(model_id, messages, tools if use_tools
+                                     else None, think_mode == "think")
+        except Exception as e:  # noqa: BLE001 — degrade, never 500
+            log.warning("[%s] native render failed (%s) — hermes fallback",
+                        model_id, str(e)[:80])
+            native_fmt = "hermes"
+    if native_fmt == "hermes":
         if use_tools:
             messages = _inject_tools(messages, tools)
         history = _to_chat_history(messages)

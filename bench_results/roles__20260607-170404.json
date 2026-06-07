@@ -1,0 +1,168 @@
+{
+  "Echo9Zulu/OmniCoder-9B-int4_sym-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 6.4,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 7.4,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 4.8,
+      "detail": "calls=[] content='The acronym **API** stands for **Application Programming Int'"
+    },
+    "result-use": {
+      "pass": false,
+      "seconds": 0.0,
+      "detail": "EXC: HTTP Error 500: Internal Server Error"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 0.0,
+      "detail": "EXC: HTTP Error 500: Internal Server Error"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 19.5,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 17.3,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": false,
+      "seconds": 0.0,
+      "detail": "EXC: HTTP Error 500: Internal Server Error"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 21.8,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 15.6,
+      "detail": "content='the bug is in the even case expression `s[mid] + s[mid + 1]`, which incorrectly selects the two midd'"
+    },
+    "diagnose+think": {
+      "pass": true,
+      "seconds": 262.1,
+      "detail": "content='thinking process:\\n\\n1.  **analyze the request:**\\n    *   input: a failing test case (`test_median_eve'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 27.9,
+      "detail": "symbols=4 numbered=True code=False"
+    },
+    "plan+think": {
+      "pass": true,
+      "seconds": 268.7,
+      "detail": "symbols=4 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 176.6,
+      "detail": "stopped at turn 0: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 10.3,
+      "detail": "content='The environment variable that holds your deployment API key is **`FROBNICATE_KEY'"
+    },
+    "_summary": {
+      "passed": 7,
+      "of": 15,
+      "avg_seconds": 55.9,
+      "total_seconds": 838.0
+    }
+  },
+  "virtual/agent": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 7.2,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 14.1,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 6.2,
+      "detail": "calls=[] content='<!--virtual:plan-->\\nThe acronym API stands for **Application'"
+    },
+    "result-use": {
+      "pass": false,
+      "seconds": 0.0,
+      "detail": "EXC: HTTP Error 500: Internal Server Error"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 0.0,
+      "detail": "EXC: HTTP Error 500: Internal Server Error"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 91.9,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 176.0,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": false,
+      "seconds": 0.0,
+      "detail": "EXC: HTTP Error 500: Internal Server Error"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 30.1,
+      "detail": "4/6 [chat:chat, edit:edit, design:edit, chat:chat, edit:edit, design:edit]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 39.0,
+      "detail": "content='the bug is in the even-case return expression `s[mid] + s[mid + 1]`, which incorrectly sums the two '"
+    },
+    "diagnose+think": {
+      "pass": true,
+      "seconds": 50.6,
+      "detail": "content='the bug is in the even-case return expression `s[mid] + s[mid + 1]`, which incorrectly sums the two '"
+    },
+    "plan": {
+      "pass": false,
+      "seconds": 40.7,
+      "detail": "symbols=1 numbered=False code=False"
+    },
+    "plan+think": {
+      "pass": false,
+      "seconds": 146.8,
+      "detail": "symbols=4 numbered=True code=True"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 52.4,
+      "detail": "stopped at turn 0: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 12.3,
+      "detail": "content='The deployment API key is stored in the environment variable `FROBNICATE_KEY_77`'"
+    },
+    "_summary": {
+      "passed": 4,
+      "of": 15,
+      "avg_seconds": 44.5,
+      "total_seconds": 667.0
+    }
+  }
+}
