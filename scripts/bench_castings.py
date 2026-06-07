@@ -5,6 +5,11 @@ weight comes from task and phrasing breadth: 6 exec-probed design tasks x 2
 phrasings per casting. Appends to bench_results/castings.jsonl.
 
 Usage: .venv/Scripts/python.exe scripts/bench_castings.py <label> [--review]
+           [--temp=0.6] [--top-p=0.95]
+
+Default decoding is greedy (the tournament condition). --temp enables
+sampling — use for card-advised parameter blocks; scores then carry
+sampling variance on every serving path, not just the VLM one.
 """
 
 import json
@@ -18,6 +23,8 @@ BASE = "http://localhost:8000/v1"
 OUT = pathlib.Path(__file__).resolve().parent.parent / "bench_results" / "castings.jsonl"
 CASTING = sys.argv[1]
 REVIEW = "--review" in sys.argv
+TEMP = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--temp=")), None)
+TOP_P = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--top-p=")), None)
 
 TASKS = {
     "merge-intervals": {
@@ -161,6 +168,10 @@ def probe(task: dict, content: str) -> str:
 def ask_virtual(prompt: str) -> tuple[str, float]:
     body = {"model": "virtual/agent", "max_tokens": 2048, "review": REVIEW,
             "messages": [{"role": "user", "content": prompt}]}
+    if TEMP is not None:
+        body["temperature"] = TEMP
+        if TOP_P is not None:
+            body["top_p"] = TOP_P
     req = urllib.request.Request(f"{BASE}/chat/completions",
                                  data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json"})
@@ -182,6 +193,9 @@ if __name__ == "__main__":
             passes += verdict == "PASS"
             row = {"casting": CASTING, "task": tname, "phrasing": pi,
                    "review": REVIEW, "probe": verdict, "seconds": dt}
+            if TEMP is not None:
+                row["temperature"] = TEMP
+                row["top_p"] = TOP_P
             print(json.dumps(row), flush=True)
             with OUT.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(row) + "\n")

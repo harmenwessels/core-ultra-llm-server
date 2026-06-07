@@ -70,3 +70,75 @@
 {"casting": "Q314B-solo", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (IndexError: string index out of range)", "seconds": 92.4}
 {"casting": "Q314B-solo", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 47.6}
 {"casting": "Q314B-solo", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 59.6}
+{"casting": "Omni9B-awq-solo", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 63.8}
+{"casting": "Omni9B-awq-solo", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 80.1}
+{"casting": "Omni9B-awq-solo", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 2))", "seconds": 180.4}
+{"casting": "Omni9B-awq-solo", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 183.8}
+{"casting": "Omni9B-awq-solo", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: unterminated string literal (detected at line 18) (<string>, line 18))", "seconds": 175.9}
+{"casting": "Omni9B-awq-solo", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 57))", "seconds": 200.1}
+{"casting": "Omni9B-awq-solo", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 156.8}
+{"casting": "Omni9B-awq-solo", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: unterminated string literal (detected at line 5) (<string>, line 5))", "seconds": 156.1}
+{"casting": "Omni9B-awq-solo", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 73))", "seconds": 69.1}
+{"casting": "Omni9B-awq-solo", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 60.7}
+{"casting": "Omni9B-awq-solo", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 34))", "seconds": 59.9}
+{"casting": "Omni9B-awq-solo", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "FAIL (FileNotFoundError: [Errno 2] No such file or directory: '/tmp/test_anagram.py')", "seconds": 130.8}
+{"casting": "Omni9B-solo-r2", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 176.3}
+{"casting": "Omni9B-solo-r2", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 91.0}
+{"casting": "Omni9B-solo-r2", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 45.7}
+{"casting": "Omni9B-solo-r2", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 206.2}
+{"casting": "Omni9B-solo-r2", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "FAIL (_lru() -> [1, 2, 3, 1])", "seconds": 102.7}
+{"casting": "Omni9B-solo-r2", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 57.8}
+{"casting": "Omni9B-solo-r2", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 96.7}
+{"casting": "Omni9B-solo-r2", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 143.8}
+{"casting": "Omni9B-solo-r2", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid decimal literal (<string>, line 129))", "seconds": 164.4}
+{"casting": "Omni9B-solo-r2", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (rle_decode('a3b1c3') -> None)", "seconds": 175.6}
+{"casting": "Omni9B-solo-r2", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 64.3}
+{"casting": "Omni9B-solo-r2", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "FAIL (ModuleNotFoundError: No module named 'solution')", "seconds": 129.1}
+{"casting": "Omni9B-awq-solo-r2", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 64.4}
+{"casting": "Omni9B-awq-solo-r2", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 78.4}
+{"casting": "Omni9B-awq-solo-r2", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 2))", "seconds": 185.4}
+{"casting": "Omni9B-awq-solo-r2", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 186.7}
+{"casting": "Omni9B-awq-solo-r2", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: unterminated string literal (detected at line 18) (<string>, line 18))", "seconds": 177.5}
+{"casting": "Omni9B-awq-solo-r2", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 57))", "seconds": 201.2}
+{"casting": "Omni9B-awq-solo-r2", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 146.6}
+{"casting": "Omni9B-awq-solo-r2", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: unterminated string literal (detected at line 3) (<string>, line 3))", "seconds": 158.8}
+{"casting": "Omni9B-awq-solo-r2", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 118))", "seconds": 149.4}
+{"casting": "Omni9B-awq-solo-r2", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 101))", "seconds": 75.6}
+{"casting": "Omni9B-awq-solo-r2", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 106))", "seconds": 93.7}
+{"casting": "Omni9B-awq-solo-r2", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])", "seconds": 70.5}
+{"casting": "Omni9B-solo-card", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid decimal literal (<string>, line 109))", "seconds": 153.7, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 73.1, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 64.2, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 204.0, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 53.5, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 86.1, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "FAIL (ModuleNotFoundError: No module named 'duration_parser')", "seconds": 180.7, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "FAIL (UnboundLocalError: cannot access local variable 'total_seconds' where it is not associated with a value)", "seconds": 51.7, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 55.3, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 126.9, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 29.8, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-card", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 66.7, "temperature": 0.6, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 29.4, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 117.3, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 48.3, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 108.0, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 77.1, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 110.2, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "FAIL (parse_duration('2h45m') -> 882000)", "seconds": 58.8, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 222.3, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 50.9, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (rle_encode('aaabccc') -> '3a1b3c')", "seconds": 194.3, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "FAIL (AssertionError: )", "seconds": 59.2, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Omni9B-solo-agentic", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 64.7, "temperature": 0.3, "top_p": 0.95}
+{"casting": "Q314B-solo-card", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 73.8, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 98.7, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 48.0, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 122.3, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 60.9, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 114.1, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 49.4, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 22.4, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 53.2, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (ValueError: invalid literal for int() with base 10: '')", "seconds": 79.0, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 29.7, "temperature": 0.7, "top_p": 0.8}
+{"casting": "Q314B-solo-card", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 77.0, "temperature": 0.7, "top_p": 0.8}

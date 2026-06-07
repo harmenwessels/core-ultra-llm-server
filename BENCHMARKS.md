@@ -303,10 +303,47 @@ ensembles ~3× at long-form code generation on this hardware. Omni also profiles
 an analyst++ in the role suite (route 6/6, diagnose ✓ in 15.6 s — its think mode gives the
 same answer in 262 s, plan ✓✓, recall ✓); its tool-emission rows were invalidated by a
 server-side native-render bug (fixed: render failures now fall back to hermes injection).
-Omni's quantization is data-free int4_sym — the recipe class that measurably damaged
-granite-3b — making an AWQ+SE re-quantization the highest-value open quality experiment.
 Load-ceiling addendum: Qwen3-14B int4 (~8 GiB) compiles (62 s) and decodes at 6.4 tok/s —
 the single-model wall lies between 8 and 11.7 GiB.
+
+**AWQ+SE re-quantization of Omni — tested, negative (2026-06-07).** Hypothesis: Omni's
+data-free int4_sym is the recipe class that damaged granite-3b, so AWQ+SE should repair it
+(granite precedent). Result: it made Omni **worse**, decisively. Two greedy blocks of the
+self-converted AWQ+SE build scored **3/12 and 3/12** vs the data-free build's **8/12, 7/12**
+— failure mode was syntax-truncation (verbose preambles blowing the 2048-token budget,
+malformed code fences), not logic. Root cause is the calibration *domain*: OmniCoder is
+VLM-shaped, and optimum-intel's visual-LM quantization path accepts only the `contextual`
+dataset (image-instruction pairs) — `wikitext2` (the granite-repair set) is rejected with
+`KeyError`. AWQ+SE optimized weight precision for image-chat activations, which misallocates
+it for code. This **extends playbook rule 0c**: calibration-domain mismatch moves
+near-threshold behavior in *either* direction, and for a coding model the only available VLM
+calibration domain is a net loss. Corollary (rule 0 addendum): data-free int4_sym is *not*
+universally damaging — it is near-optimal for **QAT checkpoints** whose weights were trained
+onto the target lattice (our Gemma-4 E2B/E4B QAT builds: sym g32 = Q4_0 geometry, int4 ≈
+bf16 by construction). The damaging case is data-free quant of a *non-QAT* model at coarse
+granularity. The AWQ+SE artifact was deleted after the verdict.
+
+**Decoding condition matters — the solo leaderboard was measured greedy, off every Qwen-
+family card's advice (2026-06-07).** Discovered while auditing Omni: identical greedy
+requests through the **VLMPipeline diverge from the first token** — the VLM path is *not*
+greedy-deterministic (numeric jitter flips near-tie tokens), so the "byte-identical reruns"
+law holds only on the text-LLM path. Single-block VLM scores are therefore one draw from a
+distribution; VLM benchmarking needs repeated blocks. Re-benching the leaders at their
+**card-recommended sampling** (runner now passes `--temp`/`--top-p`; top_k not wired) lifted
+every build and cured the syntax-truncation failures (greedy's argmax-derailment), leaving
+only genuine logic misses:
+
+| Artifact (size) | greedy | card params | params |
+|---|---|---|---|
+| **Qwen3-14B (9.1 GB)** | 9/12 | **10/12** | 0.7 / 0.8 (nothink) |
+| OmniCoder-9B data-free (5.4 GB) | 8, 7/12 | 9, 9/12 | 0.6/0.95 and 0.3/0.95 |
+
+Qwen3-14B keeps a one-cell lead at each matched condition, but Omni at ~60 % the size stays
+within one cell — a well-characterized size/quality tradeoff. **Methodology fix going
+forward: bench each model at its own card-advised operating point, not a uniform greedy.**
+Granite is unaffected — IBM's examples and unsloth both specify greedy (`temp 0.0, top_p 1.0,
+top_k 0`), which is exactly how it is benched and served, so the production executor carries
+no condition debt.
 
 ## Current role recommendations (will evolve as more models run)
 
@@ -321,7 +358,8 @@ the single-model wall lies between 8 and 11.7 GiB.
 | Assistant (explain) / Architect | Qwen3.5-2B | 37–43 tok/s, probe ✓; Qwen3.5-0.8B (61.4) as the speed option — both pending quality A/B |
 | Fast edit/chat (experimental) | MiniCPM5-1B g128, no-think template (self-converted) | **fastest probe-passing edits measured (81.4 tok/s)**, ~83 tok/s chat, 128k ctx — 1B quality is the open question; no PL (flaky at this scale) |
 | Chat/assistant (quality tier) | **Qwen3.5-4B with the no-think rt_info patch** | probe ✓ at 19.8 tok/s; thinking-mode card scores (MMLU-Pro 79.1) overstate no-think quality — A/B vs Gemma E4B (69.4, probe ✓, 15.6) to pick |
-| Max coding quality | OmniCoder-9B, no-think patch | probe ✓ at 12.9 tok/s; GPQA-D 83.8 / Terminal-Bench champion base |
+| Max coding quality | OmniCoder-9B data-free, no-think patch, **card sampling (0.3–0.6)** | 9/12 breadth sampled (vs 7–8 greedy); GPQA-D 83.8 base; ~13 tok/s. Use the community data-free build — AWQ+SE on `contextual` measured 3/12 (deleted) |
+| Max coding quality (larger) | Qwen3-14B int4, **card sampling (0.7/0.8 nothink)** | 10/12 breadth sampled (vs 9 greedy), leaderboard top; 6.4 tok/s, ~9 GiB — near the load ceiling |
 | Assistant (edit/tool quality tier) | Granite-4.1-8b cw (self-converted) **+PL** | IFEval 87 / MBPP 87 / BFCL 68: 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
 | Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |

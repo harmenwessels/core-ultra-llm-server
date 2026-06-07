@@ -392,6 +392,33 @@ Hard-won rules:
    Rule: calibration dataset is a per-build hyperparameter — convert, run the seat-critical
    probes, keep the winner. (wikitext2-8b keeps the executor seat; the code-3b is the
    better 3b artifact.)
+   **VLM corollary (OmniCoder-9B, 2026-06-07):** the domain mismatch can be large enough to
+   wreck a model, not just shift margins. optimum-intel's visual-LM quantization path accepts
+   only `dataset=contextual` (image-instruction pairs); `wikitext2` raises `KeyError`. AWQ+SE
+   on `contextual` calibrated a *coding* model's precision against image-chat activations →
+   **3/12 vs the data-free build's 8,7/12** (two greedy breadth blocks each), failing by
+   syntax-truncation. For a code model, the only available VLM calibration domain is a net
+   loss; the data-free build was already near-optimal. Don't AWQ+SE a VLM-shaped coding model
+   through this path — there is no code-domain option short of the hand-rolled Python-API
+   route (feed text embeddings to nncf directly, bypassing the predefined-dataset gate).
+0d. **Data-free int4_sym is the right call for QAT checkpoints — the exception to rule 0.**
+   Google's Gemma-4 QAT weights are trained onto the Q4_0 lattice; converting data-free with
+   the *matching* grid (`sym: true, group_size: 32` = Q4_0 geometry) snaps weights onto the
+   points QAT targeted, so int4 ≈ bf16 by construction — no calibration data needed or wanted.
+   This is the same grid-alignment unsloth forces in llama.cpp-land. Rule 0's "data-free is
+   damaging" applies to *non-QAT* models at coarse granularity; for a QAT source, match the
+   grid and skip the dataset.
+0e. **Bench at the model's card-advised decoding, not uniform greedy.** Two coupled findings
+   (2026-06-07): (a) the **VLMPipeline is not greedy-deterministic** — identical greedy
+   requests diverge from the first token (numeric jitter on near-tie logits), so the
+   byte-identical-rerun law holds only on the text-LLM path, and VLM scores need *repeated*
+   blocks, not one. (b) The solo casting leaderboard was measured greedy, which is off every
+   Qwen-family card (nothink: Qwen3 0.7/0.8/20, Qwen3.5/Omni 0.6/0.95/20, agentic 0.2–0.4).
+   Re-benching at card params lifted **both** leaders and cured greedy's syntax-truncation
+   fails (argmax derailment late in long outputs): Qwen3-14B 9→**10/12** (0.7/0.8), Omni
+   data-free 7–8→**9/12** (0.3 and 0.6 tied). Granite is exempt — IBM examples and unsloth
+   both specify greedy (`temp 0.0, top_p 1.0, top_k 0`), matching how it is benched/served.
+   `bench_castings.py` now takes `--temp`/`--top-p` (top_k not yet wired through the server).
 1b. **Believe the declared pin first.** optimum-intel master declares `transformers<5.1` —
    that pointer would have found the lfm2 window immediately; symbol-probing across versions
    found it the slow way. Read the installed package's requirements before bisecting.
@@ -486,6 +513,13 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
 - **Draft-model speculative decoding**: untested. granite-4.1-3b drafting for granite-8b
   could accelerate executor decode on low-overlap outputs where prompt-lookup fails
   (agent/architect turns) — complements Finding 6's PL boundary.
+- **MTP (Multi-Token Prediction) — watch item, not actionable on this stack**: Qwen 3.5/3.6
+  ship trained MTP heads that act as a built-in drafter (self-speculation, ~1.4–2× decode at
+  no accuracy cost). Supported by llama.cpp / vLLM / SGLang, not OpenVINO GenAI: optimum-intel
+  drops the heads on export and GenAI's `draft_model=` API consumes only a *separate* draft
+  pipeline, with no path to a model's own MTP heads. Gain would also be smaller here than the
+  RTX-class headline numbers — MTP cuts forward passes, not bytes-read-per-accepted-token, and
+  this iGPU is bandwidth-bound. Re-check when optimum-intel learns to emit MTP heads.
 - ~~Per-model tool-format adapters~~ **SHIPPED 2026-06-07 (Finding 16)**: native template
   rendering + per-family parsers (gemma, lfm, hermes); fleet-wide language survey done;
   formats pinned per model in `models.yaml`. Remaining refinement: Gemma's brace-delimited
