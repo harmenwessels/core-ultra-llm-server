@@ -61,10 +61,16 @@ models:
 #    alias: lfm-1.2b
 #    tool_format: lfm                # 'List of tools:' + Pythonic calls; 7/13
 
+  - dir: models/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
+    alias: coder-1.5b-cpu
+    device: CPU                     # router seat: 0.7 s/dec solo, 1.8 s under
+    thinking: none                  # GPU load — beats NPU (4.0 s) both ways;
+    roles: [router]                 # reference numerics, no sym constraint
+
 virtual:
   id: virtual/agent
   roles:
-    router: coder-1.5b-npu      # classification runs on the NPU — zero GPU
-                                # contention while the executor generates
+    router: coder-1.5b-cpu      # classification off-GPU (CPU measured 2.2×
+                                # faster than NPU even under full GPU load)
     architect: qwen3.5-2b
     executor: granite-8b

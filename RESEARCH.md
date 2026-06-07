@@ -332,6 +332,19 @@ remaining failures are 1.2B capability limits, not protocol). Qwen/MiniCPM/OmniC
 templates are natively hermes. Net language map: gemma → native adapter (big win),
 lfm → native adapter (fair reading), everything else → hermes (correct by training).
 
+## Finding 17 — Three engines, one memory: place roles by contention, not just speed
+
+All three engines (CPU, iGPU, NPU) share one physical RAM pool and its bandwidth —
+"VRAM" is a driver carve-out, the NPU maps the same memory. What differs per engine is
+*compute ownership*: GPU cycles belong to the big brains, CPU cycles to the user's
+applications, NPU cycles to nobody. Measured on the router workload (Coder-1.5B, 6-case
+classification): **CPU 0.69 s/dec solo and 1.84 s under full GPU load — 2-4× faster than
+NPU (3.0/4.05 s) both ways**, with reference numerics and no quantization-layout
+constraints. CPU degrades more under load (2.7× vs NPU's 1.35×) but its worst case beats
+the NPU's best. Final auxiliary placement: **router on CPU** (fast, exact), **lock-free
+autocomplete on NPU** (typing-time is when the CPU belongs to the IDE), big brains on GPU.
+NPU long-form remains ~16× slower than GPU — short-output roles only on both auxiliaries.
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`
