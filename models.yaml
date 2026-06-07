@@ -1,0 +1,60 @@
+# Model registry — the per-model operating manual, executable.
+# Loaded by server.py (override path via MODELS_CONFIG env). Every setting
+# here was measured before it was written down: BENCHMARKS.md has the
+# numbers, RESEARCH.md the findings. Env vars (MODEL_DIRS etc.), if set,
+# override this file for quick experiments.
+
+models:
+  - dir: models/HarmenWessels/granite-4.1-8b-int4-cw-ov
+    alias: granite-8b               # served model id (owner/name also works)
+    device: GPU
+    scheduler:                      # prefix caching + chunked prefill
+      kv_pool_gb: 4                 # reserved at load — budget vs iGPU ceiling
+    prompt_lookup: false            # PL hurts agent/explain turns (finding 6)
+    thinking: none                  # no switchable thinking machinery
+    context_budget: 8192            # prefill curve: 43s @ 8k, wall above (finding 11)
+    roles: [executor, chat]         # role-fitness 12/15: only byte-exact looper
+
+  - dir: models/Echo9Zulu/Qwen3.5-2B-int4_sym-ov
+    alias: qwen3.5-2b
+    device: GPU
+    scheduler:
+      kv_pool_gb: 2
+    thinking: switchable            # pattern B; default nothink (think adds
+                                    # nothing at probe difficulty, 15x latency)
+    context_budget: 24576           # near-flat prefill: 16k in 17s
+    roles: [architect, chat-fast]   # fastest correct diagnoser
+
+  - dir: models/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
+    alias: coder-1.5b
+    device: GPU
+    prompt_lookup: true             # FIM-trained: +25% on autocomplete
+    tool_format: hermes             # qwen-native
+    thinking: none
+    roles: [autocomplete, router]   # route 6/6; g128 build (cw damaged routing)
+
+  - dir: models/HarmenWessels/Qwen2.5-Coder-1.5B-int4-cw-ov
+    alias: coder-1.5b-npu
+    device: NPU                     # own gen lock: never queues behind GPU
+    max_prompt_len: 4096            # NPU static-shape ceiling
+    thinking: none
+    roles: [autocomplete-npu]       # probe-certified on NPU; cw broke routing
+                                    # (quantization damage is task-selective)
+
+# Models with adapters but no current seat — uncomment to serve:
+#  - dir: models/HarmenWessels/gemma-4-E2B-it-qat-int4-ov
+#    alias: gemma-e2b
+#    tool_format: gemma              # native template protocol (auto-detected)
+#    thinking: switchable            # pattern C (enable_thinking gate);
+#                                    # reasoning has no decodable end-delimiter
+#    roles: [chat, all-rounder]      # 12/15 hermes-era; native retest pending
+#  - dir: models/HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov
+#    alias: lfm-1.2b
+#    tool_format: lfm                # Pythonic <|tool_call_start|> protocol
+
+virtual:
+  id: virtual/agent
+  roles:
+    router: coder-1.5b
+    architect: qwen3.5-2b
+    executor: granite-8b

@@ -293,6 +293,22 @@ in one response, with the architect's plan streamed as `reasoning_content` (rend
 thinking block in Continue). Validated end-to-end with NPU autocomplete serving
 concurrently throughout.
 
+## Finding 16 — Speak each model's tool language: format mismatch costs more than size
+
+Per-family tool adapters (server-side jinja2 rendering of the model's OWN chat template
+with `tools`/`enable_thinking`/tool-role turns — everything GenAI's template application
+cannot pass — plus per-family emission parsers) re-scored the Gemmas dramatically
+(2026-06-07): **E4B 10/15 → 13/15, the new role-fitness champion**, gaining byte-exact
+edits and clean loop endurance — skills the hermes-era matrix called granite-exclusive.
+The "tool-shy" verdict measured our protocol, not the model. Corollaries: (a) any
+agentic score on a non-native protocol is a lower bound; (b) Gemma thinking (pattern C)
+recorded its first measured quality win — it flips E4B's diagnose verdict from
+test-blaming to correct (66.7 s vs 9.4 s) — thinking earns selective architect-style use
+on Gemma; (c) parser care matters: Gemma's brace-delimited args break on code content
+with nested braces (v1 limitation); (d) LFM's template hides its protocol from
+literal-string detection — still served hermes, still understated. Registry
+(`models.yaml`) carries `tool_format` per model so the language is pinned, not guessed.
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`

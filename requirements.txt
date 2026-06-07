@@ -16,3 +16,5 @@ huggingface_hub==1.17.0
 # API server
 fastapi==0.136.3
 uvicorn==0.49.0
+jinja2==3.1.6
+pyyaml==6.0.3

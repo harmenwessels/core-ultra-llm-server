@@ -101,9 +101,17 @@ PROMPT_LOOKUP_MODELS = set(
 )
 
 
+_ALIASES: dict[str, str] = {}          # resolved dir -> served alias
+_THINKING_POLICY: dict[str, str] = {}  # model id -> none | switchable
+_TOOL_FORMAT_OVERRIDE: dict[str, str] = {}
+_PROMPT_LEN_OVERRIDE: dict[str, int] = {}
+
+
 def _model_id(model_dir: pathlib.Path) -> str:
-    """Model id mirrors the HF repo id: 'owner/name' for dirs under models/,
-    plain folder name otherwise."""
+    """Served id: the registry alias if set, else the HF-style 'owner/name'."""
+    alias = _ALIASES.get(str(model_dir.resolve()))
+    if alias:
+        return alias
     try:
         return model_dir.resolve().relative_to((ROOT / "models").resolve()).as_posix()
     except ValueError:
@@ -204,10 +212,15 @@ def _split_reasoning(text: str, think_mode: str = "nothink") -> tuple[str | None
 
 
 # --- OpenAI tool calling on local models ------------------------------------
-# GenAI applies the model's chat template, which (for our models) has no tools
-# support — so tools are injected hermes-style: definitions in the system
-# message, calls expected as <tool_call>{json}</tool_call> blocks (the exact
-# format Qwen2.5 was trained on; Gemma follows it from the instruction).
+# Per-model-family tool language (RESEARCH.md findings 9 + Gemma/LFM addenda):
+# models trained on a native function-calling protocol ignore instructed
+# formats, so the server speaks each family's own language.
+#   "native" families (gemma, lfm): the model's chat_template.jinja is
+#     rendered SERVER-SIDE with jinja2 — passing tools / enable_thinking /
+#     tool-role messages that GenAI's template application cannot — and
+#     generation runs raw; emissions are parsed with a per-family parser.
+#   "hermes" fallback (qwen & friends): definitions injected into the system
+#     message, calls expected as <tool_call>{json}</tool_call> blocks.
 
 _TOOLS_PROMPT = """
 
@@ -227,6 +240,129 @@ within <tool_call></tool_call> XML tags:
 </tool_call>"""
 
 _TOOL_CALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
+
+_TOOL_FORMATS: dict[str, str] = {}  # model id -> gemma | lfm | hermes
+_NATIVE_TEMPLATES: dict[str, object] = {}  # model id -> compiled jinja template
+
+
+def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
+    """Pick the tool language by inspecting the model's own chat template
+    (or the models.yaml override)."""
+    tf = model_dir / "chat_template.jinja"
+    if not tf.exists():
+        return "hermes"
+    template = tf.read_text(encoding="utf-8")
+    fmt = _TOOL_FORMAT_OVERRIDE.get(model_id)
+    if fmt is None:
+        fmt = "hermes"
+        if "declaration:" in template and "<|tool" in template:
+            fmt = "gemma"
+        elif "<|tool_call_start|>" in template:
+            fmt = "lfm"
+    if fmt != "hermes":
+        try:
+            import jinja2
+            env = jinja2.Environment(extensions=["jinja2.ext.loopcontrols"])
+            env.filters["tojson"] = lambda v, **kw: json.dumps(v)
+            _NATIVE_TEMPLATES[model_id] = env.from_string(template)
+        except Exception as e:  # noqa: BLE001 — fall back rather than break
+            log.warning("%s: native template compile failed (%s) — hermes "
+                        "fallback", model_id, str(e)[:80])
+            return "hermes"
+    return fmt
+
+
+def _render_native(model_id: str, messages: list, tools: list | None,
+                   think: bool) -> str:
+    """Render the model's own template with everything GenAI cannot pass."""
+    return _NATIVE_TEMPLATES[model_id].render(
+        messages=messages, tools=tools or None, add_generation_prompt=True,
+        enable_thinking=think, bos_token="")
+
+
+def _coerce_arg(value: str):
+    v = value.strip().strip('"').strip("'")
+    if v.lower() in ("true", "false"):
+        return v.lower() == "true"
+    try:
+        return int(v)
+    except ValueError:
+        try:
+            return float(v)
+        except ValueError:
+            return v
+
+
+_GEMMA_CALL_RE = re.compile(r"call:(\w+)\{(.*?)\}(?:\s|$)", re.DOTALL)
+
+
+def _parse_gemma_calls(text: str, tools: list, id_prefix: str
+                       ) -> tuple[str, list]:
+    """Parse 'call:name{key:value,...}' — quote tokens are stripped by the
+    detokenizer, so argument values arrive bare; keys are schema-known."""
+    known = {t["function"]["name"]: list(
+        t["function"].get("parameters", {}).get("properties", {}))
+        for t in tools}
+    calls: list[dict] = []
+
+    def _consume(m: re.Match) -> str:
+        name, argstr = m.group(1), m.group(2)
+        if name not in known:
+            return m.group(0)
+        keys = known[name]
+        args: dict = {}
+        # split on commas that precede a known key
+        parts = re.split(
+            r",(?=(?:" + "|".join(map(re.escape, keys)) + r"):)", argstr) \
+            if keys else [argstr]
+        for part in parts:
+            k, sep, v = part.partition(":")
+            if sep and k.strip() in keys:
+                args[k.strip()] = _coerce_arg(v)
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {"name": name,
+                         "arguments": json.dumps(args, ensure_ascii=False)},
+        })
+        return ""
+
+    content = _GEMMA_CALL_RE.sub(_consume, text).strip()
+    return content, calls
+
+
+_LFM_CALL_RE = re.compile(
+    r"(?:<\|tool_call_start\|>)?\[(\w+)\((.*?)\)\](?:<\|tool_call_end\|>)?",
+    re.DOTALL)
+
+
+def _parse_lfm_calls(text: str, tools: list, id_prefix: str
+                     ) -> tuple[str, list]:
+    """Parse LFM's Pythonic '[name(key="value", ...)]' calls."""
+    known = {t["function"]["name"] for t in tools}
+    calls: list[dict] = []
+
+    def _consume(m: re.Match) -> str:
+        name, argstr = m.group(1), m.group(2)
+        if name not in known:
+            return m.group(0)
+        args = {k: _coerce_arg(v) for k, v in
+                re.findall(r"(\w+)\s*=\s*(\"[^\"]*\"|'[^']*'|[^,]+)", argstr)}
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {"name": name,
+                         "arguments": json.dumps(args, ensure_ascii=False)},
+        })
+        return ""
+
+    content = _LFM_CALL_RE.sub(_consume, text).strip()
+    content = content.replace("<|tool_call_start|>", "").replace(
+        "<|tool_call_end|>", "").strip()
+    return content, calls
+
+
+_NATIVE_PARSERS = {"gemma": _parse_gemma_calls, "lfm": _parse_lfm_calls}
 
 
 def _lenient_tool_json(raw: str) -> dict | None:
@@ -385,7 +521,8 @@ def _load_pipelines() -> None:
         model_id = _model_id(model_dir)
         device = MODEL_DEVICES.get(model_id, DEVICE)
         if device == "NPU":
-            kwargs["MAX_PROMPT_LEN"] = NPU_MAX_PROMPT_LEN
+            kwargs["MAX_PROMPT_LEN"] = _PROMPT_LEN_OVERRIDE.get(
+                model_id, NPU_MAX_PROMPT_LEN)
         use_pl = model_id in PROMPT_LOOKUP_MODELS and not is_vlm
         if device == "NPU" and use_pl:
             log.warning("%s: prompt lookup unsupported on NPU — ignoring",
@@ -419,8 +556,16 @@ def _load_pipelines() -> None:
         _pipes[model_id] = pipe
         _model_device[model_id] = device
         _prompt_lookup_enabled[model_id] = use_pl
+        _TOOL_FORMATS[model_id] = _detect_tool_format(model_dir, model_id)
+        if _TOOL_FORMATS[model_id] != "hermes":
+            log.info("%s: native tool language '%s' (server-side template "
+                     "rendering)", model_id, _TOOL_FORMATS[model_id])
         try:
-            variants = _derive_think_variants(pipe.get_tokenizer().chat_template)
+            if _THINKING_POLICY.get(model_id) == "none":
+                variants = None  # registry says no thinking machinery
+            else:
+                variants = _derive_think_variants(
+                    pipe.get_tokenizer().chat_template)
         except Exception:  # noqa: BLE001 — template introspection is best-effort
             variants = None
         _think_variants[model_id] = variants
@@ -806,14 +951,26 @@ async def chat_completions(request: Request):
     model_id, pipe = _resolve_pipe(body)
     tools = body.get("tools")
     use_tools = bool(tools) and body.get("tool_choice") != "none"
-    if use_tools:
-        messages = _inject_tools(messages, tools)
-    history = _to_chat_history(messages)
+    think_mode = _requested_think_mode(body)
+    native_fmt = _TOOL_FORMATS.get(model_id, "hermes") \
+        if (use_tools or model_id in _NATIVE_TEMPLATES) else "hermes"
+    if native_fmt != "hermes":
+        # native tool language: render the model's OWN template server-side
+        # (tools + enable_thinking + tool-role turns), generate raw
+        history = _render_native(model_id, messages, tools if use_tools
+                                 else None, think_mode == "think")
+    else:
+        if use_tools:
+            messages = _inject_tools(messages, tools)
+        history = _to_chat_history(messages)
     # tool-call JSON (file edits!) must not be truncated mid-arguments
     gen_cfg = _build_generation_config(
         pipe, body, default_max=4096 if use_tools else 1024, model_id=model_id)
-    think_mode = _requested_think_mode(body)
-    if not _think_variants.get(model_id):
+    if native_fmt != "hermes":
+        gen_cfg.apply_chat_template = False
+        think_mode = "nothink"  # native render handled thinking via kwarg;
+        # (gemma reasoning has no decodable end-delimiter to split on)
+    elif not _think_variants.get(model_id):
         # model has no switchable thinking — never treat output as reasoning
         # (otherwise a no-</think> answer would be swallowed whole)
         think_mode = "nothink"
@@ -831,12 +988,16 @@ async def chat_completions(request: Request):
         message: dict = {"role": "assistant", "content": content}
         finish = "stop"
         if use_tools:
-            content, tool_calls = _extract_tool_calls(content)
+            if native_fmt != "hermes":
+                content, tool_calls = _NATIVE_PARSERS[native_fmt](
+                    content, tools, "call_")
+            else:
+                content, tool_calls = _extract_tool_calls(content)
             message["content"] = content or None
             if tool_calls:
                 message["tool_calls"] = tool_calls
                 finish = "tool_calls"
-                log.info("[%s] tool calls: %s", model_id,
+                log.info("[%s] tool calls (%s): %s", model_id, native_fmt,
                          "; ".join(f"{c['function']['name']}("
                                    f"{c['function']['arguments'][:80]})"
                                    for c in tool_calls))
@@ -1021,6 +1182,59 @@ async def completions(request: Request):
     return StreamingResponse(_sse(), media_type="text/event-stream")
 
 
+def _load_models_config() -> None:
+    """models.yaml: the per-model registry (alias, device, scheduler pool,
+    prompt-lookup, tool language, thinking policy, prompt-length, virtual
+    roles). Explicit MODEL_DIRS/MODEL_DIR env keeps override power for
+    quick experiments."""
+    global MODEL_DIRS, VIRTUAL_MODEL_ID
+    path = pathlib.Path(os.environ.get("MODELS_CONFIG", ROOT / "models.yaml"))
+    if not path.exists():
+        return
+    if os.environ.get("MODEL_DIRS") or os.environ.get("MODEL_DIR"):
+        log.info("models.yaml present but MODEL_DIRS env set — env wins")
+        return
+    import yaml
+    cfg = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    dirs: list[pathlib.Path] = []
+    for m in cfg.get("models") or []:
+        d = pathlib.Path(m["dir"])
+        if not d.is_absolute():
+            d = ROOT / d
+        d = d.resolve()
+        dirs.append(d)
+        if m.get("alias"):
+            _ALIASES[str(d)] = m["alias"]
+        mid = _model_id(d)
+        if m.get("device"):
+            MODEL_DEVICES[mid] = str(m["device"]).upper()
+        if (m.get("scheduler") or {}).get("kv_pool_gb"):
+            SCHEDULER_MODELS[mid] = int(m["scheduler"]["kv_pool_gb"])
+        if m.get("prompt_lookup"):
+            PROMPT_LOOKUP_MODELS.add(mid)
+        if m.get("tool_format"):
+            _TOOL_FORMAT_OVERRIDE[mid] = str(m["tool_format"])
+        if m.get("thinking"):
+            _THINKING_POLICY[mid] = str(m["thinking"])
+        if m.get("max_prompt_len"):
+            _PROMPT_LEN_OVERRIDE[mid] = int(m["max_prompt_len"])
+    if dirs:
+        MODEL_DIRS = dirs
+        # registry replaces (not merges with) the env defaults
+        for k in list(SCHEDULER_MODELS):
+            if k not in {_model_id(d) for d in dirs}:
+                del SCHEDULER_MODELS[k]
+    v = cfg.get("virtual") or {}
+    if v.get("id"):
+        VIRTUAL_MODEL_ID = v["id"]
+    if v.get("roles"):
+        VIRTUAL_ROLES.clear()
+        VIRTUAL_ROLES.update({str(r): str(mid) for r, mid in v["roles"].items()})
+    log.info("models.yaml: %d models, virtual=%s", len(dirs),
+             VIRTUAL_MODEL_ID if VIRTUAL_ROLES else "off")
+
+
 if __name__ == "__main__":
+    _load_models_config()
     _load_pipelines()
     uvicorn.run(app, host=HOST, port=PORT, log_level="info")

@@ -221,6 +221,18 @@ analysis) — the cleanest evidence for role-split serving. Qwen2.5-Coder-3B is 
 budget-executor candidate: the only other model to complete the scripted fix-test-stop loop
 (1.9 GiB), though it re-calls tools instead of reading results outside the loop harness.
 
+**Native tool-language retest (2026-06-07,** `roles__20260607-090450.json`**)**: with
+per-family adapters (the server renders each model's own chat template with tools — see
+README), the Gemmas transform: **E4B 10/15 → 13/15, the new suite champion** — its
+"tool-shyness" was pure format mismatch; in its native protocol it does byte-exact edits
+AND clean loops (previously granite-exclusive skills) at 16.1 s/probe. E2B 12 → 11 with a
+profile shift (executor skills appear: edit-exact ✓, chain-depth ✓; routing/recall drop).
+Gemma thinking (pattern C, first measurements): **fixes E4B's diagnose verdict**
+(nothink blames the test, think answers correctly at 66.7 s) — the first measured case of
+thinking changing a quality outcome. LFM remains hermes-served (its template hides the
+protocol from the detector) — still understated. Executor seat now contested:
+granite-8b 12/15 vs E4B-native 13/15 — pending a virtual-model A/B.
+
 **Think-steering sweep** (all 13 probes × think/nothink on the hybrid-thinking models,
 `roles__20260606-214914.json`): thinking is quality-neutral-to-harmful at this scale.
 Qwen3.5-2B: one verdict improved, otherwise identical — at up to **15× latency** on

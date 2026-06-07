@@ -57,6 +57,15 @@ the request's `model` field: `HarmenWessels/gemma-4-E2B-it-qat-int4-ov` (chat �
 The first launch per model pays a one-time compile cost (~30–70 s); subsequent launches load from
 the cache in seconds.
 
+### Configuration
+
+**`models.yaml` — the model registry (preferred).** Every model's measured operating
+manual in one file: served alias, device (GPU/NPU), prefix-caching pool, prompt-lookup,
+**tool language** (native gemma/lfm protocols vs hermes), thinking policy, context
+budget, and the virtual model's role casting. The shipped file documents the production
+stack; `MODELS_CONFIG` points elsewhere. Explicit `MODEL_DIRS` env overrides the file
+for quick experiments.
+
 ### Configuration (environment variables)
 
 | Variable | Default | Purpose |
