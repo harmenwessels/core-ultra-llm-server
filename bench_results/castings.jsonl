@@ -58,3 +58,15 @@
 {"casting": "Omni9B-solo", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (AssertionError: Expected 'a3b1c3', got 'a3,b1,c3')", "seconds": 160.6}
 {"casting": "Omni9B-solo", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 57))", "seconds": 77.3}
 {"casting": "Omni9B-solo", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 112.7}
+{"casting": "Q314B-solo", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 101.5}
+{"casting": "Q314B-solo", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 104.2}
+{"casting": "Q314B-solo", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 67.5}
+{"casting": "Q314B-solo", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 98.9}
+{"casting": "Q314B-solo", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 104.5}
+{"casting": "Q314B-solo", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 192.8}
+{"casting": "Q314B-solo", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 56.8}
+{"casting": "Q314B-solo", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 26.9}
+{"casting": "Q314B-solo", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "FAIL (ValueError: invalid literal for int() with base 10: 'a')", "seconds": 97.0}
+{"casting": "Q314B-solo", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (IndexError: string index out of range)", "seconds": 92.4}
+{"casting": "Q314B-solo", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 47.6}
+{"casting": "Q314B-solo", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 59.6}

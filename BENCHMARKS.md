@@ -295,7 +295,11 @@ execution remains the only *logic* reviewer that works at this scale.
 
 **Breadth confirmation (6 tasks × 2 phrasings, exec-probed, `castings.jsonl`)**: the
 2-task tournament numbers did not survive breadth — **A (production ensemble) 3/12;
-A-Q38B + review 6/12; OmniCoder-9B solo 8/12 (nothink, leading)**. Omni also profiles as
+A-Q38B + review 6/12; OmniCoder-9B solo 8/12; Qwen3-14B solo 9/12 (nothink, leading —
+swept every algorithmic task incl. rate-limiter; fails confined to string-parsing; wall
+time matched the 9B despite 6.4 tok/s because it wastes no tokens)**. The 9-vs-8 gap is
+within noise at n=12; the solid claim: single large brains (9–15B) beat the small-model
+ensembles ~3× at long-form code generation on this hardware. Omni also profiles as
 an analyst++ in the role suite (route 6/6, diagnose ✓ in 15.6 s — its think mode gives the
 same answer in 262 s, plan ✓✓, recall ✓); its tool-emission rows were invalidated by a
 server-side native-render bug (fixed: render failures now fall back to hermes injection).
