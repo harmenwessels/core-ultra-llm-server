@@ -101,7 +101,8 @@ PROMPT_LOOKUP_MODELS = set(
 )
 
 
-_ALIASES: dict[str, str] = {}          # resolved dir -> served alias
+_ALIASES: dict[str, str] = {}          # resolved dir -> served alias (env path)
+_REGISTRY_ALIASES: list[str] = []      # positional ids for models.yaml entries
 _THINKING_POLICY: dict[str, str] = {}  # model id -> none | switchable
 _TOOL_FORMAT_OVERRIDE: dict[str, str] = {}
 _PROMPT_LEN_OVERRIDE: dict[str, int] = {}
@@ -521,7 +522,7 @@ class QueueStreamer:
 
 
 def _load_pipelines() -> None:
-    for model_dir in MODEL_DIRS:
+    for idx, model_dir in enumerate(MODEL_DIRS):
         if not model_dir.exists():
             # registry entries may reference not-yet-downloaded/-converted
             # artifacts — serve what exists rather than refuse to start
@@ -530,7 +531,8 @@ def _load_pipelines() -> None:
         is_vlm = (model_dir / "openvino_vision_embeddings_model.xml").exists()
         pipe_cls = ov_genai.VLMPipeline if is_vlm else ov_genai.LLMPipeline
         kwargs: dict = {"CACHE_DIR": str(CACHE_DIR)}
-        model_id = _model_id(model_dir)
+        model_id = _REGISTRY_ALIASES[idx] if idx < len(_REGISTRY_ALIASES) \
+            else _model_id(model_dir)
         device = MODEL_DEVICES.get(model_id, DEVICE)
         if device == "NPU":
             kwargs["MAX_PROMPT_LEN"] = _PROMPT_LEN_OVERRIDE.get(
@@ -1215,9 +1217,10 @@ def _load_models_config() -> None:
             d = ROOT / d
         d = d.resolve()
         dirs.append(d)
-        if m.get("alias"):
-            _ALIASES[str(d)] = m["alias"]
-        mid = _model_id(d)
+        # one dir may be served multiple times under different aliases
+        # (e.g. the same IR on GPU and CPU) — entries are positional
+        mid = m.get("alias") or _model_id(d)
+        _REGISTRY_ALIASES.append(mid)
         if m.get("device"):
             MODEL_DEVICES[mid] = str(m["device"]).upper()
         if (m.get("scheduler") or {}).get("kv_pool_gb"):
