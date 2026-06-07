@@ -1,0 +1,75 @@
+{
+  "HarmenWessels/Qwen3-1.7B-int4-cw-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 3.1,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 3.0,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 2.8,
+      "detail": "calls=[] content='The acronym API stands for \"Application Programming Interfac'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 2.5,
+      "detail": "calls=[] content='The value of MAX_RETRIES is 7.'"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 6.0,
+      "detail": "calls=[('read_file', \"{'path': 'stats.py'}\")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 3.4,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 3.2,
+      "detail": "writes=0 calls=['edit_file']"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 2.5,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 16.5,
+      "detail": "4/6 [chat:chat, edit:None, design:design, chat:chat, edit:None, design:design]"
+    },
+    "diagnose": {
+      "pass": false,
+      "seconds": 4.1,
+      "detail": "content='the code has a logic error. the `median` function returns a float, but the assertion `3.5 == 2.5` fa'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 3.8,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 7.6,
+      "detail": "stopped at turn 1: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 3.7,
+      "detail": "content='The environment variable that holds your deployment API key is `FROBNICATE_KEY_7'"
+    },
+    "_summary": {
+      "passed": 5,
+      "of": 13,
+      "avg_seconds": 4.8,
+      "total_seconds": 62.0
+    }
+  }
+}

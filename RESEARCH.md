@@ -277,6 +277,12 @@ Overnight NPU campaign (2026-06-06/07), after the cw-sym discovery unblocked com
   ~7 s while the GPU runs multi-stage agent turns.
 - Final NPU lineup verdict: exactly one seat — FIM autocomplete on the certified
   cw-1.5B. Routing candidates all failed (Instruct-cw 4/6, LFM-cw 0/6); ≥3B too slow.
+- **There is no numerics-safe size threshold** (Qwen3-1.7B paired test, 2026-06-07):
+  the same cw IR routes 4/6 on GPU and 5/6 on NPU *with different errors*, and recall
+  returns empty on NPU — device numerics shift near-threshold behaviors in both
+  directions, exactly like calibration domain (playbook 0c). Per-device, per-artifact
+  probe certification is mandatory at any size. NPU long-form generation is ~16× slower
+  (plan: 3.8 s GPU → 61 s NPU) — short-output roles only.
 
 ## Finding 15 — The virtual model: measured role-split serving, shipped
 

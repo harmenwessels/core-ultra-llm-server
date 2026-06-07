@@ -1,0 +1,40 @@
+{
+  "HarmenWessels/Qwen3-1.7B-int4-cw-ov": {
+    "call-restraint": {
+      "pass": true,
+      "seconds": 7.2,
+      "detail": "calls=[] content='API stands for Application Programming Interface. It is a pr'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 3.8,
+      "detail": "calls=[] content='MAX_RETRIES: 7'"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 6.2,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 26.7,
+      "detail": "5/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:chat]"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 60.9,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "recall-deep": {
+      "pass": false,
+      "seconds": 5.1,
+      "detail": "content=''"
+    },
+    "_summary": {
+      "passed": 4,
+      "of": 6,
+      "avg_seconds": 18.3,
+      "total_seconds": 110.0
+    }
+  }
+}
