@@ -282,10 +282,16 @@ code: **A (3-brain: 2B architect + granite executor)** — both easy-task passes
 hard task fails with broken output. **B (Qwen3-8B architect + granite)** — easy passes at
 ~55 s; hard task fails *close* (clean running code, one boundary bug). **C (Qwen3-8B every
 seat)** — same results as B at 2-4× the latency, including the *identical* boundary bug.
-Verdicts: A stays the production default (best economics); B is the one-line registry swap
-for design-heavy work; C is dominated. **The LLM reviewer caught nothing in six cells**
-(once it changed the failure instead of fixing it) — review is opt-in (`"review": true`),
-and execution remains the only reviewer that works at this scale.
+Executor variants (A-E4B, A-Q38B, A-C3B) completed the matrix (24 cells): granite and E4B
+— the agentic champions — produce *broken* long-form code on the hard task, while
+Qwen3-8B-in-any-seat produces near-misses (closest: 3/4 of the behavior sequence as
+executor). Agentic discipline and long-form codegen are different muscles. Verdicts:
+**A (granite) stays production** (fastest, agentic king); **A-Q38B + review is the
+design-flow alternative** (best hard-task code, reviewer covers its spec slips); C/E4B/C3B
+dominated. **Reviewer, measured across 12 reviewed cells: 2 catches, both spec/format
+defects (tuple-vs-list, hallucinated import), zero logic bugs** — a spec-conformance
+checker, opt-in (`"review": true`), worthwhile with qwen-family executors in design flows;
+execution remains the only *logic* reviewer that works at this scale.
 
 ## Current role recommendations (will evolve as more models run)
 

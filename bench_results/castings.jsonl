@@ -10,3 +10,15 @@
 {"casting": "C-1brain-q38b", "task": "merge-intervals", "review": true, "probe": "PASS", "seconds": 210.2}
 {"casting": "C-1brain-q38b", "task": "rate-limiter", "review": false, "probe": "FAIL (_seq() -> [True, False, False, True])", "seconds": 71.5}
 {"casting": "C-1brain-q38b", "task": "rate-limiter", "review": true, "probe": "FAIL (_seq() -> [True, False, False, True])", "seconds": 143.7}
+{"casting": "A-E4B-exec", "task": "merge-intervals", "review": false, "probe": "PASS", "seconds": 73.8}
+{"casting": "A-E4B-exec", "task": "merge-intervals", "review": true, "probe": "PASS", "seconds": 36.3}
+{"casting": "A-E4B-exec", "task": "rate-limiter", "review": false, "probe": "FAIL (SyntaxError: invalid syntax. Perhaps you forgot a comma? (<string>, line 50))", "seconds": 223.3}
+{"casting": "A-E4B-exec", "task": "rate-limiter", "review": true, "probe": "FAIL (IndentationError: unexpected indent (<string>, line 10))", "seconds": 110.2}
+{"casting": "A-Q38B-exec", "task": "merge-intervals", "review": false, "probe": "FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [(1, 6), (8, 10)])", "seconds": 39.6}
+{"casting": "A-Q38B-exec", "task": "merge-intervals", "review": true, "probe": "PASS", "seconds": 59.2}
+{"casting": "A-Q38B-exec", "task": "rate-limiter", "review": false, "probe": "FAIL (_seq() -> [True, True, False, False])", "seconds": 46.7}
+{"casting": "A-Q38B-exec", "task": "rate-limiter", "review": true, "probe": "FAIL (_seq() -> [True, True, False, False])", "seconds": 182.3}
+{"casting": "A-C3B-exec", "task": "merge-intervals", "review": false, "probe": "FAIL (ImportError: cannot import name 'Interval' from 'collections.abc' (C:\\Users\\HarmenWessels\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\collections\\abc.py))", "seconds": 19.0}
+{"casting": "A-C3B-exec", "task": "merge-intervals", "review": true, "probe": "PASS", "seconds": 25.2}
+{"casting": "A-C3B-exec", "task": "rate-limiter", "review": false, "probe": "FAIL (_seq() -> [True, True, True, True])", "seconds": 45.6}
+{"casting": "A-C3B-exec", "task": "rate-limiter", "review": true, "probe": "FAIL (_seq() -> [True, True, True, True])", "seconds": 77.9}
