@@ -32,7 +32,12 @@ else:
 print(f"loading on {DEVICE} with {PREC} config...", flush=True)
 t0 = time.perf_counter()
 model = OVModelForVisualCausalLM.from_pretrained(PATH, device=DEVICE, ov_config=CFG)
-proc = AutoProcessor.from_pretrained(PATH)
+try:
+    proc = AutoProcessor.from_pretrained(PATH)
+except Exception as e:  # gemma4 text builds may lack an image processor
+    print(f"AutoProcessor failed ({type(e).__name__}); using tokenizer", flush=True)
+    from transformers import AutoTokenizer
+    proc = AutoTokenizer.from_pretrained(PATH)
 print(f"loaded in {time.perf_counter()-t0:.0f}s", flush=True)
 
 for prompt in ["Write a Python function that reverses a string.",

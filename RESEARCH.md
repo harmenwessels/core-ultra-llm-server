@@ -574,6 +574,19 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   token_type_ids, apply f16-safety) = C++ + from-source GenAI rebuild, not an editable config or
   Python hook. Full dead-end chain: base(QAT/it)✗ quant✗ activation-scale✗ relabel✗ → upstream
   GenAI gemma4_unified dispatch only. Track it; don't self-build.
+  **BREAKTHROUGH 2026-06-08 — the f16-safety is in the IR/export, not GenAI; a local Python fix is
+  viable.** Decisive test: **E4B runs coherent+fast at f16 through the *same* optimum
+  `OVModelForVisualCausalLM` path** the 12B uses (~8 tok/s, correct code + "Paris"). So GenAI is
+  *not* required for f16-safe execution — the mature `gemma4` export bakes the safety into the IR
+  (overflow-prone LM ops kept f32), and the experimental `gemma4_unified` export (optimum PR #1770)
+  omits it. Embedding normalizer is f32 in both (not the cause); the gap is in the LM layers
+  (attention softmax / MLP). **Fix path: re-export the 12B forcing f32 attention softmax** (the
+  classic Gemma f16 fix; the patcher already has an eager path doing `softmax(dtype=float32)`) to
+  match `gemma4` → should run coherent+fast via optimum f16, no GenAI dispatch needed. Upstream is
+  also moving (genai #3644/#3844/#3782 merged, #3944 WIP) — a newer optimum-intel/GenAI may just
+  fix it. So: **not a C++/GenAI rebuild — an export-side change**, plus separately the GenAI
+  loading gate for serving via our own server (still needs gemma4_unified dispatch). Next:
+  re-export with f32 softmax once RAM frees (12B export ~24 GB; can't run alongside a CPU bench).
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
