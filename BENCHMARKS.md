@@ -409,13 +409,16 @@ condition); card sampling stays the opt-in max-quality lever for the 14B/Omni ge
 Incidental fleet facts: **Gemma E4B is the role-fitness champion** (11/13 greedy, holds even at
 temp 1.0); **Coder-3B ≡ Coder-7B** on both suites (9/13 role, 7-vs-6 castings) at ½ size and ~2×
 speed, so the re-acquired 7B again earns no seat; **Qwen3-8B** is a strong all-rounder brain
-(10/13 role, up to 10/12 castings). **Caveat — Qwen3.5 community builds (Echo9Zulu-2B,
-yangsu0423-4B) are thinking-unstable:** empty `generation_config`, no nothink rt_info patch, so
-the "nothink" card params don't suppress reasoning — under sampling they loop into degenerate
-output (castings 0/11, role `recall-deep` emits `user\nuser\n…`). Their card rows are confounded,
-not a sampling verdict; fairly testing them needs the rule-0b rt_info nothink patch first
-(follow-up). The architect seat (Qwen3.5-2B) is unaffected — it passes `diagnose` (its actual
-job) at greedy; its low aggregate is executor probes it never serves.
+(10/13 role, up to 10/12 castings). **Qwen3.5 community builds (Echo9Zulu-2B, yangsu0423-4B)
+degenerate under sampling — but it is *not* a thinking-leak (corrected 2026-06-08).** Their
+rt_info template already defaults to nothink (the `enable_thinking` else-branch GenAI always
+hits emits `<think>\n\n</think>\n\n`), and at **greedy** they are coherent (Qwen3.5-2B `diagnose`
+✓, `recall-deep` emits a well-formed — if misguided — tool call). The `user\nuser\n…` loops and
+castings 0/11 appear **only under sampling**: genuine small-model EOS-evasion at temperature,
+i.e. textbook rule 0f (small models lack headroom for sampling). Conversion/patching won't fix
+it — these 2–4B models are simply sampling-fragile and must run greedy. The architect seat
+(Qwen3.5-2B) is unaffected: it runs greedy in production and passes `diagnose` (its actual job);
+its low aggregate is executor probes it never serves.
 
 ## Current role recommendations (will evolve as more models run)
 

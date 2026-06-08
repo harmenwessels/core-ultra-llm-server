@@ -439,10 +439,13 @@ Hard-won rules:
    the production casting — no seat changes; card sampling stays the opt-in max-quality lever
    for the 14B/Omni generative path. Two corollaries surfaced: (i) the re-acquired Coder-7B
    again earns no seat (Coder-3B ties it at ½ size / 2× speed on both suites); (ii) **Qwen3.5
-   community builds (Echo9Zulu-2B, yangsu0423-4B) are thinking-unstable under sampling** —
-   empty `generation_config`, no nothink rt_info patch, so card "nothink" params don't suppress
-   reasoning and they loop into degenerate output (castings 0/11). Their card rows are
-   confounded; fairly sampling them needs the rule-0b rt_info patch first (follow-up).
+   community builds (Echo9Zulu-2B, yangsu0423-4B) degenerate under sampling — confirmed *not*
+   a thinking-leak.** Their rt_info template already defaults to nothink (the `enable_thinking`
+   else-branch GenAI always hits emits `<think>\n\n</think>\n\n`), and at greedy they are
+   coherent (2B `diagnose` ✓). The `user\nuser\n…` loops + castings 0/11 are sampling-only:
+   small-model EOS-evasion at temperature — rule 0f itself, not a template/conversion bug. A
+   self-conversion would *not* fix it (template is already correct); these 2–4B models are
+   sampling-fragile and must run greedy. No follow-up warranted.
 1b. **Believe the declared pin first.** optimum-intel master declares `transformers<5.1` —
    that pointer would have found the lfm2 window immediately; symbol-probing across versions
    found it the slow way. Read the installed package's requirements before bisecting.
