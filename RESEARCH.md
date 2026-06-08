@@ -509,7 +509,20 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   to match reference, garbage at f16. **Our path sidesteps it via rule 0d:** Google ships
   `google/gemma-4-12B-it-qat-q4_0-unquantized` (ungated) — data-free grid-matched conversion
   (sym g32 = Q4_0) gives int4≈bf16 by construction, exactly how our E2B/E4B builds work. Load
-  ceiling clear (int4 12B ≈7 GiB; Qwen3-14B at 9.1 GiB already runs). **In progress 2026-06-08.**
+  ceiling clear (int4 12B ≈7 GiB; Qwen3-14B at 9.1 GiB already runs).
+  **VERDICT 2026-06-08 — converts and is coherent, but impractical on this stack.** PR #1770
+  (+ transformers 5.10) exports `gemma4_unified` cleanly; the QAT grid-matched int4 (sym-g32,
+  328/329 layers, 7.7 GB) is **coherent at f32** (CPU and GPU both: correct code + "Paris"). The
+  QAT recipe beat the weight-quant concern. BUT the numerical sensitivity is an *architecture*
+  property (logit softcapping + embedding scaling), not a quant one, so it persists: **f16 — our
+  server's default — is unreliable** (single-token "Paris" survives, multi-token generation
+  derails to garbage like `Thereatoi`). Forced to **f32 it runs ~1.4 tok/s** on both CPU and the
+  iGPU (no speedup from GPU at f32) — ~4.5× slower than Qwen3-14B's 6.4 tok/s. So: a valid,
+  coherent artifact and both gates proven cleared, but **not a usable seat** until OV/GenAI
+  handles the softcapping at lower precision. Not worth a server integration now. Revisit if a
+  later OpenVINO release adds an f16-safe softcap path, or for a one-off quality query where 1.4
+  tok/s is acceptable. Convert venv was moved to transformers 5.10 + PR optimum-intel for this —
+  revert before other exports.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
