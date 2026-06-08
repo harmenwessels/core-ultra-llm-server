@@ -552,6 +552,14 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   pipeline, with no path to a model's own MTP heads. Gain would also be smaller here than the
   RTX-class headline numbers — MTP cuts forward passes, not bytes-read-per-accepted-token, and
   this iGPU is bandwidth-bound. Re-check when optimum-intel learns to emit MTP heads.
+  **Update 2026-06-08:** optimum-intel **PR #1763** adds MTP for Gemma 4 — exports the
+  `*-assistant` MTP head as `Gemma4AssistantForCausalLM` and runs it via `OVAssistantForCausalLM`
+  + `generate(assistant_model=…)`. But that is the **optimum-intel OVModel `generate()` path, not
+  OpenVINO GenAI** (our server's runtime, which has no `assistant_model` hook). So MTP is now in
+  the OV ecosystem but still off our backend — using it would mean switching inference engines
+  (losing GenAI's scheduler/prefix-caching/streaming) or waiting for GenAI to gain assistant
+  support. Targets `gemma4` (E2B/E4B); the 12B is `gemma4_unified` (PR #1770). Both PRs pin f32
+  inference (Gemma-4 numerical sensitivity).
 - ~~Per-model tool-format adapters~~ **SHIPPED 2026-06-07 (Finding 16)**: native template
   rendering + per-family parsers (gemma, lfm, hermes); fleet-wide language survey done;
   formats pinned per model in `models.yaml`. Remaining refinement: Gemma's brace-delimited
