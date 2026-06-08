@@ -601,6 +601,12 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   real issue was a too-small baked scale factor. Caveat: this runs via **optimum**, not our GenAI
   server (GenAI still lacks gemma4_unified dispatch) — serving it in the main server needs either
   GenAI support or an optimum-based serving path. Fix tool: `scripts/sweep_scale_factor.py`.
+  **Validated end-to-end:** full 12-cell exec-probed code suite at **f16 GPU = 11/12, identical to
+  f32** (same single budget-truncation fail), at ~7 tok/s (cells 85–155 s vs 380–586 s on CPU
+  f32). Quality-neutral. Root of the `8.0`: **optimum-intel `convert.py:118` hardcodes
+  `ACTIVATIONS_SCALE_FACTOR="8.0"` for every text-gen / VLM language-model submodel** — a flat
+  default (same file uses 128.0 for SD VAEs) that's too small for large Gemma. Reported on
+  optimum-intel PR #1770.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
