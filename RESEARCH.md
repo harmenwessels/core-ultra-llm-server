@@ -469,7 +469,6 @@ architecture, ≤ ~6 GiB int4, permissive license, quality above incumbents). Sc
 | GLM-4.7-Flash | MoE (`glm4_moe_lite`), unsupported type, too big |
 | Qwen3.6-27B / Mistral-Small-4 / Gemma-4-31B / EXAONE-4.5-33B / Codestral | over the memory ceiling |
 | Qwen3.6 small dense / Qwen3.5-Coder / EXAONE-4.5 ≤8B | not released yet |
-| **OmniCoder-2-9B** (Tesslate, qwen3_5 VLM) | **base repo pulled — `Tesslate/OmniCoder-2-9B` 404 (2026-06-07).** Survives only as GGUF (`mradermacher/OmniCoder-2-9B-GGUF`, incl. f16 + mmproj-f16). No safetensors anywhere. **Watch item**: if the base is republished in safetensors it slots into the V1 fp16-export→AWQ+SE pipeline; otherwise GGUF→HF reconstruction for a VLM is high-effort/fragile and not worth it speculatively (no V2 benchmarks; V1 data-free already 9/12) |
 | Seed-Coder-8B | 2025-05 vintage — matched/beaten by granite-4.1-8b (already published) |
 | EXAONE-4.0 family | gated + restrictive license |
 | GLM-4-9B-0414, Phi-4-mini, Falcon-3, OLMo-3, Hunyuan-7B | dated or dominated by incumbents at equal size |
@@ -497,10 +496,15 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   (transformers ≤5.5 doesn't know the type; export registry has only the older `minicpmv`).
   Would fill the sub-2B vision niche nothing in our table covers.
 - **Gemma-4-12B / `gemma4_unified`**: the quality standout of the fitting size class
-  (MMLU-Pro 77.2, LiveCodeBench 72.0 at 11.95B). **Gate 1 opened 2026-06-07** (transformers
-  5.10 knows the arch); optimum-intel export config still missing. The load-ceiling
-  concern is retired: Qwen3-14B int4 (~8 GiB) compiles and runs (6.4 tok/s) — the
-  single-model wall sits between 8 and 11.7 GiB. Re-check optimum-intel monthly.
+  (MMLU-Pro 77.2, LiveCodeBench 72.0 at 11.95B). **Both gates now open (2026-06-08):** gate 1
+  transformers 5.10 knows the arch; gate 2 optimum-intel **PR #1770** (open, mergeable, from the
+  OV maintainer) adds the `gemma4_unified` + `gemma4_unified_text` export configs (VLM,
+  image-text-to-text, `MIN_TRANSFORMERS_VERSION=5.10`). Caveat the PR flags: the **naive
+  bf16→int4 path is numerically sensitive** (embedding scaling + logit softcapping) — needs f32
+  to match reference, garbage at f16. **Our path sidesteps it via rule 0d:** Google ships
+  `google/gemma-4-12B-it-qat-q4_0-unquantized` (ungated) — data-free grid-matched conversion
+  (sym g32 = Q4_0) gives int4≈bf16 by construction, exactly how our E2B/E4B builds work. Load
+  ceiling clear (int4 12B ≈7 GiB; Qwen3-14B at 9.1 GiB already runs). **In progress 2026-06-08.**
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
