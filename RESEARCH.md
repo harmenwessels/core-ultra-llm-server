@@ -538,6 +538,19 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   missing int4→f32 GPU kernel, both upstream OV/PR fixes. Revisit on bf16/f32-capable hardware
   (discrete GPU, AVX512-BF16 CPU) or a later OV release. Convert venv moved to transformers 5.10
   + PR optimum-intel — revert before other exports.
+  **Can the GPU path be fixed locally? Investigated 2026-06-08 — no.** OV *does* expose a fp32-keep
+  marker (`mark_as_precision_sensitive`, rt_info `"precision_sensitive"`), and the IR has only one
+  Tanh (the final-logit softcap; attention softcap is fused into SDPA). But the f16 overflow is
+  **pervasive, not localized to the softcap**: the literature (and our own evidence) puts it in
+  the per-layer *attention logits (QK^T)* and *post-SwiGLU MLP* activations across all 48 layers.
+  Proof it's distributed: (a) **bf16** — which only adds *range*, everywhere — fixes it; (b)
+  `ACTIVATIONS_SCALE_FACTOR` does *not* (attention scores scale quadratically with activations and
+  the softcap has fixed constants, so linear scaling can't tame them). Keeping those layers fp32
+  means full-f32 compute, which on Xe-LPG hits the missing int4→f32 `_reorder_weights` kernel — so
+  marking precision-sensitive just reproduces the kernel error. The wall is a **compiled intel_gpu
+  kernel gap, not an editable graph attribute**. Local IR/code changes can't bridge it; needs an
+  upstream int4→f32(/bf16) GPU kernel or Gemma-specific f16-safe kernels (f32 accumulation, as in
+  llama.cpp). Not pursued further.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
