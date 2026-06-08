@@ -489,8 +489,13 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   smaller siblings are coming — would likely supersede the Qwen3.5 tier.
 - **EXAONE-4.5 small sizes**: 33B-only so far; STEM avg 77.3 beats GPT-5-mini — but mind the
   restrictive EXAONE license before investing.
-- **Ministral-3 / `mistral3` export support** in optimum-intel: blocked upstream (gate-2
-  catch-22 above).
+- **SmolLM3-3B** (`HuggingFaceTB/SmolLM3-3B`): dense 3B, fills the assistant/edit tier. Export
+  support in optimum-intel **PR #1761** (open/WIP, `mlukasze` — also fixes a position_ids
+  double-append). Check later when the PR stabilises; 3B int4 fits trivially.
+- **Ministral-3 / `mistral3` export support** in optimum-intel: **PR #1659** (open, `mistral3`
+  VLM export+inference, `dhandhalyabhavik`) — but **CONFLICTING/unmergeable** as of 2026-06-08
+  (community fork, not the OV bot). Lower-confidence than the Gemma/SmolLM PRs; revisit when it
+  rebases clean and a maintainer engages.
 - **MiniCPM-V-4.6 / `minicpmv4_6`**: the "best open model under 2B" (vision-capable, Apache-2.0,
   `qwen3_5_text` backbone) is blocked at both gates — confirmed empirically 2026-06-06
   (transformers ≤5.5 doesn't know the type; export registry has only the older `minicpmv`).
