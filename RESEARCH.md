@@ -601,9 +601,10 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   real issue was a too-small baked scale factor. Caveat: this runs via **optimum**, not our GenAI
   server (GenAI still lacks gemma4_unified dispatch) — serving it in the main server needs either
   GenAI support or an optimum-based serving path. Fix tool: `scripts/sweep_scale_factor.py`.
-  **Validated end-to-end:** full 12-cell exec-probed code suite at **f16 GPU = 11/12, identical to
-  f32** (same single budget-truncation fail), at ~7 tok/s (cells 85–155 s vs 380–586 s on CPU
-  f32). Quality-neutral. Root of the `8.0`: **optimum-intel `convert.py:118` hardcodes
+  **Validated end-to-end:** full 12-cell exec-probed code suite at **f16 GPU = 12/12** with
+  adequate output budget (= f32; 11/12 at a tight 1024-token cap where one cell truncated
+  mid-code — raising to 3072 → clean 12/12), at ~7 tok/s. Quality-neutral, and the **fleet quality
+  leader** (Qwen3-14B 10/12, OmniCoder-9B 9/12). Root of the `8.0`: **optimum-intel `convert.py:118` hardcodes
   `ACTIVATIONS_SCALE_FACTOR="8.0"` for every text-gen / VLM language-model submodel** — a flat
   default (same file uses 128.0 for SD VAEs) that's too small for large Gemma. Reported on
   optimum-intel PR #1770.

@@ -179,7 +179,7 @@ LFM's architect speed carries its vendor's own warning against programming-domai
 | granite-4.0-h-tiny 7B-A1B (MoE) | GPU compile grinds unboundedly (killed at 57 min) — finding 10 |
 | LFM2.5-350M (official conversions) | runtime `ScatterNDUpdate` shape bug at inference |
 | Ministral-3-3B, MiniCPM-V-4.6, Mellum2-12B | architectures unsupported by the conversion toolchain (see RESEARCH.md watch items) |
-| Gemma-4-12B (`gemma4_unified`) | **converts** now (optimum-intel PR #1770 + transformers 5.10, QAT int4 sym-g32) and is coherent — but runs *only* on CPU at f32/bf16 (~1.4 tok/s): the iGPU can't run it (softcap overflows at f16; f32/dynamic hit a missing int4→f32 GPU kernel). Not a usable seat; full matrix in RESEARCH.md |
+| Gemma-4-12B (`gemma4_unified`) | **RUNS on the iGPU at ~7 tok/s (f16) and is the fleet quality leader: 12/12** (vs Qwen3-14B 10, OmniCoder-9B 9). Convert with optimum-intel PR #1770 + transformers 5.10 (QAT int4 sym-g32), then raise the baked `ACTIVATIONS_SCALE_FACTOR` 8.0→64 in the LM IR (the 8.0 default overflows f16 for this size). Runs via the optimum `OVModelForVisualCausalLM` path; GenAI `VLMPipeline` doesn't dispatch `gemma4_unified` yet. Published: HarmenWessels/gemma-4-12B-it-qat-int4-ov. Full story in RESEARCH.md |
 
 Root causes and full forensics: RESEARCH.md (findings 2–3, 10 and the screening ledger).
 

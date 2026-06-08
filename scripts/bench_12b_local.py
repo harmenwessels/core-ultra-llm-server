@@ -24,7 +24,8 @@ from bench_castings import TASKS, probe  # noqa: E402 — reuse exact tasks+prob
 PATH = r"C:\git\GitHub\openvino-windows-openai-api\models\HarmenWessels\gemma-4-12B-it-qat-int4-ov"
 DEVICE = sys.argv[1] if len(sys.argv) > 1 else "GPU"
 F16 = "--f16" in sys.argv  # GPU f16 path (needs the baked ACTIVATIONS_SCALE_FACTOR fix)
-MAX_NEW = 1024  # bound wall-time; enough for a function/class + brief preamble
+import os as _os
+MAX_NEW = int(_os.environ.get("MAX_NEW", "1024"))  # raise for verbose models (Gemma)
 OUT = pathlib.Path(__file__).resolve().parent.parent / "bench_results" / (
     "gemma12b_gpu_f16_castings.jsonl" if F16 else "gemma12b_f32_castings.jsonl")
 # f16 on GPU works once the IR's ACTIVATIONS_SCALE_FACTOR is raised 8->64 (the 8.0
