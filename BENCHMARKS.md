@@ -421,6 +421,58 @@ it — these 2–4B models are simply sampling-fragile and must run greedy. The 
 (Qwen3.5-2B) is unaffected: it runs greedy in production and passes `diagnose` (its actual job);
 its low aggregate is executor probes it never serves.
 
+### Fair single-engine leaderboard (2026-06-08): every model on one GenAI engine
+
+The casting scores above were collected with a cross-engine confound: the Qwen family ran on the
+GenAI server, but Gemma-4-12B could only run via optimum (GenAI lacked `gemma4_unified` dispatch),
+and optimum *mis-renders* int4 Qwen models (rule 0g — doubled brackets, ~3/12). To remove the
+confound we **built GenAI from source with `gemma4_unified` support** (openvino.genai PR #3944
+branch; RESEARCH.md) and re-ran **all** models through the *one* engine, each served solo by id
+(`scripts/run_genai_sweep.ps1` → `scripts/bench_server.py`, nothink, greedy, 3072-token budget,
+robust exec-probe, per-cell wall-clock; `bench_results/genai_server_castings.jsonl`):
+
+| Rank | Model | Size | Quality | Total time | Avg/cell |
+|---|---|---|---|---|---|
+| 1 | **Qwen3-14B** | 14B | **12/12** | 891 s | 74 s |
+| 2 | **Gemma-4-12B** QAT | 12B | **12/12** | 1312 s | 109 s |
+| 3 | Gemma-4-E4B QAT | 4B | 10/12 | 997 s | 83 s |
+| 4 | Qwen3-8B | 8B | 9/12 | 600 s | 50 s |
+| 5 | Gemma-4-E2B QAT | 2B | 8/12 | 768 s | 64 s |
+| 5 | OmniCoder-9B data-free | 9B | 8/12 | 1500 s | 125 s |
+| 7 | Qwen2.5-Coder-3B | 3B | 6/12 | 233 s | 19 s |
+
+**What the equal engine reveals:**
+- **Qwen3-14B jumps 3/12 → 12/12** vs its optimum path — the cross-family gap was *engine-induced*
+  (rule 0g), not a model/quant property. Building GenAI from source didn't just unlock Gemma; it put
+  everyone on a clean shared engine.
+- **The top is a two-way tie, and Qwen3-14B wins on speed** (12/12 in 891 s vs Gemma-12B's 1312 s,
+  ~32% faster). The earlier "Gemma is the sole quality leader" was an artifact of the confound.
+- **Both ladders scale cleanly:** Gemma 2B→4B→12B = 8→10→12; Qwen 3B→8B→14B = 6→9→12. No
+  quantization/engine surprises.
+- **Gemma QAT punches above its weight per-parameter:** E4B (4B) at 10/12 beats Qwen3-8B (8B) at
+  9/12; E2B (2B) ties OmniCoder-9B (9B). QAT int4 ≈ bf16 (rule 0d) shows here.
+- **Qwen3-14B's 12/12 is on plain data-free int4** (INT4_ASYM ratio-0.8 g128, AWQ/GPTQ/SE all
+  `False` in rt_info) — recipe headroom exists, but it's already at this task set's ceiling.
+- OmniCoder-9B is the value loser (slowest, 1500 s, for only 8/12). The recurring miss across tiers
+  is `parse-duration` (empty-string / malformed-unit edge case) — a genuine reasoning gap.
+
+**Quant method = quality knob, not a speed knob.** AWQ, scale-estimation, GPTQ and QAT all emit the
+*same* int4 IR as data-free — identical bit-width/group_size/kernels at inference, so ~zero runtime
+difference; speed is set by bit-width + group_size + int4/int8 ratio. The win from data-aware/QAT is
+pure accuracy recovery (largest at low-bit / small models / hard tasks; vanishes when a model already
+saturates the task set). `pytorch/Qwen3-8B-QAT-INT4` is **torchao** format — not directly
+OV-convertible (no bf16-unquantized variant); using it means dequantize → grid-matched NNCF int4, or
+just self-quant the bf16 base with AWQ+SE.
+
+**Thinking on/off (small Gemmas, same 3072 budget):** non-monotonic — **E2B 8 → 10 (+2)** (helped the
+weaker 2B), **E4B 10 → 7 (−3)** (hurt the stronger 4B, and *not* via truncation — all 12 cells
+`finish=stop`). Consistent with rule 0f's spirit (thinking is no free win for small/structured tasks),
+with a twist: the benefit flips with model strength. Qwen3-8B-think was discarded — a harness confound
+(Gemma/Qwen3 go through the native-render path where `<think>` isn't stripped from the answer
+(server.py:1044), so verbose reasoning breaks the exec-probe; the done-log even mislabels `mode=nothink`
+though the score changed). A clean Qwen3 think test needs the server to split reasoning on that path +
+a larger budget.
+
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |
@@ -435,7 +487,8 @@ its low aggregate is executor probes it never serves.
 | Fast edit/chat (experimental) | MiniCPM5-1B g128, no-think template (self-converted) | **fastest probe-passing edits measured (81.4 tok/s)**, ~83 tok/s chat, 128k ctx — 1B quality is the open question; no PL (flaky at this scale) |
 | Chat/assistant (quality tier) | **Qwen3.5-4B with the no-think rt_info patch** | probe ✓ at 19.8 tok/s; thinking-mode card scores (MMLU-Pro 79.1) overstate no-think quality — A/B vs Gemma E4B (69.4, probe ✓, 15.6) to pick |
 | Max coding quality | OmniCoder-9B data-free, no-think patch, **card sampling (0.3–0.6)** | 9/12 breadth sampled (vs 7–8 greedy); GPQA-D 83.8 base; ~13 tok/s. Use the community data-free build — AWQ+SE on `contextual` measured 3/12 (deleted) |
-| Max coding quality (larger) | Qwen3-14B int4, **card sampling (0.7/0.8 nothink)** | 10/12 breadth sampled (vs 9 greedy), leaderboard top; 6.4 tok/s, ~9 GiB — near the load ceiling |
+| Max coding quality (larger) | Qwen3-14B int4 — **co-leader, faster** | On the fair single-engine leaderboard **12/12 nothink-greedy** (ties Gemma-4-12B, ~32% faster total); plain data-free int4. 6.4 tok/s, ~9 GiB — near the load ceiling. (Card sampling 0.7/0.8 was its old-condition top; greedy on one engine now suffices) |
+| Max coding quality (absolute) | Gemma-4-12B QAT (self-converted) **or** Qwen3-14B | Both **12/12** on the fair engine; Gemma at ~7 tok/s (scale-factor-fixed f16), Qwen3-14B faster. Pick Gemma for per-param quality / Qwen for speed |
 | Assistant (edit/tool quality tier) | Granite-4.1-8b cw (self-converted) **+PL** | IFEval 87 / MBPP 87 / BFCL 68: 27 tok/s edits / 14 chat, probes ✓, 128k context. Enable PL only for edit-heavy use (−14% on explain) |
 | Assistant (edit, non-Coder option) | Granite-4.1-3b cw **v2** | 31.3 tok/s, probes ✓, 128k context — no PL needed |
 | Avoid for edits | OmniCoder-9B, Qwen3.5-4B, Granite-4.1-cw **v1** | thinking preambles (former two); quantization damage (v1, fixed in v2) |

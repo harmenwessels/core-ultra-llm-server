@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 .venv-convert/
 .venv-probe/
+.venv-genai/
 
 # Models (multi-GB OpenVINO IR downloads — fetch via scripts/download_model.py)
 models/
@@ -16,3 +17,4 @@ models/
 .vscode/
 .claude/
 *.log
+*.log.err

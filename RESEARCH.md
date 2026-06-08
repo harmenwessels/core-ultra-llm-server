@@ -439,6 +439,15 @@ Hard-won rules:
    Practical note: our serving stack is GenAI, so this optimum artifact doesn't affect production —
    but don't trust optimum-`generate()` casting scores for int4 Qwen models. (`scripts/bench_direct.py`,
    `_code_candidates` robust-extraction in `bench_castings.py`.)
+   **RESOLVED 2026-06-08 — a single common engine now runs both families, via a from-source GenAI
+   build with `gemma4_unified` dispatch (PR #3944 branch; see the Gemma-4-12B open item below).** With
+   Gemma-4-12B and the Qwen family all on the *one* GenAI engine (nothink/greedy/3072,
+   `scripts/bench_server.py` hitting each model solo by id, `scripts/run_genai_sweep.ps1`), the
+   confound is gone: **Qwen3-14B jumps from optimum's ~3/12 to 12/12 on GenAI** — confirming the gap
+   was engine-induced, not a model/quant property. The clean cross-family head-to-head is the fair
+   leaderboard in BENCHMARKS.md: Qwen3-14B and Gemma-4-12B **tie at 12/12**, with Qwen3-14B ~32%
+   faster total — so "Gemma is the sole quality leader" was an optimum-vs-GenAI artifact, now a
+   two-way tie with Qwen faster.
 0f. **Sampling's benefit is a task × size interaction — not a free lift (fleet sweep,
    2026-06-08, `scripts/run_card_sweep.py`, top_k now wired).** Card sampling helped only
    *large models on open-ended generation*; it was neutral-to-negative everywhere else, on the
@@ -622,6 +631,19 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   `ACTIVATIONS_SCALE_FACTOR="8.0"` for every text-gen / VLM language-model submodel** — a flat
   default (same file uses 128.0 for SD VAEs) that's too small for large Gemma. Reported on
   optimum-intel PR #1770.
+  **SERVED 2026-06-08 — built GenAI from source with `gemma4_unified` dispatch; Gemma-4-12B now runs
+  via our own GenAI server, not just optimum.** The earlier "serving needs GenAI support or an
+  optimum path" caveat is closed: cloned the `mlukasze` branch `enable/google-gemma-4-12B`
+  (openvino.genai **PR #3944**) and built it on Windows (py-build-cmake, `--no-build-isolation` —
+  nightly openvino isn't on PyPI; MSVC Build Tools 2022; openvino+tokenizers+py-build-cmake==0.5.0
+  +cmake<4+pybind11-stubgen+ninja) into `.venv-genai` (version
+  `2026.3.0.0-1-…-enable/google-gemma-4-12B`). The 12B loads via `ov_genai.VLMPipeline` and serves
+  coherent at ~8 tok/s; the baked `ACTIVATIONS_SCALE_FACTOR=64` fix carries over (GenAI honours the
+  same rt_info). This put **every fleet model on one engine for the first time** and unlocked the
+  fair single-engine leaderboard (BENCHMARKS.md, `scripts/run_genai_sweep.ps1`): Gemma-4-12B 12/12,
+  Qwen3-14B 12/12 (tie; Qwen faster), and the full Gemma ladder (E2B 8 / E4B 10 / 12B 12) vs Qwen
+  ladder (Coder-3B 6 / 8B 9 / 14B 12) — both scale cleanly. Branch build kept local pending the
+  #3944 merge; production server still runs the released GenAI (swap in once merged upstream).
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE

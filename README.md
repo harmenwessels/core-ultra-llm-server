@@ -206,7 +206,7 @@ behaves correctly*) — artifacts that fail are documented in BENCHMARKS.md, not
 | Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s |
 | Chat — quality | [Gemma 4 E4B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 |
 | Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits |
-| Max coding quality | [Qwen3-14B](https://huggingface.co/OpenVINO/Qwen3-14B-int4-ov) (card sampling 0.7/0.8) leads; [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) at ~60% size | 14B 10/12 vs Omni 9/12 (card params); ~6 vs ~13 tok/s |
+| Max coding quality | [Qwen3-14B](https://huggingface.co/OpenVINO/Qwen3-14B-int4-ov) and [Gemma-4-12B QAT](https://huggingface.co/HarmenWessels/gemma-4-12B-it-qat-int4-ov) **tie at 12/12** (fair single-engine leaderboard); Qwen ~32% faster | both 12/12 nothink-greedy on one GenAI engine; ~6 (Qwen) / ~7 (Gemma) tok/s — see [BENCHMARKS.md](BENCHMARKS.md) |
 
 ### Agent roles (tool loops — Continue agent mode/CLI, Kilo CLI, orchestration)
 
