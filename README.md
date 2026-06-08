@@ -206,7 +206,7 @@ behaves correctly*) — artifacts that fail are documented in BENCHMARKS.md, not
 | Chat — speed | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | ~42 tok/s |
 | Chat — quality | [Gemma 4 E4B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | ~17 tok/s, MMLU-Pro 69.4 |
 | Edit-heavy (refactors, apply-changes) | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) **+PL** | **63 tok/s** on edits |
-| Max coding quality | [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) | ~13 tok/s |
+| Max coding quality | [Qwen3-14B](https://huggingface.co/OpenVINO/Qwen3-14B-int4-ov) (card sampling 0.7/0.8) leads; [OmniCoder-9B](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) (no-think patch) at ~60% size | 14B 10/12 vs Omni 9/12 (card params); ~6 vs ~13 tok/s |
 
 ### Agent roles (tool loops — Continue agent mode/CLI, Kilo CLI, orchestration)
 
@@ -218,7 +218,7 @@ format mismatch cost E4B three points before the adapters existed).
 | **Executor** (edit→test→verify loops) — *seat contested* | [Granite-4.1-8b (self-converted)](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov), prefix-cached, PL off — **or** [Gemma 4 E4B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov), native tool language | 12 vs **13** | both do byte-exact edits + clean loops; granite is lighter (keep its context ≤8k, treat failing tests as ground truth); E4B additionally diagnoses correctly *with thinking enabled* |
 | **All-rounder / agent backup** | [Gemma 4 E2B QAT (self-converted)](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov), native tool language | 11 | fast (7.9 s/probe hermes-era; executor skills appear in native mode, routing drops) |
 | **Analyst / architect** (diagnosis, planning) | [Qwen3.5-2B](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov), prefix-cached, no-think | 10 | fastest correct diagnoser; near-flat prefill (16k ctx in 17 s) for big planning contexts; thinking adds latency, not quality, at this scale |
-| **Router** (request classification) | [Qwen2.5-Coder-1.5B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) (g128 build) | 6 (route 6/6) | 3-way routing at ~2.4 s/decision, already resident for autocomplete; the cw build loses routing (quantization damage is task-selective) |
+| **Router** (request classification) | [Qwen2.5-Coder-1.5B sym-g128 (self-converted)](https://huggingface.co/HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov) | 6 (route 6/6) | 3-way routing at ~2.4 s/decision, dual-role with NPU autocomplete; the cw build loses routing (quantization damage is task-selective). Series-1 NPU needs symmetric int4 — sym-g128 satisfies it and keeps quality |
 | **Autocomplete, lock-free** | Qwen2.5-Coder-1.5B int4-**cw** (self-converted) on **NPU** | FIM probe ✓ | ~7 s completions that never queue behind GPU chat/agent turns; NPU requires cw-sym IRs, probe-certified per device |
 | **Budget executor** | [Qwen2.5-Coder-3B](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 10 | loop-capable, fastest suite run (6.4 s/probe), 1.9 GiB |
 
