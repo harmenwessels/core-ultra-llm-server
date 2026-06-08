@@ -1,0 +1,12 @@
+{"model": "gemma-4-12B-int4-f32", "task": "merge-intervals", "phrasing": 0, "probe": "PASS", "seconds": 134.9}
+{"model": "gemma-4-12B-int4-f32", "task": "merge-intervals", "phrasing": 1, "probe": "PASS", "seconds": 126.7}
+{"model": "gemma-4-12B-int4-f32", "task": "rate-limiter", "phrasing": 0, "probe": "PASS", "seconds": 120.3}
+{"model": "gemma-4-12B-int4-f32", "task": "rate-limiter", "phrasing": 1, "probe": "PASS", "seconds": 144.8}
+{"model": "gemma-4-12B-int4-f32", "task": "lru-cache", "phrasing": 0, "probe": "PASS", "seconds": 144.4}
+{"model": "gemma-4-12B-int4-f32", "task": "lru-cache", "phrasing": 1, "probe": "FAIL (SyntaxError: unterminated string literal (detected at line 19) (<string>, line 19))", "seconds": 155.2}
+{"model": "gemma-4-12B-int4-f32", "task": "parse-duration", "phrasing": 0, "probe": "PASS", "seconds": 107.7}
+{"model": "gemma-4-12B-int4-f32", "task": "parse-duration", "phrasing": 1, "probe": "PASS", "seconds": 101.0}
+{"model": "gemma-4-12B-int4-f32", "task": "rle-codec", "phrasing": 0, "probe": "PASS", "seconds": 113.2}
+{"model": "gemma-4-12B-int4-f32", "task": "rle-codec", "phrasing": 1, "probe": "PASS", "seconds": 95.7}
+{"model": "gemma-4-12B-int4-f32", "task": "group-anagrams", "phrasing": 0, "probe": "PASS", "seconds": 83.5}
+{"model": "gemma-4-12B-int4-f32", "task": "group-anagrams", "phrasing": 1, "probe": "PASS", "seconds": 94.8}

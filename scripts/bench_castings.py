@@ -21,7 +21,7 @@ import urllib.request
 
 BASE = "http://localhost:8000/v1"
 OUT = pathlib.Path(__file__).resolve().parent.parent / "bench_results" / "castings.jsonl"
-CASTING = sys.argv[1]
+CASTING = sys.argv[1] if len(sys.argv) > 1 else ""  # lazy: importable for reuse
 REVIEW = "--review" in sys.argv
 TEMP = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--temp=")), None)
 TOP_P = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--top-p=")), None)
