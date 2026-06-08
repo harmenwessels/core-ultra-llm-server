@@ -247,3 +247,22 @@
 {"casting": "Qwen2.5-Coder-3B-Instruct-int4-ov-card-r2", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (rle_decode(rle_encode('zzzzzzzzzzzz')) -> 'z2')", "seconds": 23.3, "temperature": 0.7, "top_p": 0.8, "top_k": 20}
 {"casting": "Qwen2.5-Coder-3B-Instruct-int4-ov-card-r2", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: 'return' outside function (<string>, line 19))", "seconds": 24.4, "temperature": 0.7, "top_p": 0.8, "top_k": 20}
 {"casting": "Qwen2.5-Coder-3B-Instruct-int4-ov-card-r2", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 34.5, "temperature": 0.7, "top_p": 0.8, "top_k": 20}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 85.9}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 93.2}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 60.9}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 113.8}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 101.9}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 111.6}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 47.8}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "parse-duration", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 23.2}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "rle-codec", "phrasing": 0, "review": false, "probe": "FAIL (rle_decode(rle_encode('zzzzzzzzzzzz')) -> 'z2')", "seconds": 52.8}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "rle-codec", "phrasing": 1, "review": false, "probe": "FAIL (IndexError: string index out of range)", "seconds": 79.4}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "group-anagrams", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 41.3}
+{"casting": "Qwen3-14B-int4-ov-greedy-3072", "task": "group-anagrams", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 48.3}
+{"casting": "OmniCoder-9B-int4_sym-ov-greedy-3072", "task": "merge-intervals", "phrasing": 0, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 1))", "seconds": 238.2}
+{"casting": "OmniCoder-9B-int4_sym-ov-greedy-3072", "task": "merge-intervals", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 91.6}
+{"casting": "OmniCoder-9B-int4_sym-ov-greedy-3072", "task": "rate-limiter", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 45.8}
+{"casting": "OmniCoder-9B-int4_sym-ov-greedy-3072", "task": "rate-limiter", "phrasing": 1, "review": false, "probe": "FAIL (SyntaxError: invalid syntax (<string>, line 224))", "seconds": 296.0}
+{"casting": "OmniCoder-9B-int4_sym-ov-greedy-3072", "task": "lru-cache", "phrasing": 0, "review": false, "probe": "FAIL (_lru() -> [1, 2, 3, 1])", "seconds": 101.7}
+{"casting": "OmniCoder-9B-int4_sym-ov-greedy-3072", "task": "lru-cache", "phrasing": 1, "review": false, "probe": "PASS", "seconds": 57.9}
+{"casting": "OmniCoder-9B-int4_sym-ov-greedy-3072", "task": "parse-duration", "phrasing": 0, "review": false, "probe": "PASS", "seconds": 76.2}

@@ -143,31 +143,52 @@ TASKS = {
 }
 
 
-def extract_code(text: str) -> str:
+def extract_code(text: str) -> str:  # kept for back-compat
     blocks = re.findall(r"```(?:python)?\s*(.*?)```", text, re.DOTALL)
     return "\n\n".join(blocks) if blocks else text
 
 
+def _code_candidates(text: str) -> list:
+    """Extraction strategies, in order — verbose models emit several ``` blocks
+    (snippets + the final answer); joining them all yields invalid Python, which
+    unfairly fails them. Try joined first (single-block / helper+main), then each
+    block largest-first. PASS if ANY candidate runs the tests."""
+    blocks = re.findall(r"```(?:python)?\s*(.*?)```", text, re.DOTALL)
+    if not blocks:
+        return [text]
+    return ["\n\n".join(blocks)] + sorted(blocks, key=len, reverse=True)
+
+
 def probe(task: dict, content: str) -> str:
-    code = extract_code(content)
-    ns: dict = {}
-    try:
-        exec(code, ns)  # noqa: S102 — our own benchmark task
-        if task["fn"] not in ns:
-            return "FAIL (missing definition)"
-        if task.get("harness"):
-            exec(task["harness"], ns)  # noqa: S102
-        for expr, want in task["tests"]:
-            got = eval(expr, ns)  # noqa: S307
-            if got != want:
-                return f"FAIL ({expr} -> {got!r})"
-        return "PASS"
-    except Exception as e:  # noqa: BLE001
-        return f"FAIL ({type(e).__name__}: {e})"
+    last = "FAIL (no code)"
+    for code in _code_candidates(content):
+        ns: dict = {}
+        try:
+            exec(code, ns)  # noqa: S102 — our own benchmark task
+            if task["fn"] not in ns:
+                last = "FAIL (missing definition)"
+                continue
+            if task.get("harness"):
+                exec(task["harness"], ns)  # noqa: S102
+            ok = True
+            for expr, want in task["tests"]:
+                got = eval(expr, ns)  # noqa: S307
+                if got != want:
+                    last = f"FAIL ({expr} -> {got!r})"
+                    ok = False
+                    break
+            if ok:
+                return "PASS"
+        except Exception as e:  # noqa: BLE001
+            last = f"FAIL ({type(e).__name__}: {e})"
+    return last
+
+
+_MAX_TOKENS = int(__import__("os").environ.get("MAX_TOKENS", "2048"))
 
 
 def ask_virtual(prompt: str) -> tuple[str, float]:
-    body = {"model": "virtual/agent", "max_tokens": 2048, "review": REVIEW,
+    body = {"model": "virtual/agent", "max_tokens": _MAX_TOKENS, "review": REVIEW,
             "messages": [{"role": "user", "content": prompt}]}
     if TEMP is not None:
         body["temperature"] = TEMP

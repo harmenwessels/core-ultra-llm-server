@@ -425,6 +425,20 @@ Hard-won rules:
    data-free 7–8→**9/12** (0.3 and 0.6 tied). Granite is exempt — IBM examples and unsloth
    both specify greedy (`temp 0.0, top_p 1.0, top_k 0`), matching how it is benched/served.
    `bench_castings.py` now takes `--temp`/`--top-p` (top_k not yet wired through the server).
+0g. **optimum `OVModelForCausalLM` and GenAI `LLMPipeline` can produce materially different
+   output quality for the *same* int4 IR (2026-06-08).** Trying to build an equal Gemma-vs-fleet
+   leaderboard on a single engine: the Qwen int4 models (Qwen3-14B etc.) emit **token-level
+   malformed code — doubled brackets** like `last[1]]` — via the optimum `generate()` path, even at
+   **greedy** (so not sampling), with a clean system prompt and robust extraction → ~3/12. The same
+   IRs score 9–10/12 via the **GenAI** server path (the casting leaderboard). So the optimum
+   inference path mis-renders these models where GenAI doesn't. Consequence: **a clean cross-family
+   head-to-head with Gemma-4-12B is not achievable** — Gemma runs *only* via optimum (GenAI lacks
+   `gemma4_unified` dispatch, 0e/Gemma note) and is 12/12 there; the Qwen family runs correctly
+   *only* via GenAI. No common engine runs both correctly. What holds: Gemma-4-12B is 12/12 robust
+   on its native path (top-tier); the Qwen family is 9–10 on theirs; not directly comparable.
+   Practical note: our serving stack is GenAI, so this optimum artifact doesn't affect production —
+   but don't trust optimum-`generate()` casting scores for int4 Qwen models. (`scripts/bench_direct.py`,
+   `_code_candidates` robust-extraction in `bench_castings.py`.)
 0f. **Sampling's benefit is a task × size interaction — not a free lift (fleet sweep,
    2026-06-08, `scripts/run_card_sweep.py`, top_k now wired).** Card sampling helped only
    *large models on open-ended generation*; it was neutral-to-negative everywhere else, on the
