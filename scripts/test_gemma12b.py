@@ -8,10 +8,16 @@ from transformers import AutoProcessor
 
 PATH = r"C:\git\GitHub\openvino-windows-openai-api\models\HarmenWessels\gemma-4-12B-it-qat-int4-ov"
 DEVICE = sys.argv[1] if len(sys.argv) > 1 else "CPU"
-PREC = "f16" if "--f16" in sys.argv else "f32"  # f16 = the server-default path
-CFG = ({} if PREC == "f16" else
-       {"INFERENCE_PRECISION_HINT": "f32", "KV_CACHE_PRECISION": "f32",
-        "DYNAMIC_QUANTIZATION_GROUP_SIZE": 0})
+PREC = "f16" if "--f16" in sys.argv else "bf16" if "--bf16" in sys.argv else "f32"
+if PREC == "f16":
+    CFG = {}  # f16 = the server-default path
+elif PREC == "bf16":
+    # f32's range (no softcap overflow) at half the size — the untested middle
+    CFG = {"INFERENCE_PRECISION_HINT": "bf16", "KV_CACHE_PRECISION": "bf16",
+           "DYNAMIC_QUANTIZATION_GROUP_SIZE": 0}
+else:
+    CFG = {"INFERENCE_PRECISION_HINT": "f32", "KV_CACHE_PRECISION": "f32",
+           "DYNAMIC_QUANTIZATION_GROUP_SIZE": 0}
 
 print(f"loading on {DEVICE} with {PREC} config...", flush=True)
 t0 = time.perf_counter()

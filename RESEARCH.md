@@ -523,6 +523,15 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   later OpenVINO release adds an f16-safe softcap path, or for a one-off quality query where 1.4
   tok/s is acceptable. Convert venv was moved to transformers 5.10 + PR optimum-intel for this —
   revert before other exports.
+  **bf16 probe (2026-06-08):** confirmed the f16 failure is *range/overflow* (softcapping +
+  embedding ×√3840), not precision — **bf16 is coherent** (f32's 8-bit exponent, no overflow).
+  But bf16 gives **no speedup over f32 on this iGPU** (~1.4 tok/s either way): Meteor Lake Xe-LPG
+  has no native bf16 unit — its fast path is f16 (which overflows). So the artifact is *sound and
+  would run at speed on bf16-capable hardware* (Xe2/Battlemage, discrete GPUs, AVX512-BF16 CPUs),
+  just not this one. The only route to speed *here* is op-level mixed precision (f16 everywhere
+  except the ~2 sensitive ops forced to f32) — an OV-runtime/PR feature, not reachable via the
+  plugin precision hints. Net: still no usable seat on this machine; the blocker is now precisely
+  "no native bf16 on Xe-LPG + no op-level precision control", not the model itself.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
