@@ -1,0 +1,79 @@
+{
+  "HarmenWessels/gemma-4-E4B-it-qat-int4-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 3.7,
+      "detail": "calls=[('web_search', {'query': 'latest stable python version'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 3.3,
+      "detail": "calls=[] content='API stands for **Application Programming Interface**.'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 3.9,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is `7`.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 6.3,
+      "detail": "calls=[('edit_file', \"{'new_string': 'if not values:\\\\n        \")]"
+    },
+    "edit-exact": {
+      "pass": true,
+      "seconds": 7.4,
+      "detail": "old-match=True old='if window < 1:\\n        raise ValueError(\"window mu'"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 13.2,
+      "detail": "exec/assert failed: unterminated triple-quoted string literal (detected at line 16) (<string>, line 12)"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 5.1,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 17.6,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": false,
+      "seconds": 10.0,
+      "detail": "content='the test fails because the expected value in the test case is incorrect; for the list `[4, 1, 3, 2]`'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 13.4,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": true,
+      "seconds": 21.0,
+      "detail": "stopped at turn 3: edits=1 green-tests-seen=1"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 6.6,
+      "detail": "content='The environment variable that holds your deployment API key is **FROBNICATE_KEY_'"
+    },
+    "_summary": {
+      "passed": 11,
+      "of": 13,
+      "avg_seconds": 8.9,
+      "total_seconds": 115.0
+    }
+  },
+  "_run": {
+    "sampling": "greedy",
+    "think_axis": false
+  }
+}

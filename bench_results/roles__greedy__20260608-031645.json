@@ -1,0 +1,79 @@
+{
+  "yangsu0423/Qwen3.5-4B-int4-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 4.8,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 3.9,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 4.8,
+      "detail": "calls=[] content='The acronym **API** stands for **Application Programming Int'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 5.6,
+      "detail": "calls=[] content='The value of MAX_RETRIES in config.yaml is **7**.'"
+    },
+    "no-repeat": {
+      "pass": true,
+      "seconds": 22.7,
+      "detail": "calls=[('edit_file', \"{'path': 'stats.py', 'old_string': 'def \")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 25.9,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 24.3,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 7.3,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 29.5,
+      "detail": "0/6 [chat:None, edit:None, design:None, chat:None, edit:None, design:None]"
+    },
+    "diagnose": {
+      "pass": false,
+      "seconds": 53.9,
+      "detail": "content='user\\nthe user is asking for help debugging a test failure in a median function. they want to know wh'"
+    },
+    "plan": {
+      "pass": false,
+      "seconds": 53.9,
+      "detail": "symbols=2 numbered=False code=True"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 11.1,
+      "detail": "stopped at turn 0: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": false,
+      "seconds": 13.6,
+      "detail": "content='user\\nWhat is the purpose of the `__main__` block in Python?\\nassistant\\n<think>\\n\\n<'"
+    },
+    "_summary": {
+      "passed": 4,
+      "of": 13,
+      "avg_seconds": 20.1,
+      "total_seconds": 261.0
+    }
+  },
+  "_run": {
+    "sampling": "greedy",
+    "think_axis": false
+  }
+}

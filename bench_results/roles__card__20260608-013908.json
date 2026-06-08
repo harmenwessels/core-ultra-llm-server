@@ -1,0 +1,83 @@
+{
+  "Echo9Zulu/Qwen3.5-2B-int4_sym-ov": {
+    "call-simple": {
+      "pass": false,
+      "seconds": 4.2,
+      "detail": "calls=[]"
+    },
+    "call-choose": {
+      "pass": false,
+      "seconds": 6.9,
+      "detail": "calls=[]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 5.3,
+      "detail": "calls=[] content='API stands for **Application Programming Interface** (or **A'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 3.2,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is **7**.'"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 29.3,
+      "detail": "calls=[('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\"), ('read_file', \"{'path': 'stats.py'}\")]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 41.6,
+      "detail": "edits=0 calls=[]"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 66.3,
+      "detail": "writes=0 calls=[]"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 2.8,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 31.3,
+      "detail": "0/6 [chat:None, edit:None, design:None, chat:None, edit:None, design:None]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 31.4,
+      "detail": "content='the error is on the even case: `return (s[mid] + s[mid + 1]) / 2`. when `n = 4`, `mid = 4 // 2 = 2`,'"
+    },
+    "plan": {
+      "pass": false,
+      "seconds": 36.5,
+      "detail": "symbols=4 numbered=False code=False"
+    },
+    "chain-depth": {
+      "pass": false,
+      "seconds": 65.9,
+      "detail": "stopped at turn 0: edits=0 green-tests-seen=0"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 10.7,
+      "detail": "content='The environment variable that holds our deployment API key is **FROBNICATE_KEY_7'"
+    },
+    "_summary": {
+      "passed": 5,
+      "of": 13,
+      "avg_seconds": 25.8,
+      "total_seconds": 335.0
+    }
+  },
+  "_run": {
+    "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20
+    },
+    "think_axis": false
+  }
+}

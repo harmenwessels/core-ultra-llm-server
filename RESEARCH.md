@@ -425,6 +425,24 @@ Hard-won rules:
    data-free 7–8→**9/12** (0.3 and 0.6 tied). Granite is exempt — IBM examples and unsloth
    both specify greedy (`temp 0.0, top_p 1.0, top_k 0`), matching how it is benched/served.
    `bench_castings.py` now takes `--temp`/`--top-p` (top_k not yet wired through the server).
+0f. **Sampling's benefit is a task × size interaction — not a free lift (fleet sweep,
+   2026-06-08, `scripts/run_card_sweep.py`, top_k now wired).** Card sampling helped only
+   *large models on open-ended generation*; it was neutral-to-negative everywhere else, on the
+   *same* 13-probe role suite measured greedy-vs-card:
+   - **Open-ended codegen (castings):** Qwen3-14B 9→10, Omni 7-8→9, Qwen3-8B →10 (one block of
+     two — variance is real on the text path too, 2 blocks mandatory).
+   - **Structured/deterministic role probes:** card was −1 to −2 for nearly every model and
+     gained nowhere meaningfully (Gemma E4B 11→10, Coder-3B 9→8, Gemma E2B 9→7…). Sampling
+     breaks exact-match/format probes and small models lack headroom to absorb the variance.
+   Rule: **sample only for open-ended generation on a large model; keep greedy for structured/
+   deterministic work (routing, exact edits, recall) and for small models.** This *confirmed*
+   the production casting — no seat changes; card sampling stays the opt-in max-quality lever
+   for the 14B/Omni generative path. Two corollaries surfaced: (i) the re-acquired Coder-7B
+   again earns no seat (Coder-3B ties it at ½ size / 2× speed on both suites); (ii) **Qwen3.5
+   community builds (Echo9Zulu-2B, yangsu0423-4B) are thinking-unstable under sampling** —
+   empty `generation_config`, no nothink rt_info patch, so card "nothink" params don't suppress
+   reasoning and they loop into degenerate output (castings 0/11). Their card rows are
+   confounded; fairly sampling them needs the rule-0b rt_info patch first (follow-up).
 1b. **Believe the declared pin first.** optimum-intel master declares `transformers<5.1` —
    that pointer would have found the lfm2 window immediately; symbol-probing across versions
    found it the slow way. Read the installed package's requirements before bisecting.

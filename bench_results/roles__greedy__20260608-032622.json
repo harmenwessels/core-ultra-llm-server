@@ -1,0 +1,79 @@
+{
+  "HarmenWessels/gemma-4-E2B-it-qat-int4-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 3.3,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 3.1,
+      "detail": "calls=[('web_search', {'query': 'latest stable Python version'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 2.9,
+      "detail": "calls=[] content='API stands for **Application Programming Interface**.'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 3.3,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is **7**.'"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 49.4,
+      "detail": "calls=[]"
+    },
+    "edit-exact": {
+      "pass": true,
+      "seconds": 11.4,
+      "detail": "old-match=True old='def moving_average(values, window):\\n    \"\"\"Moving '"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 9.4,
+      "detail": "exec/assert failed: unterminated triple-quoted string literal (detected at line 18) (<string>, line 12)"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 4.6,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": false,
+      "seconds": 17.3,
+      "detail": "4/6 [chat:design, edit:edit, design:design, chat:design, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 4.2,
+      "detail": "content='the error is in the calculation for the even case of the median, where the expression `(s[mid] + s[m'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 7.2,
+      "detail": "symbols=3 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": true,
+      "seconds": 45.8,
+      "detail": "stopped at turn 4: edits=2 green-tests-seen=1"
+    },
+    "recall-deep": {
+      "pass": false,
+      "seconds": 6.8,
+      "detail": "content='(answer omitted from transcript for brevity) (answer omitted from transcript for'"
+    },
+    "_summary": {
+      "passed": 9,
+      "of": 13,
+      "avg_seconds": 13.0,
+      "total_seconds": 169.0
+    }
+  },
+  "_run": {
+    "sampling": "greedy",
+    "think_axis": false
+  }
+}

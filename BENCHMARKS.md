@@ -369,6 +369,54 @@ Granite is unaffected — IBM's examples and unsloth both specify greedy (`temp 
 top_k 0`), which is exactly how it is benched and served, so the production executor carries
 no condition debt.
 
+### Fleet card-temperature sweep (2026-06-08): sampling helps *only* large-model open-ended generation
+
+The above prompted a full re-bench at card params (`scripts/run_card_sweep.py`, top_k now wired;
+11 models; role suite greedy-vs-card on the *same* 13-probe suite, plus castings ×2 for brains;
+card = best of 2 sampled blocks). The result is a **clean task × size interaction**:
+
+**Castings (open-ended codegen) — card sampling helps the big brains:**
+
+| Model | greedy | card | note |
+|---|---|---|---|
+| Qwen3-14B | 9 | **10/12** | leader |
+| OmniCoder-9B data-free | 7–8 | **9/12** | |
+| Qwen3-8B | — | 7, **10/12** | high variance — 2 blocks essential |
+| Qwen2.5-Coder-3B | — | 7, 7/12 | matches Coder-7B at ½ size |
+| Qwen2.5-Coder-7B | — | 6, 6/12 | no seat — 3B dominates it |
+| Qwen3.5-2B / 4B | — | 0/11 / err | **thinking-leak, invalid (see below)** |
+
+**Role suite (structured/deterministic probes) — card sampling is neutral-to-negative for
+every model**, same 13-probe suite, greedy vs best card:
+
+| Model | greedy | card | Δ |   | Model | greedy | card | Δ |
+|---|---|---|---|---|---|---|---|---|
+| Gemma E4B | **11** | 10 | −1 |   | Qwen3.5-2B | 4 | 5 | +1 |
+| Qwen3-8B | 10 | 10 | 0 |   | Qwen3-1.7B | 5 | 6 | +1 |
+| Qwen2.5-Coder-7B | 9 | 8 | −1 |   | Coder-1.5B | 5 | 4 | −1 |
+| Qwen2.5-Coder-3B | 9 | 8 | −1 |   | Qwen3.5-0.8B | 4 | 3 | −1 |
+| Gemma E2B | 9 | 7 | −2 |   | Coder-0.5B | 3 | 3 | 0 |
+| Qwen3.5-4B | 4 | 6 | +2 |   |  |  |  |  |
+
+**The rule: sample for open-ended generation on a large model; keep greedy for structured/
+deterministic work (routing, exact edits, recall) and for small models.** Sampling injects
+token-level variance that breaks exact-match probes and that small models lack the headroom to
+absorb; only large models on open-ended tasks have enough valid-continuation mass for sampling's
+diversity to pay off. This *confirms* the production casting rather than overturning it —
+**no seat changes**: router/autocomplete/architect/executor all stay greedy (their strong native
+condition); card sampling stays the opt-in max-quality lever for the 14B/Omni generative path.
+
+Incidental fleet facts: **Gemma E4B is the role-fitness champion** (11/13 greedy, holds even at
+temp 1.0); **Coder-3B ≡ Coder-7B** on both suites (9/13 role, 7-vs-6 castings) at ½ size and ~2×
+speed, so the re-acquired 7B again earns no seat; **Qwen3-8B** is a strong all-rounder brain
+(10/13 role, up to 10/12 castings). **Caveat — Qwen3.5 community builds (Echo9Zulu-2B,
+yangsu0423-4B) are thinking-unstable:** empty `generation_config`, no nothink rt_info patch, so
+the "nothink" card params don't suppress reasoning — under sampling they loop into degenerate
+output (castings 0/11, role `recall-deep` emits `user\nuser\n…`). Their card rows are confounded,
+not a sampling verdict; fairly testing them needs the rule-0b rt_info nothink patch first
+(follow-up). The architect seat (Qwen3.5-2B) is unaffected — it passes `diagnose` (its actual
+job) at greedy; its low aggregate is executor probes it never serves.
+
 ## Current role recommendations (will evolve as more models run)
 
 | Role | Recommendation | Why |

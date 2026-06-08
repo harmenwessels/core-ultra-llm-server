@@ -1,0 +1,83 @@
+{
+  "OpenVINO/Qwen3-8B-int4-cw-ov": {
+    "call-simple": {
+      "pass": true,
+      "seconds": 4.8,
+      "detail": "calls=[('read_file', {'path': 'config.yaml'})]"
+    },
+    "call-choose": {
+      "pass": true,
+      "seconds": 4.1,
+      "detail": "calls=[('web_search', {'query': 'latest stable python version'})]"
+    },
+    "call-restraint": {
+      "pass": true,
+      "seconds": 5.0,
+      "detail": "calls=[] content='The acronym API stands for \"Application Programming Interfac'"
+    },
+    "result-use": {
+      "pass": true,
+      "seconds": 4.1,
+      "detail": "calls=[] content='The value of `MAX_RETRIES` in `config.yaml` is **7**.'"
+    },
+    "no-repeat": {
+      "pass": false,
+      "seconds": 16.1,
+      "detail": "calls=[]"
+    },
+    "edit-exact": {
+      "pass": false,
+      "seconds": 9.5,
+      "detail": "old-match=False old='return [sum(values[i:i + window]) / window for i i'"
+    },
+    "write-full": {
+      "pass": false,
+      "seconds": 7.7,
+      "detail": "writes=0 calls=['edit_file']"
+    },
+    "stop-done": {
+      "pass": true,
+      "seconds": 5.9,
+      "detail": "calls=[]"
+    },
+    "route": {
+      "pass": true,
+      "seconds": 17.6,
+      "detail": "6/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design:design]"
+    },
+    "diagnose": {
+      "pass": true,
+      "seconds": 12.5,
+      "detail": "content='the error is in the line `return (s[mid] + s[mid + 1]) / 2` \u2014 it should be `s[mid - 1]` instead of `'"
+    },
+    "plan": {
+      "pass": true,
+      "seconds": 23.7,
+      "detail": "symbols=4 numbered=True code=False"
+    },
+    "chain-depth": {
+      "pass": true,
+      "seconds": 25.9,
+      "detail": "stopped at turn 3: edits=1 green-tests-seen=1"
+    },
+    "recall-deep": {
+      "pass": true,
+      "seconds": 9.3,
+      "detail": "content='The environment variable that holds your deployment API key is **FROBNICATE_KEY_'"
+    },
+    "_summary": {
+      "passed": 10,
+      "of": 13,
+      "avg_seconds": 11.2,
+      "total_seconds": 146.0
+    }
+  },
+  "_run": {
+    "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.8,
+      "top_k": 20
+    },
+    "think_axis": false
+  }
+}
