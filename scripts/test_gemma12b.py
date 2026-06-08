@@ -6,7 +6,9 @@ import time
 from optimum.intel import OVModelForVisualCausalLM
 from transformers import AutoProcessor
 
-PATH = r"C:\git\GitHub\openvino-windows-openai-api\models\HarmenWessels\gemma-4-12B-it-qat-int4-ov"
+import os
+PATH = os.environ.get("GEMMA_PATH",
+    r"C:\git\GitHub\openvino-windows-openai-api\models\HarmenWessels\gemma-4-12B-it-qat-int4-ov")
 DEVICE = sys.argv[1] if len(sys.argv) > 1 else "CPU"
 PREC = "f16" if "--f16" in sys.argv else "bf16" if "--bf16" in sys.argv else "f32"
 # --scale=N : run f16 but scale activations into f16 range (the overflow fix)

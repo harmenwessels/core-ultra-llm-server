@@ -551,6 +551,19 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   kernel gap, not an editable graph attribute**. Local IR/code changes can't bridge it; needs an
   upstream int4→f32(/bf16) GPU kernel or Gemma-specific f16-safe kernels (f32 accumulation, as in
   llama.cpp). Not pursued further.
+  **The real GPU unblock is GenAI `gemma4_unified` support (root cause found 2026-06-08).** Our
+  **E4B** (`gemma4`, identical `final_logit_softcapping: 30.0`, identical baked
+  `ACTIVATIONS_SCALE_FACTOR: 8.0`) runs **f16-safe on this same iGPU** — because our nightly GenAI
+  (2026.3) supports `gemma4` (VLMPipeline dispatch, openvino.genai **PR #3644**) and applies the
+  Gemma f16-overflow handling there. The 12B is **`gemma4_unified`**, a separate VLM type GenAI
+  doesn't dispatch yet ("Unsupported gemma4_unified VLM model type"), so it falls back to optimum's
+  generic `OVModelForVisualCausalLM` path which lacks that handling → f16 garbage. **So the f16
+  failure is an execution-path gap, not the model, the softcap, the quant, or the base (QAT vs
+  `it` is irrelevant — same arch, same overflow; QAT stays the best int4-quality choice).** When
+  GenAI adds `gemma4_unified` dispatch (the natural follow-on to #3644), our existing QAT int4
+  artifact should run on the GPU at f16 like E4B. **Watch openvino.genai for gemma4_unified; keep
+  the artifact.** No local fix bridges it (optimum can't replicate GenAI's gemma handling;
+  activation scaling proven insufficient; f32 hits the int4 kernel gap).
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
