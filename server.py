@@ -108,6 +108,26 @@ _TOOL_FORMAT_OVERRIDE: dict[str, str] = {}
 _PROMPT_LEN_OVERRIDE: dict[str, int] = {}
 
 
+def _card_serving(model_dir: pathlib.Path) -> dict:
+    """Per-model card serving config (cards/<owner>__<name>.yaml). Provides
+    model-intrinsic defaults (tool_format, thinking, max_prompt_len); a
+    models.yaml deployment entry overrides. Empty dict if no card. The cards are
+    the same files the benchmark reads — single source of truth."""
+    try:
+        slug = model_dir.resolve().relative_to(
+            (ROOT / "models").resolve()).as_posix().replace("/", "__")
+    except ValueError:
+        return {}
+    f = ROOT / "cards" / f"{slug}.yaml"
+    if not f.exists():
+        return {}
+    try:
+        import yaml
+        return yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+    except Exception:  # noqa: BLE001
+        return {}
+
+
 def _model_id(model_dir: pathlib.Path) -> str:
     """Served id: the registry alias if set, else the HF-style 'owner/name'."""
     alias = _ALIASES.get(str(model_dir.resolve()))
@@ -1277,8 +1297,12 @@ def _load_models_config() -> None:
         d = d.resolve()
         dirs.append(d)
         # one dir may be served multiple times under different aliases
-        # (e.g. the same IR on GPU and CPU) — entries are positional
-        mid = m.get("alias") or _model_id(d)
+        # (e.g. the same IR on GPU and CPU) — entries are positional.
+        # Model-INTRINSIC fields (tool_format, thinking, max_prompt_len) fall
+        # back to the model's card; DEPLOYMENT fields (device, prompt_lookup,
+        # scheduler, alias) stay per-entry. models.yaml always overrides the card.
+        card = _card_serving(d)
+        mid = m.get("alias") or card.get("alias") or _model_id(d)
         _REGISTRY_ALIASES.append(mid)
         if m.get("device"):
             MODEL_DEVICES[mid] = str(m["device"]).upper()
@@ -1286,12 +1310,15 @@ def _load_models_config() -> None:
             SCHEDULER_MODELS[mid] = int(m["scheduler"]["kv_pool_gb"])
         if m.get("prompt_lookup"):
             PROMPT_LOOKUP_MODELS.add(mid)
-        if m.get("tool_format"):
-            _TOOL_FORMAT_OVERRIDE[mid] = str(m["tool_format"])
-        if m.get("thinking"):
-            _THINKING_POLICY[mid] = str(m["thinking"])
-        if m.get("max_prompt_len"):
-            _PROMPT_LEN_OVERRIDE[mid] = int(m["max_prompt_len"])
+        tool_format = m.get("tool_format") or card.get("tool_format")
+        if tool_format:
+            _TOOL_FORMAT_OVERRIDE[mid] = str(tool_format)
+        thinking = m.get("thinking") or card.get("thinking")
+        if thinking:
+            _THINKING_POLICY[mid] = str(thinking)
+        max_prompt_len = m.get("max_prompt_len") or card.get("max_prompt_len")
+        if max_prompt_len:
+            _PROMPT_LEN_OVERRIDE[mid] = int(max_prompt_len)
     if dirs:
         MODEL_DIRS = dirs
         # registry replaces (not merges with) the env defaults
