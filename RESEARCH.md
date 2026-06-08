@@ -564,6 +564,16 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   artifact should run on the GPU at f16 like E4B. **Watch openvino.genai for gemma4_unified; keep
   the artifact.** No local fix bridges it (optimum can't replicate GenAI's gemma handling;
   activation scaling proven insufficient; f32 hits the int4 kernel gap).
+  **Can't relabel onto the working gemma4 path either (checked 2026-06-08).** `gemma4` (E4B) and
+  `gemma4_unified` (12B) are *different pipeline architectures*, not just labels: E4B's LM ports are
+  `[attention_mask, position_ids, inputs_embeds, per_layer_inputs, beam_idx]` + a
+  `text_embeddings_per_layer` (PLE) submodel; the 12B's LM is `[…, token_type_ids, beam_idx]` with
+  **no per_layer_inputs port and no PLE submodel**. GenAI's gemma4 handler computes PLE and feeds
+  `per_layer_inputs` — which the 12B LM can't accept, so a `model_type` rename → load error / input
+  mismatch. Running the 12B via GenAI needs a real `gemma4_unified` handler (skip PLE, feed
+  token_type_ids, apply f16-safety) = C++ + from-source GenAI rebuild, not an editable config or
+  Python hook. Full dead-end chain: base(QAT/it)✗ quant✗ activation-scale✗ relabel✗ → upstream
+  GenAI gemma4_unified dispatch only. Track it; don't self-build.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
