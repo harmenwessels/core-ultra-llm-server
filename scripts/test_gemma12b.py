@@ -9,7 +9,15 @@ from transformers import AutoProcessor
 PATH = r"C:\git\GitHub\openvino-windows-openai-api\models\HarmenWessels\gemma-4-12B-it-qat-int4-ov"
 DEVICE = sys.argv[1] if len(sys.argv) > 1 else "CPU"
 PREC = "f16" if "--f16" in sys.argv else "bf16" if "--bf16" in sys.argv else "f32"
-if PREC == "f16":
+# --scale=N : run f16 but scale activations into f16 range (the overflow fix)
+SCALE = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--scale=")), None)
+if "--dynamic" in sys.argv:  # OV auto mixed-precision (GPU supports f16/f32/dynamic)
+    CFG = {"INFERENCE_PRECISION_HINT": "dynamic"}
+    PREC = "dynamic"
+elif SCALE is not None:
+    CFG = {"ACTIVATIONS_SCALE_FACTOR": SCALE}  # f16 inference + activation scaling
+    PREC = f"f16+scale{SCALE}"
+elif PREC == "f16":
     CFG = {}  # f16 = the server-default path
 elif PREC == "bf16":
     # f32's range (no softcap overflow) at half the size — the untested middle
@@ -21,7 +29,7 @@ else:
 
 print(f"loading on {DEVICE} with {PREC} config...", flush=True)
 t0 = time.perf_counter()
-model = OVModelForVisualCausalLM.from_pretrained(PATH, ov_config=CFG)
+model = OVModelForVisualCausalLM.from_pretrained(PATH, device=DEVICE, ov_config=CFG)
 proc = AutoProcessor.from_pretrained(PATH)
 print(f"loaded in {time.perf_counter()-t0:.0f}s", flush=True)
 

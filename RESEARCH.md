@@ -510,28 +510,34 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   `google/gemma-4-12B-it-qat-q4_0-unquantized` (ungated) — data-free grid-matched conversion
   (sym g32 = Q4_0) gives int4≈bf16 by construction, exactly how our E2B/E4B builds work. Load
   ceiling clear (int4 12B ≈7 GiB; Qwen3-14B at 9.1 GiB already runs).
-  **VERDICT 2026-06-08 — converts and is coherent, but impractical on this stack.** PR #1770
-  (+ transformers 5.10) exports `gemma4_unified` cleanly; the QAT grid-matched int4 (sym-g32,
-  328/329 layers, 7.7 GB) is **coherent at f32** (CPU and GPU both: correct code + "Paris"). The
-  QAT recipe beat the weight-quant concern. BUT the numerical sensitivity is an *architecture*
-  property (logit softcapping + embedding scaling), not a quant one, so it persists: **f16 — our
-  server's default — is unreliable** (single-token "Paris" survives, multi-token generation
-  derails to garbage like `Thereatoi`). Forced to **f32 it runs ~1.4 tok/s** on both CPU and the
-  iGPU (no speedup from GPU at f32) — ~4.5× slower than Qwen3-14B's 6.4 tok/s. So: a valid,
-  coherent artifact and both gates proven cleared, but **not a usable seat** until OV/GenAI
-  handles the softcapping at lower precision. Not worth a server integration now. Revisit if a
-  later OpenVINO release adds an f16-safe softcap path, or for a one-off quality query where 1.4
-  tok/s is acceptable. Convert venv was moved to transformers 5.10 + PR optimum-intel for this —
-  revert before other exports.
-  **bf16 probe (2026-06-08):** confirmed the f16 failure is *range/overflow* (softcapping +
-  embedding ×√3840), not precision — **bf16 is coherent** (f32's 8-bit exponent, no overflow).
-  But bf16 gives **no speedup over f32 on this iGPU** (~1.4 tok/s either way): Meteor Lake Xe-LPG
-  has no native bf16 unit — its fast path is f16 (which overflows). So the artifact is *sound and
-  would run at speed on bf16-capable hardware* (Xe2/Battlemage, discrete GPUs, AVX512-BF16 CPUs),
-  just not this one. The only route to speed *here* is op-level mixed precision (f16 everywhere
-  except the ~2 sensitive ops forced to f32) — an OV-runtime/PR feature, not reachable via the
-  plugin precision hints. Net: still no usable seat on this machine; the blocker is now precisely
-  "no native bf16 on Xe-LPG + no op-level precision control", not the model itself.
+  **VERDICT 2026-06-08 — converts and is coherent, but impractical on this stack (corrected
+  after a device-labelling bug).** PR #1770 (+ transformers 5.10) exports `gemma4_unified`
+  cleanly; the QAT grid-matched int4 (sym-g32, 328/329 layers, 7.7 GB) is **coherent at f32/bf16**
+  (correct code + "Paris"). The QAT recipe beat the weight-quant concern. The numerical
+  sensitivity is *architectural* (logit softcapping + embedding ×√3840), not quant, so it
+  persists at f16: single-token "Paris" survives, multi-token generation derails (`Thereatoi`).
+  Full precision × device matrix (`scripts/test_gemma12b.py`):
+  | device | precision | coherent? | speed | blocker |
+  |---|---|---|---|---|
+  | CPU | f32 / bf16 | ✅ | ~1.4 tok/s | — (the only coherent path) |
+  | CPU | f16 | ✗ | — | softcap overflow |
+  | GPU | f16 | ✗ | ~6 tok/s | softcap overflow |
+  | GPU | f16 + ACTIVATIONS_SCALE_FACTOR 8–256 | ✗ | ~6 tok/s | scaling fixes *linear* overflow only; softcap is nonlinear |
+  | GPU | f32 / dynamic | ✗ (errors) | — | `_reorder_weights`: no int4→f32 kernel on Xe-LPG |
+  | GPU | bf16 | ✗ (errors) | — | not a valid GPU precision hint (f16/f32/dynamic only) |
+  **The GPU cannot run this int4 model coherently by any path** — two independent blockers: (1)
+  softcap overflows at f16 (the only GPU precision that loads), and `ACTIVATIONS_SCALE_FACTOR`
+  (OV's f16-overflow fix, GPU-only) can't help because the softcap is *nonlinear*, not a linearly
+  scalable activation; (2) f32/dynamic hit a missing int4→f32 `_reorder_weights` kernel in the
+  intel_gpu plugin. So the model runs **only on CPU at f32/bf16, ~1.4 tok/s** — ~4.5× slower than
+  Qwen3-14B. **Correction:** earlier notes here claimed "coherent at f32 on GPU, ~1.4 tok/s on the
+  iGPU" — that was a bug: `OVModelForVisualCausalLM.from_pretrained` was called without `device=`,
+  so every "GPU" run silently used CPU. The real GPU runs (device passed) are the matrix above;
+  GPU f32 doesn't run at all. Net: a valid, coherent artifact, both gates cleared, **no usable
+  seat** — would need *either* op-level mixed precision (softcap kept f32 so f16 works) *or* the
+  missing int4→f32 GPU kernel, both upstream OV/PR fixes. Revisit on bf16/f32-capable hardware
+  (discrete GPU, AVX512-BF16 CPU) or a later OV release. Convert venv moved to transformers 5.10
+  + PR optimum-intel — revert before other exports.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
