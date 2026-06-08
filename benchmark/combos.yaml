@@ -1,0 +1,16 @@
+# Named virtual/agent combinations to benchmark as peer entries (Step 2).
+# roles map a virtual role -> a model alias/id; run_combos.ps1 loads these
+# co-resident, sets VIRTUAL_ROLES, and runs bench_run.py virtual/agent.
+# No "beat" target — a combo is just another row in the leaderboard.
+combos:
+  small-trio:
+    roles:
+      router: coder-1.5b-cpu
+      architect: qwen3.5-2b
+      executor: gemma-e4b
+      reviewer: qwen3.5-2b
+  granite-stack:
+    roles:
+      router: coder-1.5b-cpu
+      architect: qwen3.5-2b
+      executor: granite-8b

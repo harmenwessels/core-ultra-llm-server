@@ -1,0 +1,10 @@
+hf_id: HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov
+alias: coder-1.5b-npu
+family: qwen2.5
+device: NPU
+thinking: none
+max_prompt_len: 4096
+roles:
+- autocomplete-npu
+- router-npu
+decoding: {}

@@ -1,0 +1,5 @@
+hf_id: Echo9Zulu/OmniCoder-9B-int4_sym-ov
+alias: omnicoder-9b_sym-ov
+family: omnicoder
+device: GPU
+decoding: {}

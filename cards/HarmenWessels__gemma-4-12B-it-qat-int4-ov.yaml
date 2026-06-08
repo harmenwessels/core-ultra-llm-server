@@ -1,0 +1,5 @@
+hf_id: HarmenWessels/gemma-4-12B-it-qat-int4-ov
+alias: gemma-4-12b-it-qat-ov
+family: gemma4
+device: GPU
+decoding: {}

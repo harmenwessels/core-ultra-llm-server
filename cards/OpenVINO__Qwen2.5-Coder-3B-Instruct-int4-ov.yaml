@@ -1,0 +1,5 @@
+hf_id: OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov
+alias: qwen2.5-coder-3b-instruct-ov
+family: qwen2.5
+device: GPU
+decoding: {}

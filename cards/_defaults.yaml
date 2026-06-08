@@ -1,0 +1,40 @@
+# Card defaults — family decoding/think baselines so each per-model card stays
+# terse (a card overrides only what differs). Resolved by bench_meta.load_card:
+#   default[class]  <  families[family][class]  <  card.decoding[class]
+# Decoding values seed from the model families' published cards (RESEARCH rule
+# 0e/0f). A model's measured best-use operating point overrides here via its card.
+#
+# Task classes: generative (codegen, edit), structured (agent-loop, analysis),
+# fim (autocomplete). `greedy: true` means no sampling.
+
+default:
+  generative: { temp: 0.7, top_p: 0.8, top_k: 20 }   # open-ended codegen: sampling
+  structured: { greedy: true }                        # edit/agent/analysis: greedy (rule 0f)
+  fim: { greedy: true }                               # autocomplete: greedy
+  blocks: 2          # best-of-N; bench_run collapses to 1 when greedy+non-VLM (deterministic)
+
+families:
+  qwen3:     { generative: { temp: 0.7, top_p: 0.8,  top_k: 20 } }
+  qwen3.5:   { generative: { temp: 0.6, top_p: 0.95, top_k: 20 } }
+  qwen2.5:   { generative: { temp: 0.7, top_p: 0.8,  top_k: 20 } }
+  gemma4:    { generative: { temp: 1.0, top_p: 0.95, top_k: 64 } }
+  granite:   { generative: { greedy: true }, structured: { greedy: true } }
+  omnicoder: { generative: { temp: 0.6, top_p: 0.95, top_k: 20 } }
+  lfm2:      { generative: { temp: 0.3, top_p: 0.95, top_k: 20 } }
+  minicpm:   { generative: { temp: 0.7, top_p: 0.8,  top_k: 20 } }
+
+# documentation mirror of bench_meta.TASK_CLASS (bench_meta's constant is authoritative)
+task_class:
+  codegen: generative
+  edit: structured
+  autocomplete-fim: fim
+  agent-loop: structured
+  analysis: structured
+
+# per-task think policy (default nothink; analysis may reason)
+think_by_task:
+  codegen: nothink
+  edit: nothink
+  autocomplete-fim: nothink
+  agent-loop: nothink
+  analysis: think

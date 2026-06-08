@@ -6,7 +6,7 @@ as machine-specific and the *rules* as the transferable result.
 
 **Test rig:** Dell XPS 13, Intel Core Ultra 155H (Meteor Lake), Arc iGPU (Xe-LPG, 128 EU),
 32 GB LPDDR5x, Windows 11, Intel driver 32.0.101.8724, OpenVINO GenAI 2026.3 nightly
-(`dev20260603`), Python 3.12. Current per-model results: [BENCHMARKS.md](BENCHMARKS.md)
+(`dev20260603`), Python 3.12. Current per-model results: [BENCHMARKS.md](benchmark/README.md)
 (workload method); the superseded raw-decode overview is archived in the appendix below.
 
 ---

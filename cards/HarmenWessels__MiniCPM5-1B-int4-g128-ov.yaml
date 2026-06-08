@@ -1,0 +1,5 @@
+hf_id: HarmenWessels/MiniCPM5-1B-int4-g128-ov
+alias: minicpm5-1b-g128-ov
+family: minicpm
+device: GPU
+decoding: {}

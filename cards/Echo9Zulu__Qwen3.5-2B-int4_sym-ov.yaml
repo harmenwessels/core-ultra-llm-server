@@ -1,0 +1,12 @@
+hf_id: Echo9Zulu/Qwen3.5-2B-int4_sym-ov
+alias: qwen3.5-2b
+family: qwen3.5
+device: GPU
+thinking: switchable
+context_budget: 24576
+scheduler:
+  kv_pool_gb: 2
+roles:
+- architect
+- chat-fast
+decoding: {}

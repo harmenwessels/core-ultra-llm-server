@@ -1,0 +1,5 @@
+hf_id: HarmenWessels/LFM2.5-1.2B-Instruct-int4-cw-ov
+alias: lfm2.5-1.2b-instruct-cw-ov
+family: lfm2
+device: GPU
+decoding: {}

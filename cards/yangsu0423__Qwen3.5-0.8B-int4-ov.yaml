@@ -1,0 +1,5 @@
+hf_id: yangsu0423/Qwen3.5-0.8B-int4-ov
+alias: qwen3.5-0.8b-ov
+family: qwen3.5
+device: GPU
+decoding: {}
