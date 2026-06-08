@@ -1,5 +1,0 @@
-hf_id: HarmenWessels/Qwen2.5-Coder-0.5B-int4-ov
-alias: qwen2.5-coder-0.5b-ov
-family: qwen2.5
-device: GPU
-decoding: {}

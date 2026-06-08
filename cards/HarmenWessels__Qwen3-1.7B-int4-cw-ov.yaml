@@ -1,5 +1,0 @@
-hf_id: HarmenWessels/Qwen3-1.7B-int4-cw-ov
-alias: qwen3-1.7b-cw-ov
-family: qwen3
-device: GPU
-decoding: {}
