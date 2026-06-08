@@ -1,5 +1,0 @@
-hf_id: Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov
-alias: lfm2.5-1.2b-thinking_asym-ov
-family: lfm2
-device: GPU
-decoding: {}

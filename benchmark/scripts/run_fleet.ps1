@@ -36,6 +36,7 @@ $fleet = if ($Models.Count) { $Models } else { @(
   "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
   "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
   "HarmenWessels/granite-4.1-3b-int4-cw-ov",
+  "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",   # code-calibrated AWQ+SE — head-to-head vs the wikitext-calibrated cw
   "HarmenWessels/granite-4.1-8b-int4-cw-ov"
 ) }
 
