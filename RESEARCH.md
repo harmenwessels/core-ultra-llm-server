@@ -587,6 +587,20 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   fix it. So: **not a C++/GenAI rebuild — an export-side change**, plus separately the GenAI
   loading gate for serving via our own server (still needs gemma4_unified dispatch). Next:
   re-export with f32 softmax once RAM frees (12B export ~24 GB; can't run alongside a CPU bench).
+  **SOLVED 2026-06-08 — one-line IR fix, runs on the iGPU at ~7 tok/s.** It was the baked rt_info
+  `ACTIVATIONS_SCALE_FACTOR`, not the softmax/export. The gemma4_unified export bakes
+  `value="8.0"` (same as E4B) — but the 12B's larger activations (hidden 3840, 48 layers) overflow
+  f16 at 8.0; **E4B is small enough that 8.0 suffices, the 12B isn't.** Raising the baked value
+  fixes it: swept 16/32/64/128/512 → **all coherent at f16 on GPU (~7–8 tok/s)**, only the original
+  8.0 garbages. (This is also why the earlier `ov_config` ACTIVATIONS_SCALE_FACTOR sweep "failed" —
+  the baked rt_info value overrode the runtime property.) Baked **64.0** into
+  `openvino_language_model.xml` (8× margin over the ~just-above-8 threshold; 512 still clean, so
+  precision loss isn't a concern). So Gemma-4-12B — our **quality leader (11/12)** — now runs
+  coherent + ~7 tok/s on this exact iGPU via the optimum `OVModelForVisualCausalLM` path. Earlier
+  "GPU can't run it / needs upstream kernel or GenAI dispatch" conclusions were all wrong: the only
+  real issue was a too-small baked scale factor. Caveat: this runs via **optimum**, not our GenAI
+  server (GenAI still lacks gemma4_unified dispatch) — serving it in the main server needs either
+  GenAI support or an optimum-based serving path. Fix tool: `scripts/sweep_scale_factor.py`.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE
