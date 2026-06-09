@@ -224,7 +224,13 @@ def _split_reasoning(text: str, think_mode: str = "nothink") -> tuple[str | None
     (reasoning_content, content). In think mode, an output that never closed
     its think block is all reasoning (budget ran out mid-thought)."""
     if "</think>" not in text:
-        if think_mode == "think":
+        # An opened-but-unclosed <think> means the budget ran out mid-thought:
+        # it's all reasoning, not answer content. Route it to reasoning even in
+        # nothink mode — an always-on reasoner (e.g. LFM2.5-Thinking) emits
+        # <think> regardless of the requested mode, and a normal answer from a
+        # non-reasoning model never starts with a <think> opener, so this can't
+        # swallow a real answer.
+        if think_mode == "think" or text.lstrip().startswith("<think>"):
             return text.replace("<think>", "").strip("\n") or None, ""
         return None, text
     head, _, tail = text.partition("</think>")

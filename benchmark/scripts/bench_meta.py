@@ -12,7 +12,9 @@ assembler runs in any venv.
 from __future__ import annotations
 
 import json
+import os
 import pathlib
+import re
 import time
 import xml.etree.ElementTree as ET
 
@@ -270,7 +272,7 @@ def combo_info(name: str) -> dict:
 def build_run_header(*, target, task_type, suite, suite_budget, decoding,
                      think, model_dir=None, engine=None, driver=None,
                      subject=None, composition=None, notes=None,
-                     stamp=None, confidence="high") -> dict:
+                     stamp=None, confidence="high", warmup_seconds=None) -> dict:
     h = {
         "_type": "run_header", "schema_version": SCHEMA_VERSION,
         "run_id": f"{model_slug(target)}__{task_type}__{stamp or _stamp()}",
@@ -282,6 +284,11 @@ def build_run_header(*, target, task_type, suite, suite_budget, decoding,
         "decoding": decoding, "think": think,
         "driver": driver, "notes": notes or [], "confidence": confidence,
     }
+    if warmup_seconds is not None:
+        # First-inference warmup (OV kernel JIT + prefix-cache prime, measured
+        # ~60s on cold .ovcache). Untimed for scoring — recorded here so the
+        # model's start cost is visible, separate from steady-state task times.
+        h["warmup_seconds"] = round(float(warmup_seconds), 1)
     if composition is not None:
         h["composition"] = composition        # combo: {role: {model,quant,card}}
     else:
@@ -300,6 +307,47 @@ def _date(stamp=None) -> str:
     return time.strftime("%Y-%m-%d")
 
 
+_HOME = os.path.expanduser("~")
+_USER_PATH_RE = re.compile(r'([A-Za-z]:\\Users\\|/Users/|/home/)[^\\/\s)\'"]+')
+
+
+def redact_paths(text):
+    """Strip the local username from absolute paths so it never reaches a
+    committed artifact (standing rule: no local/username paths in git). Probe
+    verdicts can embed exec tracebacks that include the local Python install
+    path; this collapses the home dir to ~ and any Users/home path's username
+    to <user>. Idempotent; non-strings pass through unchanged."""
+    if not isinstance(text, str):
+        return text
+    for h in {_HOME, _HOME.replace("\\", "/")}:
+        if h and h not in ("", "~"):
+            text = text.replace(h, "~")
+    return _USER_PATH_RE.sub(r"\1<user>", text)
+
+
+def _redact_response(turns):
+    """Normalize + path-redact captured model turns for storage. `turns` is a
+    list of assistant message dicts; keep only the fields useful for offline
+    grading/research (content, reasoning_content, tool_calls, finish_reason).
+    Storing the raw output lets us re-grade or analyse without re-hitting the
+    LLM — and see exactly what the model wrote (e.g. unclosed <think>)."""
+    out = []
+    for m in turns or []:
+        rm = {}
+        for k in ("content", "reasoning_content"):
+            if m.get(k):
+                rm[k] = redact_paths(m[k])
+        for c in m.get("tool_calls") or []:
+            fn = c.get("function") or c
+            rm.setdefault("tool_calls", []).append(
+                {"name": fn.get("name"),
+                 "arguments": redact_paths(str(fn.get("arguments", "")))})
+        if m.get("finish_reason"):
+            rm["finish_reason"] = m["finish_reason"]
+        out.append(rm)
+    return out
+
+
 class RunWriter:
     """Writes one <task_type>__<slug>__<stamp>.jsonl atomically (.tmp->rename)."""
 
@@ -313,13 +361,15 @@ class RunWriter:
         self._lines = [json.dumps(header)]
 
     def cell(self, cell_id, *, passed, verdict, seconds, blocks_used=1,
-             extra=None):
+             extra=None, response=None):
         row = {"_type": "cell", "run_id": self.header["run_id"],
                "suite": self.header["suite"], "task_type": self.header["task_type"],
                "cell_id": cell_id,
-               "quality": {"pass": bool(passed), "verdict": verdict},
+               "quality": {"pass": bool(passed), "verdict": redact_paths(verdict)},
                "runtime": {"seconds": round(float(seconds), 1),
                            "blocks_used": blocks_used}}
+        if response:
+            row["response"] = _redact_response(response)
         if extra:
             row["extra"] = extra
         self._lines.append(json.dumps(row))

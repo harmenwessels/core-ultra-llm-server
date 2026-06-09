@@ -1,0 +1,1360 @@
+{
+  "agent-loop": [
+    {
+      "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 7,
+      "cells": 7,
+      "seconds": 47.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 6.6
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
+      "kind": "single",
+      "quality": 7,
+      "cells": 7,
+      "seconds": 55.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 33.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "result-use: FAIL (calls=[('read_file', {'path': 'config.yaml'})] content='')"
+      ],
+      "detail": "scale_estimation",
+      "recipe": "scale_estimation",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 35.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "chain-depth: FAIL (stopped at turn 2: edits=0 green-tests-seen=0)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 1.2
+    },
+    {
+      "subject": "OpenVINO/Qwen3-4B-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 36.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "chain-depth: FAIL (stopped at turn 0: edits=0 green-tests-seen=0)"
+      ],
+      "detail": "awq",
+      "recipe": "awq",
+      "size": 2.3
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 40.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "no-repeat: FAIL (calls=[])"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen3-8B-int4-cw-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 60.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "no-repeat: FAIL (calls=[])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 4.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3-14B-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 107.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "chain-depth: FAIL (turn 1: repeated call run_tests)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 9.7
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-12B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 120.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "stop-done: FAIL (calls=['read_file'])"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 8.2
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 160.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "no-repeat: FAIL (calls=[])"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 5,
+      "cells": 7,
+      "seconds": 21.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "no-repeat: FAIL (calls=[('read_file', \"{'path': 'stats.py'}\")])",
+        "chain-depth: FAIL (turn 1: repeated call run_tests)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 7,
+      "seconds": 23.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "call-simple: FAIL (calls=[])",
+        "call-restraint: FAIL (calls=[('web_search', {'query': 'API acronym'})] content='')",
+        "chain-depth: FAIL (stopped at turn 0: edits=0 green-tests-seen=0)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 7,
+      "seconds": 27.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "call-choose: FAIL (calls=[])",
+        "call-restraint: FAIL (calls=[] content='The acronym API stands for **A-P-I**. It is used in )",
+        "chain-depth: FAIL (turn 2: repeated call run_tests)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.4
+    },
+    {
+      "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 7,
+      "seconds": 147.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "call-simple: FAIL (calls=[])",
+        "call-choose: FAIL (calls=[])",
+        "chain-depth: FAIL (stopped at turn 0: edits=0 green-tests-seen=0)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 2.1
+    },
+    {
+      "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 7,
+      "seconds": 302.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "call-simple: FAIL (calls=[])",
+        "call-choose: FAIL (calls=[])",
+        "chain-depth: FAIL (stopped at turn 0: edits=0 green-tests-seen=0)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 7,
+      "seconds": 27.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "call-choose: FAIL (calls=[('read_file', {'path': 'https://www.python.org/downloads/'})])",
+        "result-use: FAIL (calls=[('read_file', {'path': 'config.yaml'})] content='')",
+        "no-repeat: FAIL (calls=[('read_file', \"{'path': 'stats.py'}\")])",
+        "stop-done: FAIL (calls=['run_tests'])",
+        "chain-depth: FAIL (stopped at turn 0: edits=0 green-tests-seen=0)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.9
+    },
+    {
+      "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 7,
+      "seconds": 51.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "call-simple: FAIL (calls=[])",
+        "call-choose: FAIL (calls=[])",
+        "call-restraint: FAIL (calls=[] content='')",
+        "result-use: FAIL (calls=[] content='')",
+        "no-repeat: FAIL (calls=[])",
+        "stop-done: FAIL (calls=[])",
+        "chain-depth: FAIL (stopped at turn 0: edits=0 green-tests-seen=0)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    }
+  ],
+  "analysis": [
+    {
+      "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 4,
+      "seconds": 151.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 6.6
+    },
+    {
+      "subject": "OpenVINO/Qwen3-4B-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 4,
+      "seconds": 317.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "awq",
+      "recipe": "awq",
+      "size": 2.3
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-12B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 4,
+      "seconds": 330.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 8.2
+    },
+    {
+      "subject": "OpenVINO/Qwen3-14B-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 4,
+      "seconds": 788.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 9.7
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 34.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "diagnose: FAIL (content='the error is that the function `median` is returning 3.5 when)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.9
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 37.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "diagnose: FAIL (content='the issue lies in the line `return (s[mid] + s[mid + 1]) / 2`)"
+      ],
+      "detail": "scale_estimation",
+      "recipe": "scale_estimation",
+      "size": 1.8
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 41.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "recall-deep: FAIL (content='(remembered from earlier) FROBNICATE_77.')"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 68.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "diagnose: FAIL (content='the test fails because the expected median value is incorrect)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 164.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "recall-deep: FAIL (content='(answer omitted from transcript for brevity) (answer omitted )"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 175.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "plan: FAIL (symbols=0 numbered=False code=False)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 1.2
+    },
+    {
+      "subject": "OpenVINO/Qwen3-8B-int4-cw-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 576.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "plan: FAIL (symbols=4 numbered=False code=False)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 4.7
+    },
+    {
+      "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 694.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "route: FAIL (3/6 [chat:chat, edit:None, design:None, chat:chat, edit:chat, design:d)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 2.1
+    },
+    {
+      "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 1482.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "route: FAIL (2/6 [chat:chat, edit:None, design:chat, chat:chat, edit:None, design:N)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
+    },
+    {
+      "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 4,
+      "seconds": 25.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "route: FAIL (3/6 [chat:chat, edit:edit, design:chat, chat:edit, edit:edit, design:c)",
+        "diagnose: FAIL (content='the test fails because the expected median of `[4, 1, 3, 2]` )"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 4,
+      "seconds": 102.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "route: FAIL (4/6 [chat:design, edit:edit, design:design, chat:design, edit:edit, de)",
+        "diagnose: FAIL (content='')"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.4
+    },
+    {
+      "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 4,
+      "seconds": 112.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "diagnose: FAIL (content='')",
+        "plan: FAIL (symbols=1 numbered=True code=False)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 4,
+      "seconds": 252.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "route: FAIL (3/6 [chat:None, edit:edit, design:None, chat:chat, edit:edit, design:N)",
+        "recall-deep: FAIL (content='(answer omitted from transcript for brevity) (answer omitted )"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 4.4
+    }
+  ],
+  "autocomplete-fim": [
+    {
+      "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 1,
+      "seconds": 1.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 1,
+      "seconds": 2.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.9
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 1,
+      "seconds": 2.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "scale_estimation",
+      "recipe": "scale_estimation",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen3-4B-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 1,
+      "seconds": 4.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "awq",
+      "recipe": "awq",
+      "size": 2.3
+    },
+    {
+      "subject": "OpenVINO/Qwen3-8B-int4-cw-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 1,
+      "seconds": 7.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 4.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3-14B-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 1,
+      "seconds": 14.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 9.7
+    },
+    {
+      "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 1.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 1.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.4
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 2.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 2.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 2.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 1.2
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 7.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    }
+  ],
+  "codegen": [
+    {
+      "subject": "OpenVINO/Qwen3-8B-int4-cw-ov",
+      "kind": "single",
+      "quality": 12,
+      "cells": 12,
+      "seconds": 735.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 4.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3-14B-int4-ov",
+      "kind": "single",
+      "quality": 12,
+      "cells": 12,
+      "seconds": 910.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 9.7
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-12B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 12,
+      "cells": 12,
+      "seconds": 1446.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 8.2
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 10,
+      "cells": 12,
+      "seconds": 1188.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "group-anagrams#0: FAIL (missing definition)",
+        "group-anagrams#1: FAIL (missing definition)"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 6.6
+    },
+    {
+      "subject": "OpenVINO/Qwen3-4B-int4-ov",
+      "kind": "single",
+      "quality": 9,
+      "cells": 12,
+      "seconds": 503.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "lru-cache#0: FAIL (NameError: name 'LRUCache' is not defined)",
+        "parse-duration#0: FAIL (NameError: name 'parse_duration' is not defined)",
+        "group-anagrams#0: FAIL (missing definition)"
+      ],
+      "detail": "awq",
+      "recipe": "awq",
+      "size": 2.3
+    },
+    {
+      "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
+      "kind": "single",
+      "quality": 9,
+      "cells": 12,
+      "seconds": 1789.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-intervals#0: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [(1, 6), (8, 10)])",
+        "parse-duration#1: FAIL (ValueError: not enough values to unpack (expected 2, got 1))",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 8,
+      "cells": 12,
+      "seconds": 220.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-intervals#0: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [(1, 6), [8, 10]])",
+        "parse-duration#0: FAIL (parse_duration('2h45m') -> 7500)",
+        "parse-duration#1: FAIL (parse_duration('2h45m') -> 0)",
+        "rle-codec#1: FAIL (ValueError: invalid literal for int() with base 10: '')"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
+      "kind": "single",
+      "quality": 8,
+      "cells": 12,
+      "seconds": 615.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "lru-cache#0: FAIL (_lru() -> [1, 2, -1, 1])",
+        "lru-cache#1: FAIL (AttributeError: 'NoneType' object has no attribute 'next')",
+        "parse-duration#1: FAIL (ValueError: invalid literal for int() with base 10: 's')",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 8,
+      "cells": 12,
+      "seconds": 1064.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-intervals#0: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [(1, 6), (8, 10)])",
+        "lru-cache#1: FAIL (NameError: name 'lrucache' is not defined)",
+        "parse-duration#1: FAIL (parse_duration('2h45m') -> 162000)",
+        "group-anagrams#0: FAIL (missing definition)"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 12,
+      "seconds": 132.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "rate-limiter#0: FAIL (NameError: name 'window_seconds' is not defined)",
+        "rate-limiter#1: FAIL (_seq() -> [True, False, False, False])",
+        "parse-duration#0: FAIL (NameError: name 'parse_duration' is not defined)",
+        "parse-duration#1: FAIL (parse_duration('2h45m') -> 0)",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)",
+        "rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 12,
+      "seconds": 324.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "rate-limiter#0: FAIL (_seq() -> [False, False, False, False])",
+        "rate-limiter#1: FAIL (_seq() -> [True, True, True, True])",
+        "parse-duration#0: FAIL (ValueError: invalid literal for int() with base 10: '2h45')",
+        "parse-duration#1: FAIL (parse_duration('2h45m') -> 0)",
+        "rle-codec#0: FAIL (IndexError: string index out of range)",
+        "rle-codec#1: FAIL (rle_decode('a3b1c3') -> 'a333b1c333')"
+      ],
+      "detail": "scale_estimation",
+      "recipe": "scale_estimation",
+      "size": 1.8
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
+      "kind": "single",
+      "quality": 5,
+      "cells": 12,
+      "seconds": 181.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-intervals#0: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [[1, 3], [2, 6], [8, 10]])",
+        "rate-limiter#0: FAIL (ImportError: cannot import name 'deque' from 'datetime' (~\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\datetime.py))",
+        "rate-limiter#1: FAIL (ImportError: cannot import name 'deque' from 'datetime' (~\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\datetime.py))",
+        "lru-cache#0: FAIL (_lru() -> [1, 2, 3, -1])",
+        "parse-duration#0: FAIL (ValueError: invalid literal for int() with base 10: 'h')",
+        "parse-duration#1: FAIL (TypeError: 'NoneType' object is not subscriptable)",
+        "rle-codec#1: FAIL (ValueError: invalid literal for int() with base 10: '')"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
+      "kind": "single",
+      "quality": 5,
+      "cells": 12,
+      "seconds": 824.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "rate-limiter#0: FAIL (ModuleNotFoundError: No module named 'SlidingWindowLimiter')",
+        "lru-cache#1: FAIL (TypeError: 'NoneType' object is not callable)",
+        "parse-duration#0: FAIL (SyntaxError: invalid syntax (<string>, line 1))",
+        "parse-duration#1: FAIL (SyntaxError: invalid syntax (<string>, line 1))",
+        "rle-codec#0: FAIL (SyntaxError: invalid syntax (<string>, line 1))",
+        "rle-codec#1: FAIL (missing definition)",
+        "group-anagrams#0: FAIL (SyntaxError: invalid syntax (<string>, line 2))"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 2.1
+    },
+    {
+      "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 12,
+      "seconds": 120.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "rate-limiter#0: FAIL (_seq() -> [True, True, True, True])",
+        "rate-limiter#1: FAIL (NameError: name 'SlidingWindowLimiter' is not defined)",
+        "lru-cache#0: FAIL (_lru() -> [1, 2, 3, 1])",
+        "lru-cache#1: FAIL (missing definition)",
+        "parse-duration#0: FAIL (NameError: name 'parse_duration' is not defined)",
+        "parse-duration#1: FAIL (NameError: name 'parse_duration' is not defined)",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)",
+        "rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.4
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 12,
+      "seconds": 217.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "rate-limiter#0: FAIL (_seq() -> [True, True, False, False])",
+        "rate-limiter#1: FAIL (_seq() -> [False, False, False, False])",
+        "lru-cache#1: FAIL (NameError: name 'LRUCache' is not defined)",
+        "parse-duration#0: FAIL (ValueError: Invalid input: 2h45m)",
+        "parse-duration#1: FAIL (NameError: name 'parse_duration' is not defined)",
+        "rle-codec#0: FAIL (IndexError: string index out of range)",
+        "rle-codec#1: FAIL (IndexError: string index out of range)",
+        "group-anagrams#0: FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.9
+    },
+    {
+      "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 12,
+      "seconds": 317.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "rate-limiter#0: FAIL (NameError: name 'SlidingWindowLimiter' is not defined)",
+        "rate-limiter#1: FAIL (NameError: name 'SlidingWindowLimiter' is not defined)",
+        "lru-cache#0: FAIL (ValueError: 2 is not in deque)",
+        "lru-cache#1: FAIL (missing definition)",
+        "parse-duration#0: FAIL (NameError: name 'parse_duration' is not defined)",
+        "parse-duration#1: FAIL (NameError: name 'parse_duration' is not defined)",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)",
+        "rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 1.2
+    },
+    {
+      "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 12,
+      "seconds": 787.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-intervals#1: FAIL (missing definition)",
+        "rate-limiter#0: FAIL (missing definition)",
+        "rate-limiter#1: FAIL (missing definition)",
+        "lru-cache#0: FAIL (missing definition)",
+        "lru-cache#1: FAIL (missing definition)",
+        "parse-duration#0: FAIL (missing definition)",
+        "parse-duration#1: FAIL (missing definition)",
+        "rle-codec#0: FAIL (missing definition)",
+        "rle-codec#1: FAIL (missing definition)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    }
+  ],
+  "edit": [
+    {
+      "subject": "OpenVINO/Qwen3-14B-int4-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 2,
+      "seconds": 62.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 9.7
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 23.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='')"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 34.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 35.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 6.6
+    },
+    {
+      "subject": "HarmenWessels/gemma-4-12B-it-qat-int4-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 74.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)"
+      ],
+      "detail": "qat",
+      "recipe": "qat",
+      "size": 8.2
+    },
+    {
+      "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 7.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='window must satisfy 1 <= window <= len(values)')",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.4
+    },
+    {
+      "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 9.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=False old='def moving_average(values, window):\\\\n    if wind)",
+        "write-full: FAIL (exec/assert failed: 'mean')"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 12.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='return [sum(values[i:i + window]) / window\\n      )",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 1.2
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 13.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='')",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 14.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=[])",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "scale_estimation",
+      "recipe": "scale_estimation",
+      "size": 1.8
+    },
+    {
+      "subject": "OpenVINO/Qwen3-8B-int4-cw-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 15.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='return [sum(values[i:i + window]) / window\\n      )",
+        "write-full: FAIL (writes=0 calls=['edit_file'])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 4.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3-4B-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 17.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='return [sum(values[i:i + window]) / window\\n      )",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "awq",
+      "recipe": "awq",
+      "size": 2.3
+    },
+    {
+      "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 20.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='window must satisfy 1 <= window <= len(values)')",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.9
+    },
+    {
+      "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 23.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=[])",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 2.1
+    },
+    {
+      "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 38.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=[])",
+        "write-full: FAIL (exec/assert failed: '(' was never closed (<string>, line 4))"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.7
+    },
+    {
+      "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 78.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=[])",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 81.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=True old='def moving_average(values, window):\\n    \"\"\"Moving)",
+        "write-full: FAIL (writes=0 calls=[])"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 1.8
+    }
+  ]
+}

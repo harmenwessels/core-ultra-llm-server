@@ -29,6 +29,25 @@ def _size_gb(model_dir: pathlib.Path) -> float:
         return 0.0
 
 
+def _is_vlm(subject: str) -> bool:
+    """VLM-shaped IRs legitimately skip autocomplete-fim — not a coverage gap."""
+    try:
+        return (bm.resolve_model_dir(subject)
+                / "openvino_vision_embeddings_model.xml").exists()
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def load_fleet() -> list:
+    """Canonical fleet (benchmark/fleet.txt) — lets us surface members that
+    produced NO records (attempted-but-wedged) instead of silently dropping them."""
+    f = bm.BENCH_ROOT / "fleet.txt"
+    if not f.exists():
+        return []
+    return [ln.strip() for ln in f.read_text(encoding="utf-8").splitlines()
+            if ln.strip() and not ln.strip().startswith("#")]
+
+
 def load_runs():
     runs = []
     for f in sorted(bm.RUNS_DIR.glob("*.jsonl")):
@@ -76,6 +95,35 @@ def rank(entries_for_task):
     return sorted(entries_for_task, key=lambda e: (-e["quality"], e["seconds"]))
 
 
+def render_overall(entries) -> str:
+    """One row per model: passes + wall-clock summed across every task type,
+    ranked by total passed (desc) then total time (asc). Single models link to
+    their Hugging Face repo."""
+    agg = {}
+    for rows in entries.values():
+        for e in rows:
+            a = agg.setdefault(e["subject"], {
+                "subject": e["subject"], "kind": e["kind"], "pass": 0,
+                "cells": 0, "seconds": 0.0, "size": e.get("size"),
+                "recipe": e.get("recipe"), "detail": e.get("detail")})
+            a["pass"] += e["quality"]
+            a["cells"] += e["cells"]
+            a["seconds"] += e["seconds"]
+    rows = sorted(agg.values(), key=lambda a: (-a["pass"], a["seconds"]))
+    out = ["| # | Model | Passed | Total s | Size/Roles | Recipe |",
+           "|---|---|---|---|---|---|"]
+    for i, a in enumerate(rows, 1):
+        if a["kind"] == "single":
+            name = f"[{a['subject']}](https://huggingface.co/{a['subject']})"
+            sr = f'{a.get("size", "?")} GB'
+            rec = a.get("recipe") or "—"
+        else:
+            name, sr, rec = a["subject"], (a.get("detail") or "—"), "combo"
+        out.append(f"| {i} | {name} | {a['pass']}/{a['cells']} | "
+                   f"{a['seconds']:.0f} | {sr} | {rec} |")
+    return "\n".join(out) + "\n"
+
+
 def render_tables(entries) -> str:
     out = []
     for tt in TASK_ORDER:
@@ -101,16 +149,23 @@ def render_retest(entries, runs) -> str:
     versions = [h["engine"]["version"] for h, _ in runs if h["engine"]["version"] != "unknown"]
     newest = max(versions) if versions else None
     queued = []
+    singles = {e["subject"] for rows in entries.values() for e in rows if e["kind"] == "single"}
+    # fleet members with NO records — attempted-but-wedged or not yet run (surface,
+    # don't silently drop)
+    for m in load_fleet():
+        if m not in singles:
+            queued.append(f"{m}: NO records — attempted-but-incomplete or not yet run")
     # entries benched on an older engine than the newest seen
     for tt, rows in entries.items():
         for e in rows:
             if newest and e["engine"] != newest:
                 queued.append(f"{e['subject']} / {tt}: engine {e['engine']} != newest {newest}")
-    # coverage gaps: single models missing task types
-    singles = {e["subject"] for rows in entries.values() for e in rows if e["kind"] == "single"}
+    # coverage gaps: single models missing task types (autocomplete-fim is N/A for VLM IRs)
     for s in sorted(singles):
         have = {tt for tt, rows in entries.items() if any(e["subject"] == s for e in rows)}
-        miss = [t for t in TASK_ORDER if t not in have]
+        vlm = _is_vlm(s)
+        miss = [t for t in TASK_ORDER if t not in have
+                and not (t == "autocomplete-fim" and vlm)]
         if miss:
             queued.append(f"{s}: not yet run on {', '.join(miss)}")
     if not queued:
@@ -156,6 +211,7 @@ def _splice(path: pathlib.Path, start: str, end: str, content: str):
 def main():
     runs = load_runs()
     entries = aggregate(runs)
+    overall = render_overall(entries)
     tables = render_tables(entries)
     retest = render_retest(entries, runs)
     summary = render_summary(entries)
@@ -165,7 +221,9 @@ def main():
             if e["fails"]:
                 failures.append(f"**{e['subject']} / {tt}**:\n" +
                                 "\n".join(f"  - {x}" for x in e["fails"]))
-    lb = (f"## Per-task-type leaderboard\n\n_{len(runs)} runs._\n\n{tables}\n"
+    lb = (f"## Overall\n\nEvery tested model, passes and wall-clock summed across all "
+          f"task types — ranked by total passed, then total time.\n\n{overall}\n"
+          f"## Per-task-type leaderboard\n\n_{len(runs)} runs._\n\n{tables}\n"
           f"## Retest queue\n\n{retest}\n"
           + ("## Failures\n\n" + "\n\n".join(failures) + "\n" if failures else ""))
 

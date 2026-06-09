@@ -13,8 +13,10 @@ sampling variance on every serving path, not just the VLM one.
 """
 
 import json
+import os
 import pathlib
 import re
+import subprocess
 import sys
 import time
 import urllib.request
@@ -159,29 +161,60 @@ def _code_candidates(text: str) -> list:
     return ["\n\n".join(blocks)] + sorted(blocks, key=len, reverse=True)
 
 
+# Exec-grading runs model-written code. Weak models occasionally emit a runaway
+# (infinite loop / pathological recursion), which would hang an in-process exec
+# forever. Grade each candidate in a throwaway subprocess with a hard timeout so
+# a runaway is killed (TerminateProcess) and scored FAIL instead of wedging the
+# whole sweep. Override the per-candidate budget with BENCH_EXEC_TIMEOUT seconds.
+_EXEC_TIMEOUT = float(os.environ.get("BENCH_EXEC_TIMEOUT", "10"))
+
+
+def _grade_candidate(code: str, task: dict, timeout: float) -> str:
+    payload = json.dumps({"code": code, "fn": task["fn"],
+                          "harness": task.get("harness", ""),
+                          "tests": task["tests"]})
+    try:
+        r = subprocess.run([sys.executable, os.path.abspath(__file__),
+                            "--grade-worker"], input=payload,
+                           capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return "FAIL (exec timeout)"
+    out = (r.stdout or "").strip().splitlines()
+    return out[-1] if out else f"FAIL (no verdict; rc={r.returncode})"
+
+
 def probe(task: dict, content: str) -> str:
+    """Grade in subprocess isolation; PASS if ANY extracted candidate passes."""
     last = "FAIL (no code)"
     for code in _code_candidates(content):
-        ns: dict = {}
-        try:
-            exec(code, ns)  # noqa: S102 — our own benchmark task
-            if task["fn"] not in ns:
-                last = "FAIL (missing definition)"
-                continue
-            if task.get("harness"):
-                exec(task["harness"], ns)  # noqa: S102
-            ok = True
-            for expr, want in task["tests"]:
-                got = eval(expr, ns)  # noqa: S307
-                if got != want:
-                    last = f"FAIL ({expr} -> {got!r})"
-                    ok = False
-                    break
-            if ok:
-                return "PASS"
-        except Exception as e:  # noqa: BLE001
-            last = f"FAIL ({type(e).__name__}: {e})"
+        verdict = _grade_candidate(code, task, _EXEC_TIMEOUT)
+        if verdict == "PASS":
+            return "PASS"
+        last = verdict
     return last
+
+
+def _grade_worker() -> int:
+    """Subprocess entrypoint: exec one candidate + harness, run tests, print the
+    verdict. Isolated so a runaway is killed by the parent's timeout."""
+    p = json.load(sys.stdin)
+    ns: dict = {}
+    try:
+        exec(p["code"], ns)  # noqa: S102 — our own benchmark task
+        if p["fn"] not in ns:
+            print("FAIL (missing definition)")
+            return 0
+        if p.get("harness"):
+            exec(p["harness"], ns)  # noqa: S102
+        for expr, want in p["tests"]:
+            got = eval(expr, ns)  # noqa: S307
+            if got != want:
+                print(f"FAIL ({expr} -> {got!r})")
+                return 0
+        print("PASS")
+    except Exception as e:  # noqa: BLE001
+        print(f"FAIL ({type(e).__name__}: {e})")
+    return 0
 
 
 _MAX_TOKENS = int(__import__("os").environ.get("MAX_TOKENS", "2048"))
@@ -207,6 +240,8 @@ def ask_virtual(prompt: str) -> tuple[str, float]:
 
 
 if __name__ == "__main__":
+    if "--grade-worker" in sys.argv:
+        sys.exit(_grade_worker())
     passes = 0
     cells = 0
     for tname, task in TASKS.items():

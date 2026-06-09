@@ -1,0 +1,21 @@
+# Canonical Step-1 benchmark fleet (one HuggingFace id per line; # = comment).
+# Single source of truth, read by run_fleet.ps1 (default model set) and
+# assemble_leaderboard.py (to surface members that produced no records).
+HarmenWessels/gemma-4-E2B-it-qat-int4-ov
+HarmenWessels/gemma-4-E4B-it-qat-int4-ov
+HarmenWessels/gemma-4-12B-it-qat-int4-ov
+OpenVINO/Qwen3-0.6B-int4-ov
+OpenVINO/Qwen3-1.7B-int4-ov
+OpenVINO/Qwen3-4B-int4-ov
+OpenVINO/Qwen3-8B-int4-cw-ov
+OpenVINO/Qwen3-14B-int4-ov
+# yangsu0423/Qwen3.5-0.8B-int4-ov  # VL variant; wedges iGPU under both sampling AND greedy -> unbenchmarkable here (dropped)
+Echo9Zulu/Qwen3.5-2B-int4_sym-ov
+Echo9Zulu/OmniCoder-9B-int4_sym-ov
+OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
+OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov
+HarmenWessels/granite-4.1-3b-int4-cw-ov
+HarmenWessels/granite-4.1-3b-int4-cw-code-ov
+HarmenWessels/granite-4.1-8b-int4-cw-ov
+HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov
+Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov

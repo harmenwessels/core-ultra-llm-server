@@ -9,4 +9,7 @@ scheduler:
 roles:
 - architect
 - chat-fast
-decoding: {}
+decoding:
+  # VL (vision) IR: sym-quant + sampling codegen is unstable/understated on the iGPU.
+  # Pin greedy for codegen (matches OmniCoder/0.8B); other task classes are greedy already.
+  generative: { greedy: true }

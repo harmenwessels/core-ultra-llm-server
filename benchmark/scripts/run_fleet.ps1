@@ -24,21 +24,13 @@ function Stop-Servers {
   Start-Sleep -Seconds 2
 }
 
-$fleet = if ($Models.Count) { $Models } else { @(
-  "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
-  "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
-  "HarmenWessels/gemma-4-12B-it-qat-int4-ov",
-  "OpenVINO/Qwen3-8B-int4-cw-ov",
-  "OpenVINO/Qwen3-14B-int4-ov",
-  "yangsu0423/Qwen3.5-0.8B-int4-ov",
-  "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
-  "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
-  "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
-  "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
-  "HarmenWessels/granite-4.1-3b-int4-cw-ov",
-  "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",   # code-calibrated AWQ+SE — head-to-head vs the wikitext-calibrated cw
-  "HarmenWessels/granite-4.1-8b-int4-cw-ov"
-) }
+# Default fleet from benchmark/fleet.txt (single source of truth, shared with the
+# assembler); -Models overrides for targeted re-runs.
+$fleet = if ($Models.Count) { $Models } else {
+  Get-Content "$root\benchmark\fleet.txt" |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_ -and -not $_.StartsWith('#') }
+}
 
 Log "=== fleet sweep: $($fleet.Count) models, tasks=$Tasks ==="
 foreach ($m in $fleet) {

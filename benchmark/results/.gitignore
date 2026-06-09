@@ -1,0 +1,8 @@
+# Version the benchmark data product; ignore runtime scratch.
+# Kept: runs/*.jsonl (provenance + raw responses), leaderboard.json, run_notes.md
+# Ignored: server/fleet logs, partial writes, ad-hoc probe/diagnostic scratch.
+*.log
+*.log.err
+*.tmp
+*.jsonl.tmp
+diagnostics/

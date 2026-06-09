@@ -1,0 +1,7 @@
+# Reasoning variant of LFM2.5-1.2B; published int4_asym build (same recipe as the
+# data-free int4 default). Emits <think> traces; analysis think policy engages.
+hf_id: Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov
+alias: lfm2.5-1.2b-thinking-ov
+family: lfm2
+device: GPU
+decoding: {}

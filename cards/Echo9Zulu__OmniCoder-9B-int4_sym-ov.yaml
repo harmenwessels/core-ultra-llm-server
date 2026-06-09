@@ -2,4 +2,8 @@ hf_id: Echo9Zulu/OmniCoder-9B-int4_sym-ov
 alias: omnicoder-9b_sym-ov
 family: omnicoder
 device: GPU
-decoding: {}
+decoding:
+  # OmniCoder is unstable under sampling on the VLM path: sampled codegen runs away
+  # into ever-longer generations that wedge the iGPU (reproduced 2026-06-09, ~16min
+  # in, twice). All prior working benches were greedy (8/12). Pin greedy for codegen.
+  generative: { greedy: true }

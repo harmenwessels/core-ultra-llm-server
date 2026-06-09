@@ -71,6 +71,17 @@ def moving_average(values, window):
 
 EXTRA_BODY: dict = {}  # axis overrides (e.g. {"reasoning_effort": "high"})
 
+_TRANSCRIPT: list = []  # raw model turns captured per probe; drained by bench_run
+
+
+def drain_transcript() -> list:
+    """Return and clear the model turns captured since the last drain. Probes
+    are multi-call (agent-loop is multi-turn), so a cell's transcript is every
+    turn between drains."""
+    global _TRANSCRIPT
+    turns, _TRANSCRIPT = _TRANSCRIPT, []
+    return turns
+
 
 def _chat(model, messages, tools=None, max_tokens=1024, timeout=600):
     body = {"model": model, "messages": messages, "max_tokens": max_tokens,
@@ -84,6 +95,7 @@ def _chat(model, messages, tools=None, max_tokens=1024, timeout=600):
     with urllib.request.urlopen(req, timeout=timeout) as r:
         data = json.load(r)
     msg = data["choices"][0]["message"]
+    _TRANSCRIPT.append({**msg, "finish_reason": data["choices"][0].get("finish_reason")})
     return msg, time.perf_counter() - t0
 
 

@@ -1,0 +1,5 @@
+hf_id: OpenVINO/Qwen3-1.7B-int4-ov
+alias: qwen3-1.7b-ov
+family: qwen3
+device: GPU
+decoding: {}

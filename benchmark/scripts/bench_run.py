@@ -26,6 +26,7 @@ from bench_workloads import fim_prompt, probe_autocomplete  # noqa: E402
 
 BASE = "http://127.0.0.1:8000/v1"
 CODEGEN_MAX = int(os.environ.get("CODEGEN_MAX", "3072"))
+WARMUP_SECONDS = None              # per-model first-inference cost; set in main()
 
 ROLE_TASKS = {
     "edit": ["edit-exact", "write-full"],
@@ -90,17 +91,39 @@ def _chat(target, messages, max_tokens, sampling, think):
     if think == "think":
         body["reasoning_effort"] = "high"
     d, dt = _post("/chat/completions", body)
-    return (d["choices"][0]["message"].get("content") or ""), dt
+    choice = d["choices"][0]
+    msg = choice["message"]
+    resp = {**msg, "finish_reason": choice.get("finish_reason")}
+    return (msg.get("content") or ""), dt, resp
+
+
+def _warmup(target):
+    """One untimed generation to absorb OpenVINO's first-inference warmup —
+    server.py documents warm-prefix TTFT ~63s -> 0.9s on a cold .ovcache. This
+    cost would otherwise land entirely in the first codegen cell and inflate the
+    model's runtime (a ranking key). Logged as `warmup_seconds`, never folded
+    into scored cell times. Returns the warmup duration, or None on failure."""
+    try:
+        _, dt, _ = _chat(target, [{"role": "user", "content": "Reply with: ready."}],
+                         32, {}, "nothink")
+        return dt
+    except Exception as e:  # noqa: BLE001
+        print(f"  warmup failed ({type(e).__name__}) — task times may include "
+              f"first-inference cost", flush=True)
+        return None
 
 
 def _header(target, task_type, combo, stamp):
     cf = bm.card_for(target, task_type)
+    _ft = os.environ.get("BENCH_FORCE_THINK")   # "think"/"nothink" A/B override
+    if _ft in ("think", "nothink"):
+        cf = {**cf, "think": _ft}               # recorded in provenance + used by run_*
     budget = {"max_tokens": CODEGEN_MAX if task_type == "codegen" else None,
               "blocks": cf["blocks"]}
     kw = dict(target=target, task_type=task_type, suite=SUITE[task_type],
               suite_budget=budget, decoding=_decoding_record(cf),
               think=cf["think"], driver="benchmark/scripts/bench_run.py",
-              stamp=stamp)
+              stamp=stamp, warmup_seconds=WARMUP_SECONDS)
     if target == "virtual/agent":
         info = bm.combo_info(combo) if combo else {}
         kw["composition"] = info.get("roles", {})
@@ -117,12 +140,13 @@ def run_codegen(target, combo, stamp, is_vlm):
     nblocks = _blocks(cf, is_vlm)
     for tname, task in bc.TASKS.items():
         for pi, prompt in enumerate(task["asks"]):
-            verdict, secs, used = "FAIL (no run)", 0.0, 0
+            verdict, secs, used, resp = "FAIL (no run)", 0.0, 0, None
             for _ in range(nblocks):
                 used += 1
                 try:
-                    content, dt = _chat(target, [{"role": "user", "content": prompt}],
-                                        CODEGEN_MAX, sampling, think)
+                    content, dt, resp = _chat(
+                        target, [{"role": "user", "content": prompt}],
+                        CODEGEN_MAX, sampling, think)
                     v = bc.probe(task, content)
                 except Exception as e:  # noqa: BLE001
                     dt, v = 0.0, f"FAIL (EXC: {type(e).__name__})"
@@ -131,7 +155,8 @@ def run_codegen(target, combo, stamp, is_vlm):
                 if v == "PASS":
                     break
             w.cell(f"{tname}#{pi}", passed=verdict == "PASS", verdict=verdict,
-                   seconds=secs, blocks_used=used)
+                   seconds=secs, blocks_used=used,
+                   response=[resp] if resp else None)
     return w.close()
 
 
@@ -144,20 +169,23 @@ def run_roles(target, task_type, combo, stamp, is_vlm):
     nblocks = _blocks(cf, is_vlm)
     for name in ROLE_TASKS[task_type]:
         fn = _PROBE_BY_NAME[name]
-        passed, verdict, secs, used = False, "FAIL (no run)", 0.0, 0
+        passed, verdict, secs, used, turns = False, "FAIL (no run)", 0.0, 0, None
         for _ in range(nblocks):
             used += 1
             br.EXTRA_BODY = dict(extra)
+            br.drain_transcript()  # discard stale turns from a prior block
             try:
                 ok, dt, detail = fn(target)
             except Exception as e:  # noqa: BLE001
                 ok, dt, detail = False, 0.0, f"EXC: {e}"
+            turns = br.drain_transcript()  # this block's model turns
             br.EXTRA_BODY = {}
             secs += dt
             passed, verdict = ok, ("PASS" if ok else f"FAIL ({detail[:70]})")
             if ok:
                 break
-        w.cell(name, passed=passed, verdict=verdict, seconds=secs, blocks_used=used)
+        w.cell(name, passed=passed, verdict=verdict, seconds=secs, blocks_used=used,
+               response=turns or None)
     return w.close()
 
 
@@ -170,13 +198,16 @@ def run_fim(target, combo, stamp):
     prompt, used_fim = fim_prompt(bm.resolve_model_dir(target))
     body = {"model": target, "prompt": prompt, "max_tokens": 96,
             **_sampling(cf["decoding"])}
+    resp = None
     try:
         d, dt = _post("/completions", body, timeout=300)
         text = d["choices"][0].get("text") or ""
         verdict = probe_autocomplete(text, used_fim)
+        resp = [{"content": text, "finish_reason": d["choices"][0].get("finish_reason")}]
     except Exception as e:  # noqa: BLE001
         dt, verdict = 0.0, f"FAIL (EXC: {type(e).__name__})"
-    w.cell("merge-fim", passed=verdict == "PASS", verdict=verdict, seconds=dt)
+    w.cell("merge-fim", passed=verdict == "PASS", verdict=verdict, seconds=dt,
+           response=resp)
     return w.close()
 
 
@@ -191,6 +222,11 @@ def main():
     is_vlm = _is_vlm(args.target)
     print(f"=== {args.target}{' ['+args.combo+']' if args.combo else ''} "
           f"(vlm={is_vlm}) tasks={tasks} ===", flush=True)
+    global WARMUP_SECONDS
+    WARMUP_SECONDS = _warmup(args.target)
+    if WARMUP_SECONDS is not None:
+        print(f"  warmup {WARMUP_SECONDS:.0f}s (first-inference; excluded from "
+              f"task times)", flush=True)
     for tt in tasks:
         t0 = time.perf_counter()
         if tt == "codegen":

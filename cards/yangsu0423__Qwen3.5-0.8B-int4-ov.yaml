@@ -2,4 +2,7 @@ hf_id: yangsu0423/Qwen3.5-0.8B-int4-ov
 alias: qwen3.5-0.8b-ov
 family: qwen3.5
 device: GPU
-decoding: {}
+decoding:
+  # VL (vision) IR: sampling codegen runs away into ever-longer generations that wedge the
+  # iGPU (hung mid-codegen 2026-06-09). Pin greedy for codegen — stable on this hardware.
+  generative: { greedy: true }
