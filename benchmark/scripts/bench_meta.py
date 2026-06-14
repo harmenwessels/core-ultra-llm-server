@@ -242,8 +242,12 @@ def card_for(model_id: str, task_type: str) -> dict:
         dec = {"greedy": True}
     blocks = card["decoding"].get("blocks", 1)
     think = card["think_by_task"].get(task_type, "nothink")
+    # Per-model reasoning budget: reasoners (e.g. Ministral-3) need a large think
+    # cap; default keeps every other model at the prior hardcoded value.
+    think_max = int(card.get("think_max_tokens", 3072))
     return {"task_class": cls, "decoding": dec,
-            "blocks": int(blocks), "think": think}
+            "blocks": int(blocks), "think": think,
+            "think_max_tokens": think_max}
 
 
 def alias_to_hf(alias: str) -> str:

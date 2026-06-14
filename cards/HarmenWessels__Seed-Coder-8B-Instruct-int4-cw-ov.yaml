@@ -1,0 +1,8 @@
+# ByteDance Seed-Coder-8B-Instruct (LlamaForCausalLM, GQA 8kv, 32K ctx, MIT),
+# self-converted to int4 channel-wise-sym + AWQ + scale-estimation (wikitext2).
+# SOTA-class ~8B coder with native FIM; sym/cw keeps the NPU int4 path open.
+hf_id: HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov
+alias: seed-coder-8b
+family: seed-coder
+device: GPU
+decoding: {}

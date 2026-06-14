@@ -1,0 +1,10 @@
+# HuggingFaceTB SmolLM3-3B (SmolLM3ForCausalLM, NoPE every 4th layer, GQA 4kv,
+# 64K ctx, Apache-2.0), self-converted to int4 sym group-128 + AWQ + scale-estimation
+# (wikitext2). sym-g128 keeps NPU eligibility while preserving 3B quality (channel-wise
+# hurt small models — cf. granite-3b-cw). OV exported via a llama-aliased export config
+# (this optimum build registers smollm3 for onnx only).
+hf_id: HarmenWessels/SmolLM3-3B-int4-symg128-ov
+alias: smollm3-3b
+family: smollm3
+device: GPU
+decoding: {}

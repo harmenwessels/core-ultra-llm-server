@@ -5,6 +5,7 @@ __pycache__/
 .venv-convert/
 .venv-probe/
 .venv-genai/
+.venv-gemmavlm/
 
 # Models (multi-GB OpenVINO IR downloads — fetch via scripts/download_model.py)
 models/

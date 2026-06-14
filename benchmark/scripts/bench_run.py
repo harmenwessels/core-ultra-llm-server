@@ -165,7 +165,8 @@ def run_roles(target, task_type, combo, stamp, is_vlm):
     w = bm.RunWriter(header)
     extra = _sampling(cf["decoding"])
     if cf["think"] == "think":
-        extra = {**extra, "reasoning_effort": "high", "max_tokens": 3072}
+        extra = {**extra, "reasoning_effort": "high",
+                 "max_tokens": cf["think_max_tokens"]}
     nblocks = _blocks(cf, is_vlm)
     for name in ROLE_TASKS[task_type]:
         fn = _PROBE_BY_NAME[name]

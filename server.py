@@ -164,10 +164,13 @@ _THINK_PREFIX = "<think>\n"
 def _derive_think_variants(template: str) -> dict | None:
     """For hybrid-thinking models, build think/nothink template variants.
 
-    Handles the two patterns seen in the wild:
+    Handles the patterns seen in the wild:
       A) our hardcoded no-think prefix (rt_info-patched artifacts)
       B) the vendor `enable_thinking` conditional (unusable through GenAI,
          which cannot pass template kwargs)
+      C) Gemma 4 — `enable_thinking` gate on a `<|think|>` token
+      D) SmolLM3 — `enable_thinking` defaults true (-> "/think" reasoning_mode);
+         flip the default per variant since GenAI cannot pass the kwarg
     Returns None for models without thinking support (e.g. Gemma).
     """
     if _NOTHINK_PREFIX in template:  # pattern A
@@ -191,6 +194,16 @@ def _derive_think_variants(template: str) -> dict | None:
         if gate in template:
             return {"nothink": template.replace(gate, "false"),
                     "think": template.replace(gate, "true")}
+    if ("reasoning_mode" in template and "enable_thinking" in template  # pattern D
+            and "set enable_thinking = true" in template):
+        # SmolLM3: `enable_thinking` defaults true (-> reasoning_mode "/think")
+        # when the kwarg is absent, which is exactly the GenAI case. Flip that
+        # default to drive the "/no_think" branch for the nothink variant.
+        return {
+            "think": template,
+            "nothink": template.replace("set enable_thinking = true",
+                                        "set enable_thinking = false"),
+        }
     return None
 
 
@@ -219,23 +232,34 @@ def _requested_think_mode(body: dict) -> str:
     return "nothink"
 
 
+# Reasoning delimiter pairs seen across families: HTML-style <think> (Qwen/SmolLM/
+# LFM/Gemma) and Mistral's [THINK] (Ministral-3 / Magistral reasoning models).
+_THINK_DELIMS = (("<think>", "</think>"), ("[THINK]", "[/THINK]"))
+
+
 def _split_reasoning(text: str, think_mode: str = "nothink") -> tuple[str | None, str]:
-    """Split '<think>...</think>' (or an unopened '...</think>') prefix into
-    (reasoning_content, content). In think mode, an output that never closed
-    its think block is all reasoning (budget ran out mid-thought)."""
-    if "</think>" not in text:
-        # An opened-but-unclosed <think> means the budget ran out mid-thought:
-        # it's all reasoning, not answer content. Route it to reasoning even in
-        # nothink mode — an always-on reasoner (e.g. LFM2.5-Thinking) emits
-        # <think> regardless of the requested mode, and a normal answer from a
-        # non-reasoning model never starts with a <think> opener, so this can't
-        # swallow a real answer.
-        if think_mode == "think" or text.lstrip().startswith("<think>"):
-            return text.replace("<think>", "").strip("\n") or None, ""
-        return None, text
-    head, _, tail = text.partition("</think>")
-    reasoning = head.replace("<think>", "").strip("\n")
-    return (reasoning or None), tail.lstrip("\n")
+    """Split a reasoning prefix ('<think>...</think>' or Mistral '[THINK]...[/THINK]',
+    or an unopened '...</think>') into (reasoning_content, content). In think mode,
+    an output that never closed its think block is all reasoning (budget ran out
+    mid-thought)."""
+    for open_tag, close_tag in _THINK_DELIMS:
+        if close_tag in text:
+            head, _, tail = text.partition(close_tag)
+            reasoning = head.replace(open_tag, "").strip("\n")
+            return (reasoning or None), tail.lstrip("\n")
+    # No close tag. An opened-but-unclosed think block means the budget ran out
+    # mid-thought: it's all reasoning, not answer content. Route it to reasoning
+    # even in nothink mode — an always-on reasoner emits the opener regardless of
+    # the requested mode, and a normal answer from a non-reasoning model never
+    # starts with a think opener, so this can't swallow a real answer.
+    stripped = text.lstrip()
+    opener = next((o for o, _ in _THINK_DELIMS if stripped.startswith(o)), None)
+    if think_mode == "think" or opener:
+        cleaned = text
+        for o, _ in _THINK_DELIMS:
+            cleaned = cleaned.replace(o, "")
+        return cleaned.strip("\n") or None, ""
+    return None, text
 
 
 # --- OpenAI tool calling on local models ------------------------------------
@@ -270,6 +294,27 @@ _TOOL_CALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
 
 _TOOL_FORMATS: dict[str, str] = {}  # model id -> gemma | lfm | hermes
 _NATIVE_TEMPLATES: dict[str, object] = {}  # model id -> compiled jinja template
+# Mistral-style reasoners (Ministral-3) gate thinking via a system prompt with
+# [THINK]/[/THINK], NOT a template flag. id -> that reasoning system prompt; the
+# template's auto-injection is neutered so nothink turns into clean instruct mode.
+_REASONING_SYSPROMPT: dict[str, str] = {}
+# The OV tokenizer's encode() does NOT prepend a BOS, and the native-render path
+# encodes the rendered string directly — so the BOS must be in the template. We
+# pass the model's real bos_token (the template emits it); "" for models that
+# don't want one. A MISSING BOS destabilizes sensitive models into garbage
+# (Ministral-14B: walls of backticks); smaller models tolerated its absence.
+_BOS_TOKEN: dict[str, str] = {}
+
+
+def _read_bos(model_dir: pathlib.Path) -> str:
+    try:
+        cfg = json.loads((model_dir / "tokenizer_config.json").read_text(encoding="utf-8"))
+        if not cfg.get("add_bos_token", True):
+            return ""
+        b = cfg.get("bos_token")
+        return (b.get("content") if isinstance(b, dict) else b) or ""
+    except Exception:  # noqa: BLE001
+        return ""
 
 
 def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
@@ -284,6 +329,10 @@ def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
         fmt = "hermes"
         if "declaration:" in template and "<|tool" in template:
             fmt = "gemma"
+        elif "[TOOL_CALLS]" in template and "[AVAILABLE_TOOLS]" in template:
+            # Mistral (Ministral-3 / tekken): definitions in [AVAILABLE_TOOLS],
+            # calls emitted as [TOOL_CALLS]name[ARGS]{json} — NOT Hermes.
+            fmt = "mistral"
         elif "<|tool_call_start|>" in template or "List of tools:" in template:
             fmt = "lfm"
         elif re.search(r"\{%-?\s*(?:if|for)[^%]*tools", template):
@@ -293,6 +342,7 @@ def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
     if fmt != "hermes":
         try:
             import jinja2
+            template = _register_reasoning(model_id, template)
             env = jinja2.Environment(extensions=["jinja2.ext.loopcontrols"])
             env.filters["tojson"] = lambda v, **kw: json.dumps(v)
             _NATIVE_TEMPLATES[model_id] = env.from_string(template)
@@ -303,12 +353,45 @@ def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
     return fmt
 
 
+def _register_reasoning(model_id: str, template: str) -> str:
+    """Detect a Mistral-style [THINK] reasoner whose chat template carries a
+    default reasoning system prompt. Extract that prompt (for the server to
+    inject on think requests) and neuter the template's auto-injection so a
+    nothink request renders clean instruct mode. Returns the (possibly neutered)
+    template; a no-op for non-reasoning templates."""
+    if "[THINK]" not in template or "default_system_message" not in template:
+        return template
+    m = re.search(r"set default_system_message = '(.*?)' %\}", template, re.DOTALL)
+    if not m or "[THINK]" not in m.group(1):
+        return template
+    prompt = m.group(1).replace("\\n", "\n").replace("\\'", "'")
+    _REASONING_SYSPROMPT[model_id] = prompt
+    log.info("%s: Mistral-style reasoner — server-driven [THINK] system prompt "
+             "(think only)", model_id)
+    return template[:m.start(1)] + template[m.end(1):]  # default_system_message = ''
+
+
+def _inject_reasoning_sysprompt(messages: list, reasoning: str) -> list:
+    """Ensure the Mistral reasoning system prompt is present (think mode). Per
+    Mistral guidance, append it to any custom system prompt; else prepend one."""
+    msgs = [dict(m) for m in messages]
+    if msgs and msgs[0].get("role") == "system":
+        existing = str(msgs[0].get("content") or "").rstrip()
+        msgs[0]["content"] = f"{existing}\n\n{reasoning}" if existing else reasoning
+    else:
+        msgs.insert(0, {"role": "system", "content": reasoning})
+    return msgs
+
+
 def _render_native(model_id: str, messages: list, tools: list | None,
                    think: bool) -> str:
     """Render the model's own template with everything GenAI cannot pass."""
+    rp = _REASONING_SYSPROMPT.get(model_id)
+    if rp and think:  # Mistral reasoner: inject the [THINK] system prompt
+        messages = _inject_reasoning_sysprompt(messages, rp)
     return _NATIVE_TEMPLATES[model_id].render(
         messages=messages, tools=tools or None, add_generation_prompt=True,
-        enable_thinking=think, bos_token="")
+        enable_thinking=think, bos_token=_BOS_TOKEN.get(model_id, ""))
 
 
 def _coerce_arg(value: str):
@@ -393,9 +476,91 @@ def _parse_lfm_calls(text: str, tools: list, id_prefix: str
     return content, calls
 
 
+def _mk_mistral_call(name: str, args, id_prefix: str) -> dict:
+    if not isinstance(args, str):
+        args = json.dumps(args, ensure_ascii=False)
+    return {"id": f"{id_prefix}{uuid.uuid4().hex[:20]}", "type": "function",
+            "function": {"name": name, "arguments": args}}
+
+
+def _mistral_args(text: str, k: int):
+    """Decode the args object at text[k]=='{'. Returns (dict, end_idx), or
+    (None, end_idx) if unrecoverable. Repairs the JSON slips small int4 models
+    make in tool args (bare `key="v"` instead of `"key":"v"`, trailing commas)."""
+    dec = json.JSONDecoder()
+    try:
+        return dec.raw_decode(text, k)
+    except ValueError:
+        pass
+    depth = 0
+    for e in range(k, len(text)):          # find the balanced-brace substring
+        if text[e] == "{":
+            depth += 1
+        elif text[e] == "}":
+            depth -= 1
+            if depth == 0:
+                raw = text[k:e + 1]
+                fixed = re.sub(r'([{,]\s*)([A-Za-z_]\w*)\s*=', r'\1"\2":', raw)
+                for cand in (re.sub(r",\s*([}\]])", r"\1", fixed), fixed):
+                    try:
+                        return json.loads(cand), e + 1
+                    except json.JSONDecodeError:
+                        continue
+                return None, e + 1
+    return None, len(text)
+
+
+def _parse_mistral_calls(text: str, tools: list, id_prefix: str
+                         ) -> tuple[str, list]:
+    """Parse Mistral's native tool-call format (Ministral-3 / tekken), which is
+    NOT Hermes <tool_call>:
+        [TOOL_CALLS]name[ARGS]{json}  |  [TOOL_CALLS]name{json}
+        |  [TOOL_CALLS] [{"name":.., "arguments":..}]   (older array form).
+    Uses a real JSON decoder for args (nested/quoted content breaks a regex)."""
+    known = {t["function"]["name"] for t in tools}
+    dec = json.JSONDecoder()
+    calls: list[dict] = []
+    out: list[str] = []
+    TC = "[TOOL_CALLS]"
+    i = 0
+    while True:
+        idx = text.find(TC, i)
+        if idx == -1:
+            out.append(text[i:])
+            break
+        out.append(text[i:idx])
+        j = idx + len(TC)
+        while j < len(text) and text[j].isspace():
+            j += 1
+        if j < len(text) and text[j] == "[":            # array form
+            try:
+                arr, end = dec.raw_decode(text, j)
+            except ValueError:
+                out.append(text[idx:j]); i = j; continue
+            for c in (arr if isinstance(arr, list) else [arr]):
+                if isinstance(c, dict) and c.get("name") in known:
+                    calls.append(_mk_mistral_call(
+                        c["name"], c.get("arguments", {}), id_prefix))
+            i = end
+            continue
+        m = re.match(r"([A-Za-z_]\w*)\s*(?:\[ARGS\])?\s*", text[j:])  # name form
+        if not m:
+            out.append(text[idx:j]); i = j; continue
+        name, k = m.group(1), j + m.end()
+        if k < len(text) and text[k] == "{":
+            args, end = _mistral_args(text, k)
+            if args is not None and name in known:
+                calls.append(_mk_mistral_call(name, args, id_prefix))
+            i = end
+        else:
+            out.append(text[idx:k]); i = k
+    return "".join(out).strip(), calls
+
+
 _NATIVE_PARSERS = {
     "gemma": _parse_gemma_calls,
     "lfm": _parse_lfm_calls,
+    "mistral": _parse_mistral_calls,
     "native-hermes": lambda text, tools, id_prefix:
         _extract_tool_calls(text, id_prefix),
 }
@@ -597,6 +762,7 @@ def _load_pipelines() -> None:
         _model_device[model_id] = device
         _prompt_lookup_enabled[model_id] = use_pl
         _TOOL_FORMATS[model_id] = _detect_tool_format(model_dir, model_id)
+        _BOS_TOKEN[model_id] = _read_bos(model_dir)
         if _TOOL_FORMATS[model_id] != "hermes":
             log.info("%s: native tool language '%s' (server-side template "
                      "rendering)", model_id, _TOOL_FORMATS[model_id])
@@ -1067,8 +1233,11 @@ async def chat_completions(request: Request):
         pipe, body, default_max=4096 if use_tools else 1024, model_id=model_id)
     if native_fmt != "hermes":
         gen_cfg.apply_chat_template = False
-        think_mode = "nothink"  # native render handled thinking via kwarg;
-        # (gemma reasoning has no decodable end-delimiter to split on)
+        if model_id not in _REASONING_SYSPROMPT:
+            think_mode = "nothink"  # native render handled thinking via kwarg;
+            # (gemma reasoning has no decodable end-delimiter to split on).
+            # Mistral reasoners DO have [THINK]/[/THINK] — keep think_mode so
+            # _split_reasoning can separate it (tokens preserved below).
     elif not _think_variants.get(model_id):
         # model has no switchable thinking — never treat output as reasoning
         # (otherwise a no-</think> answer would be swallowed whole)
@@ -1109,11 +1278,23 @@ async def chat_completions(request: Request):
             with _lock_for(model_id):
                 _apply_think_mode(model_id, pipe, think_mode)
                 t0 = time.perf_counter()
-                res = pipe.generate(history, generation_config=gen_cfg)
-                return res, time.perf_counter() - t0
+                if model_id in _REASONING_SYSPROMPT \
+                        or _TOOL_FORMATS.get(model_id) == "mistral":
+                    # GenAI's string decode skips special tokens, stripping the
+                    # Mistral control tokens — [THINK]/[/THINK] (reasoning) AND
+                    # [TOOL_CALLS]/[ARGS] (tool calls). Decode the raw ids keeping
+                    # them so _split_reasoning and the mistral parser can see them.
+                    tk = pipe.get_tokenizer()
+                    res = pipe.generate(tk.encode(history),
+                                        generation_config=gen_cfg)
+                    txt = tk.decode(res.tokens[0], skip_special_tokens=False)
+                    txt = txt.replace("<s>", "").replace("</s>", "").strip()
+                else:
+                    res = pipe.generate(history, generation_config=gen_cfg)
+                    txt = res.texts[0] if hasattr(res, "texts") else str(res)
+                return txt, time.perf_counter() - t0
         # off the event loop: a long generate must not freeze the server
-        result, dt = await asyncio.to_thread(_blocking_generate)
-        text = result.texts[0] if hasattr(result, "texts") else str(result)
+        text, dt = await asyncio.to_thread(_blocking_generate)
         message, finish = _completion_message(text)
         log.info("[%s] non-stream done in %.2fs (mode=%s, finish=%s)",
                  model_id, dt, think_mode, finish)

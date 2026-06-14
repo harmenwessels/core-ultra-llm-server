@@ -1,0 +1,13 @@
+# Ministral-3-8B-Reasoning-2512 via mrfakename Llamafied-TextOnly (Apache-2.0).
+# Mistral [THINK] reasoner: server-driven think/nothink + [THINK] split (same
+# plumbing as the 3B). Sampling on both classes (greedy loops/never closes
+# [/THINK]); advised temp 0.7 / top_p 0.95. think cap 8192 (8B reasons longer).
+# int4 sym g128 AWQ+SE. Template borrowed from unsloth. PROVENANCE: community llamafied.
+hf_id: HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov
+alias: ministral-3-8b-reasoning
+family: ministral3
+device: GPU
+decoding:
+  generative: { temp: 0.7, top_p: 0.95, top_k: 20 }
+  structured: { greedy: false, temp: 0.7, top_p: 0.95, top_k: 20 }
+think_max_tokens: 8192

@@ -1,0 +1,18 @@
+# Ministral-3-3B-Reasoning-2512 via the community Llamafied-TextOnly extraction
+# (mrfakename) of Mistral's mistral3 VLM — vision stripped to a clean
+# LlamaForCausalLM. Self-converted to int4 sym group-128 + AWQ + scale-estimation
+# (wikitext2). Reasoning model: emits Mistral [THINK]...[/THINK]; chat template
+# borrowed from unsloth's repo (Mistral ships no HF jinja template). Advised
+# decoding temp 0.7 / top_p 0.95 (base model card). PROVENANCE: community
+# re-architecture + borrowed template — scores carry that caveat.
+hf_id: HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov
+alias: ministral-3-3b-reasoning
+family: ministral3
+device: GPU
+# Reasoner: sampling on BOTH classes (greedy reasoning loops/never closes [/THINK]);
+# advised temp 0.7 / top_p 0.95. Measured ~3.4-4.2K think tokens to terminate on our
+# int4 build (temp 1.0 occasionally ran away) -> 6K think cap as a safety backstop.
+decoding:
+  generative: { temp: 0.7, top_p: 0.95, top_k: 20 }
+  structured: { greedy: false, temp: 0.7, top_p: 0.95, top_k: 20 }   # override default greedy
+think_max_tokens: 6144

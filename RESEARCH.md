@@ -644,6 +644,54 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   Qwen3-14B 12/12 (tie; Qwen faster), and the full Gemma ladder (E2B 8 / E4B 10 / 12B 12) vs Qwen
   ladder (Coder-3B 6 / 8B 9 / 14B 12) — both scale cleanly. Branch build kept local pending the
   #3944 merge; production server still runs the released GenAI (swap in once merged upstream).
+  **IMAGE/VLM path investigated 2026-06-13 — gemma-4 image inference splits by architecture, and
+  the 12B's is a dead end for now.** Two distinct Gemma-4 vision arches: **`gemma4`** (E2B/E4B, the
+  *edge* line) uses a full `vision_tower` + Per-Layer Embeddings (PLE; ships
+  `openvino_text_embeddings_per_layer_model.xml`); **`gemma4_unified`** (the dense 12B) is
+  **encoder-free** — a lightweight `embed_vision` linear patch-embedder, NO PLE, expecting
+  *pre-patchified* vision input `[batch, patches, K²·3·P²]`. Results matrix:
+  (a) **E2B/E4B image WORKS great** on a clean **GenAI nightly** (`openvino-genai`/`openvino`
+  `dev20260611`, isolated `.venv-gemmavlm`): verified accurate detailed description of a real photo.
+  This is PR **#3644** (merged 2026-04-30, commit `b556f14`) which registers the **`gemma4`** VLM
+  type only (the nightly DLL contains `gemma4` but NOT `gemma4_unified`). No reconversion — our
+  existing E4B IR routes correctly.
+  (b) **12B via GenAI VLMPipeline = SEGFAULT (exit 139)** on image input (text is fine). Our
+  enable-branch build (mlukasze PR **#3944**, `enable/google-gemma-4-12B`, head `796cb43d0bf` — the
+  same commit we built; branch untouched since 2026-06-05, draft `do-not-merge`) DOES register
+  `gemma4_unified` and serves 12B *text* via VLMPipeline, but its **image preprocessing for the
+  encoder-free arch is unfinished** → native crash even with the correct image-tensor call. A rebuild
+  is pointless (HEAD == our binary).
+  (c) **12B via optimum `OVModelForVisualCausalLM` = RUNS, coherent, but LOW-DETAIL vision.** With
+  `transformers 5.10.2` (which registers `gemma4_unified`; 5.5.0 does NOT) + a gemma chat-template
+  prompt, the 12B reads simple images correctly (a red circle → "red, semi-circular shape on white")
+  but on a complex photo gets only the dominant surface and **misses the subjects** (cats →
+  "red/white fabric, no animals"). E4B nails the same photo. **The detail gap has TWO candidate
+  causes (open):** (i) **architecture** — the 12B is encoder-free: image quality rides on 3 shallow
+  linear projections (`embed_vision`, weights `[3840,6912]`/`[3840,3840]`/`[2240,3840]`) vs E4B's
+  deep 169M-param `vision_tower`; (ii) **int8 vision quant** — corrected 2026-06-13: the 12B vision
+  is **int8, NOT fp16** (the 3 main projection matrices are `i8`, ~49.9M elems ≈ the 47.7MB .bin; an
+  earlier note wrongly called it fp16). E4B's vision is *also* int8 yet excellent — BUT E4B has a
+  deep encoder whose downstream layers absorb int8 rounding noise, whereas the 12B's shallow linear
+  path has nothing downstream to clean it up. **BOTH causes were tested 2026-06-14 — verdict:
+  ARCHITECTURAL, not quant.** (a) Re-export on optimum **`314b0c4`** (PR #1770 HEAD, June-11
+  *bidirectional vision-mask* fix) → image output **byte-identical** to the int8 baseline → the LM
+  mask is not the cause. (b) Swapped in a true **fp16 `embed_vision`** (95.2MB, verified `f16`, via
+  a disk-light vision-only export) → the output **changed** (cats: int8 "blanket/garment/button" vs
+  fp16 "bag/clothing/tag" — proof the swap took effect) but **still misses the cats ("no animals")**;
+  the simple circle was int8==fp16. So higher-precision vision **shifts the wrong answer without
+  recovering detail → int8 quant is not the cause either.** The 12B's low image detail is the
+  **encoder-free shallow `embed_vision` architecture** itself — independent of quant, the LM mask,
+  and the serving path. (Only the *mask-fix* run was byte-identical to baseline: same int8 vision.)
+  **FINAL: use E2B/E4B for gemma image inference (excellent); the 12B is a TEXT model. Don't revisit
+  12B vision unless the encoder-free arch changes upstream.** (optimum PR #1780, the encoder-free
+  padding-mask tweak, was closed UNMERGED — moot now.)
+  **Two reusable export findings from the saga:** (1) newer optimum/OV **upcasts the bf16 source
+  bf16→fp32 (48GB) during convert_model**, ballooning the page file ~70GB on a 32GB-RAM box and
+  badbit'ing every export — **load with `dtype=torch.float16`** (OV keeps fp16/24GB, no upcast) +
+  `GLOBAL_WORKERS=1`; quantizes int4 in-memory, writes ~7GB. (2) **Vision-only export**
+  (`benchmark/results/export_gemma12b_vision_only.py`): optimum
+  `with_behavior(VLMConfigBehavior.VISION_EMBEDDINGS)` + `get_model_for_behavior` + `export(...)`
+  traces ONLY the vision (95MB) — no LM trace, no balloon, swappable into any matching int4 IR.
 - **OmniCoder-9B AWQ+SE re-quantization — highest-value open quality experiment**: the
   breadth-tournament leader (8/12 solo, analyst++ role profile) runs on a data-free
   int4_sym artifact — the recipe class that measurably damaged granite-3b until AWQ+SE

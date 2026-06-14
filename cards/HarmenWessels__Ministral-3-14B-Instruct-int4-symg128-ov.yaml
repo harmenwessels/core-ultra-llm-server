@@ -1,0 +1,11 @@
+# Ministral-3-14B-Instruct-2512 via mrfakename Llamafied-TextOnly (Apache-2.0),
+# plain LlamaForCausalLM instruct (no reasoning). int4 sym g128 AWQ+SE. Chat
+# template borrowed from unsloth (Mistral [INST]). PROVENANCE: community llamafied.
+hf_id: HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov
+alias: ministral-3-14b-instruct
+family: ministral3
+device: GPU
+# Mistral advises temp <0.1 for instruct (card: "below 0.1 for production");
+# structured tasks stay greedy (fleet default).
+decoding:
+  generative: { temp: 0.1, top_p: 0.95, top_k: 20 }
