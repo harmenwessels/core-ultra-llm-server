@@ -44,7 +44,7 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe scripts\download_model.py --repo OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
 
 # 3. Optional: benchmark a model (TTFT + decode tok/s)
-.\.venv\Scripts\python.exe scripts\bench.py --model-dir models\HarmenWessels\granite-4.1-8b-int4-cw-ov
+.\.venv\Scripts\python.exe benchmark\scripts\hw\bench.py --model-dir models\HarmenWessels\granite-4.1-8b-int4-cw-ov
 
 # 4. Start the server on http://127.0.0.1:8000/v1 (config: models.yaml)
 .\.venv\Scripts\python.exe server.py
@@ -68,6 +68,13 @@ manual in one file: served alias, device (GPU/NPU), prefix-caching pool, prompt-
 budget, and the virtual model's role casting. The shipped file documents the production
 stack; `MODELS_CONFIG` points elsewhere. Explicit `MODEL_DIRS` env overrides the file
 for quick experiments.
+
+**`cards/<owner>__<name>.yaml` — per-model defaults (shared with the benchmark).** Each
+model's best-use decoding/think/serving settings live in a card keyed by its Hugging Face
+id (`cards/_defaults.yaml` holds family defaults so cards stay terse). The server reads a
+model's card as its baseline and a matching `models.yaml` entry **overrides** it, so a
+downloaded model is preconfigured even with a minimal `models.yaml`. The same cards drive
+the benchmark — see [benchmark/](benchmark/README.md).
 
 ### Configuration (environment variables)
 
@@ -101,7 +108,7 @@ and LFM's Pythonic calls via server-side rendering of the model's own chat templ
 hermes-style injection for families trained on it, e.g. Qwen and granite). This makes
 agentic frontends that require native function calling — Continue agent mode/CLI,
 Kilo CLI — work against any served model, fairly. Model-by-model agent fitness is
-measured in [BENCHMARKS.md](benchmark/README.md) (role-fitness suite); format mismatch
+measured in [benchmark/README.md](benchmark/README.md) (role-fitness suite); format mismatch
 measurably suppresses scores, so the language is pinned per model in `models.yaml`.
 
 Example — serve one bigger chat model instead (env overrides the registry):
@@ -205,10 +212,12 @@ Full per-task leaderboard, every model, and the run records: [benchmark/](benchm
 
 ```
 server.py                       OpenAI-compatible FastAPI server (multi-model, SSE, FIM)
+models.yaml                     deployment registry (served aliases, roles; overrides cards)
+cards/<owner>__<name>.yaml      per-model best-use config, shared with the benchmark
 scripts/check_gpu.py            verify OpenVINO sees the Arc iGPU
 scripts/download_model.py       fetch OpenVINO IR models from Hugging Face
-scripts/bench.py                TTFT + decode-throughput benchmark (3 measured runs)
-scripts/bench_prompt_lookup.py  A/B harness for prompt-lookup speculative decoding
+benchmark/                      per-task-type benchmark: README leaderboard, scripts/, run records
+benchmark/scripts/hw/bench.py   TTFT + decode-throughput microbenchmark (3 measured runs)
 requirements.txt                pinned dependency versions (incl. OpenVINO nightly index)
 models/<owner>/<name>/          downloaded models, mirroring HF repo ids (gitignored)
 .ovcache/                       compiled-blob cache (gitignored)

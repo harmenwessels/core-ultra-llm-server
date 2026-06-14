@@ -6,7 +6,7 @@ as machine-specific and the *rules* as the transferable result.
 
 **Test rig:** Dell XPS 13, Intel Core Ultra 155H (Meteor Lake), Arc iGPU (Xe-LPG, 128 EU),
 32 GB LPDDR5x, Windows 11, Intel driver 32.0.101.8724, OpenVINO GenAI 2026.3 nightly
-(`dev20260603`), Python 3.12. Current per-model results: [BENCHMARKS.md](benchmark/README.md)
+(`dev20260603`), Python 3.12. Current per-model results: [benchmark/README.md](benchmark/README.md)
 (workload method); the superseded raw-decode overview is archived in the appendix below.
 
 ---
@@ -353,7 +353,7 @@ from git master, torch CPU wheels, `nncf`, `compressed-tensors`.
 ```powershell
 # typical text-only model, speed-first recipe WITH data-aware calibration
 # (data-free cw-int4 measurably damaged quality on granite — AWQ+SE repaired it
-#  at zero size/speed cost; see BENCHMARKS.md finding 9)
+#  at zero size/speed cost; see benchmark/README.md finding 9)
 optimum-cli export openvino -m <org>/<model> --weight-format int4 --sym --group-size -1 `
   --awq --scale-estimation --dataset wikitext2 models\<owner>\<name>-int4-cw-ov
 
@@ -445,7 +445,7 @@ Hard-won rules:
    `scripts/bench_server.py` hitting each model solo by id, `scripts/run_genai_sweep.ps1`), the
    confound is gone: **Qwen3-14B jumps from optimum's ~3/12 to 12/12 on GenAI** — confirming the gap
    was engine-induced, not a model/quant property. The clean cross-family head-to-head is the fair
-   leaderboard in BENCHMARKS.md: Qwen3-14B and Gemma-4-12B **tie at 12/12**, with Qwen3-14B ~32%
+   leaderboard in benchmark/README.md: Qwen3-14B and Gemma-4-12B **tie at 12/12**, with Qwen3-14B ~32%
    faster total — so "Gemma is the sole quality leader" was an optimum-vs-GenAI artifact, now a
    two-way tie with Qwen faster.
 0f. **Sampling's benefit is a task × size interaction — not a free lift (fleet sweep,
@@ -640,7 +640,7 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   `2026.3.0.0-1-…-enable/google-gemma-4-12B`). The 12B loads via `ov_genai.VLMPipeline` and serves
   coherent at ~8 tok/s; the baked `ACTIVATIONS_SCALE_FACTOR=64` fix carries over (GenAI honours the
   same rt_info). This put **every fleet model on one engine for the first time** and unlocked the
-  fair single-engine leaderboard (BENCHMARKS.md, `scripts/run_genai_sweep.ps1`): Gemma-4-12B 12/12,
+  fair single-engine leaderboard (benchmark/README.md, `scripts/run_genai_sweep.ps1`): Gemma-4-12B 12/12,
   Qwen3-14B 12/12 (tie; Qwen faster), and the full Gemma ladder (E2B 8 / E4B 10 / 12B 12) vs Qwen
   ladder (Coder-3B 6 / 8B 9 / 14B 12) — both scale cleanly. Branch build kept local pending the
   #3944 merge; production server still runs the released GenAI (swap in once merged upstream).
@@ -779,7 +779,7 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   capture the edit gains without the explain/architect penalty. Requires two pipeline
   instances or the CB pipeline's per-request config.
 
-## Appendix: raw-decode model overview (legacy method, superseded by BENCHMARKS.md)
+## Appendix: raw-decode model overview (legacy method, superseded by benchmark/README.md)
 
 Single-prompt decode/TTFT measurements (`scripts/bench.py`) with modalities,
 context windows and base-release dates — including models that predate the
