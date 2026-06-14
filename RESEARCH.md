@@ -13,7 +13,7 @@ as machine-specific and the *rules* as the transferable result.
 
 ## Methodology
 
-- **Benchmark protocol** ([`scripts/bench.py`](scripts/bench.py)): load pipeline with compile
+- **Benchmark protocol** ([`benchmark/scripts/hw/bench.py`](benchmark/scripts/hw/bench.py)): load pipeline with compile
   cache, one warm-up generation (discarded), then 3 measured greedy generations of ~256 tokens.
   Report median decode tok/s (= generated tokens ÷ time after first token) and TTFT.
 - **A/B comparisons must run back-to-back in one session.** Thermal state moves absolute
@@ -22,7 +22,7 @@ as machine-specific and the *rules* as the transferable result.
 - **Differences under ~1 tok/s are noise** at this run count. We verified this by A/B-ing a
   finetune against its base model (OmniCoder vs Qwen3.5-9B): the ranking flipped between
   sessions, medians pooled to identical.
-- **Speculative decoding needs `perf_metrics`** ([`scripts/bench_prompt_lookup.py`](scripts/bench_prompt_lookup.py)):
+- **Speculative decoding needs `perf_metrics`** ([`scripts/research_pl_overlap.py`](scripts/research_pl_overlap.py)):
   streamer callbacks deliver token *batches* under speculation, so counting callbacks
   undercounts tokens and fabricates a slowdown. Use the pipeline's own metrics.
 - **Download progress bars count files, not bytes** — a stalled multi-GB download can show
@@ -781,7 +781,7 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
 
 ## Appendix: raw-decode model overview (legacy method, superseded by benchmark/README.md)
 
-Single-prompt decode/TTFT measurements (`scripts/bench.py`) with modalities,
+Single-prompt decode/TTFT measurements (`benchmark/scripts/hw/bench.py`) with modalities,
 context windows and base-release dates — including models that predate the
 workload-profile method above, and the memory/architecture failure cases.
 
