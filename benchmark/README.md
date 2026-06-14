@@ -288,8 +288,7 @@ _120 runs._
 
 ## Retest queue
 
-- HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov  # ByteDance Seed-Coder-8B (MIT, LlamaForCausalLM, native FIM); local int4 cw-sym AWQ+SE convert: NO records — attempted-but-incomplete or not yet run
-- HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov  # Ministral-3-3B-Reasoning (llamafied text-only, Apache-2.0); Mistral [THINK] reasoner, server-driven think/nothink: NO records — attempted-but-incomplete or not yet run
+_None — all entries current._
 
 ## Failures
 

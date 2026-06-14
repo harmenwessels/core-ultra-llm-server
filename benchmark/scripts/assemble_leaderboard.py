@@ -44,8 +44,11 @@ def load_fleet() -> list:
     f = bm.BENCH_ROOT / "fleet.txt"
     if not f.exists():
         return []
-    return [ln.strip() for ln in f.read_text(encoding="utf-8").splitlines()
-            if ln.strip() and not ln.strip().startswith("#")]
+    # strip inline "# ..." comments too (some entries annotate the id), not just
+    # full-line comments — else the commented id never matches a record subject and
+    # the model is falsely surfaced as "NO records".
+    return [s for ln in f.read_text(encoding="utf-8").splitlines()
+            if (s := ln.split("#", 1)[0].strip())]
 
 
 def load_runs():
