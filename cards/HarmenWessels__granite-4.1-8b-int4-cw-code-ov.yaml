@@ -1,0 +1,14 @@
+hf_id: HarmenWessels/granite-4.1-8b-int4-cw-code-ov
+alias: granite-8b-code
+family: granite
+device: GPU
+tool_format: hermes
+thinking: none
+context_budget: 8192
+prompt_lookup: false
+scheduler:
+  kv_pool_gb: 4
+roles:
+- executor
+- chat
+decoding: {}

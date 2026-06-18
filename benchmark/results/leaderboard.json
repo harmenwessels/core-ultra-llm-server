@@ -5,7 +5,7 @@
       "kind": "single",
       "quality": 7,
       "cells": 7,
-      "seconds": 58.0,
+      "seconds": 57.0,
       "decoding": "greedy",
       "think": "nothink",
       "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
@@ -27,6 +27,20 @@
       "detail": "qat",
       "recipe": "qat",
       "size": 6.6
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 7,
+      "cells": 7,
+      "seconds": 81.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
     },
     {
       "subject": "HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov",
@@ -72,7 +86,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 1.2
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
@@ -88,7 +102,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-4B-int4-ov",
@@ -168,7 +182,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 9.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/gemma-4-12B-it-qat-int4-ov",
@@ -184,7 +198,7 @@
       ],
       "detail": "qat",
       "recipe": "qat",
-      "size": 8.2
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
@@ -217,7 +231,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -235,7 +249,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
@@ -253,7 +267,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.4
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/SmolLM3-3B-int4-symg128-ov",
@@ -271,7 +285,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov",
@@ -307,7 +321,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 2.1
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
@@ -325,7 +339,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 6.1
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov",
@@ -402,7 +416,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.9
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -424,7 +438,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     }
   ],
   "analysis": [
@@ -468,7 +482,7 @@
       "fails": [],
       "detail": "qat",
       "recipe": "qat",
-      "size": 8.2
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-14B-int4-ov",
@@ -482,7 +496,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 9.7
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
@@ -498,7 +512,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.9
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -530,7 +544,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
@@ -565,6 +579,22 @@
       "size": 4.8
     },
     {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 77.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "diagnose: FAIL (content='the test fails because the expected median value for the list)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
       "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
       "kind": "single",
       "quality": 3,
@@ -578,7 +608,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 1.2
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
@@ -594,7 +624,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-4B-int4-ov",
@@ -674,7 +704,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 2.1
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
@@ -690,7 +720,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 6.1
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
@@ -707,7 +737,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
@@ -724,7 +754,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.4
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -741,7 +771,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov",
@@ -792,7 +822,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov",
@@ -842,7 +872,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
@@ -856,7 +886,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.9
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -912,7 +942,7 @@
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov",
@@ -968,7 +998,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 9.7
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
@@ -984,7 +1014,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.4
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -1000,7 +1030,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
@@ -1016,7 +1046,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -1032,7 +1062,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
@@ -1048,7 +1078,23 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 1.2
+      "size": 0.0
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 5.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
     },
     {
       "subject": "HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov",
@@ -1172,7 +1218,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 9.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov",
@@ -1228,7 +1274,7 @@
       "fails": [],
       "detail": "qat",
       "recipe": "qat",
-      "size": 8.2
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov",
@@ -1300,6 +1346,24 @@
       "size": 2.3
     },
     {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 9,
+      "cells": 12,
+      "seconds": 592.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "lru-cache#0: FAIL (_lru() -> [1, 2, 3, -1])",
+        "rle-codec#0: FAIL (NameError: name 'aaabccc' is not defined)",
+        "rle-codec#1: FAIL (rle_decode('a3b1c3') -> 'aaa13')"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
       "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
       "kind": "single",
       "quality": 9,
@@ -1315,7 +1379,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 6.1
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
@@ -1334,14 +1398,14 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
       "kind": "single",
       "quality": 8,
       "cells": 12,
-      "seconds": 673.0,
+      "seconds": 644.0,
       "decoding": "greedy",
       "think": "nothink",
       "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
@@ -1413,7 +1477,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -1434,7 +1498,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -1477,7 +1541,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.7
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
@@ -1499,7 +1563,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 2.1
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
@@ -1522,7 +1586,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.4
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
@@ -1545,7 +1609,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.9
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
@@ -1568,7 +1632,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 1.2
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -1592,7 +1656,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     }
   ],
   "edit": [
@@ -1636,19 +1700,35 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 9.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
       "kind": "single",
       "quality": 1,
       "cells": 2,
-      "seconds": 27.0,
+      "seconds": 25.0,
       "decoding": "greedy",
       "think": "nothink",
       "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
       "fails": [
         "edit-exact: FAIL (old-match=True old='')"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 28.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B",
+      "fails": [
+        "edit-exact: FAIL (old-match=False old='if window < 1:\\n        raise ValueError(\"window )"
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -1732,7 +1812,7 @@
       ],
       "detail": "qat",
       "recipe": "qat",
-      "size": 8.2
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
@@ -1749,7 +1829,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.4
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
@@ -1766,7 +1846,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
@@ -1783,7 +1863,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 1.2
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -1800,7 +1880,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov",
@@ -1868,7 +1948,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov",
@@ -1902,7 +1982,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.9
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen3-4B-int4-ov",
@@ -1936,7 +2016,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 2.1
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -1953,7 +2033,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.7
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov",
@@ -1987,7 +2067,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 6.1
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
@@ -2004,7 +2084,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 1.8
+      "size": 0.0
     }
   ]
 }

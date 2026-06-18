@@ -17,6 +17,7 @@ OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov
 HarmenWessels/granite-4.1-3b-int4-cw-ov
 HarmenWessels/granite-4.1-3b-int4-cw-code-ov
 HarmenWessels/granite-4.1-8b-int4-cw-ov
+HarmenWessels/granite-4.1-8b-int4-cw-code-ov  # code-calibrated variant (Python corpus AWQ+SE); 20/26 vs base 19/26 (codegen 9/12 vs 8/12)
 HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov
 Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov
 HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov  # ByteDance Seed-Coder-8B (MIT, LlamaForCausalLM, native FIM); local int4 cw-sym AWQ+SE convert
