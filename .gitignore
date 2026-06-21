@@ -10,6 +10,9 @@ models/
 .ovcache/
 .ovcache*/
 
+# Exploratory hardware-microbench outputs (benchmark/scripts/hw/*) — not leaderboard data
+bench_results/
+
 # Local-only / editor
 .vscode/
 .claude/
