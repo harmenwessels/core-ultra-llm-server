@@ -883,7 +883,7 @@ def _run_streaming(pipe, model_id: str, inputs, gen_cfg,
 
 # --- virtual model: per-turn role router ------------------------------------
 # One model id (default virtual/agent) that routes each turn to the best
-# measured brain (BENCHMARKS.md role-fitness): a router classifies fresh
+# measured brain (benchmark/README.md role-fitness): a router classifies fresh
 # requests, the architect analyzes/plans (read-only tools), the executor
 # does edit->test->verify loops (full tools). Stateless across requests:
 # tool-result continuations are routed by the role encoded in our call ids;
@@ -1508,9 +1508,14 @@ def _load_models_config() -> None:
             _PROMPT_LEN_OVERRIDE[mid] = int(max_prompt_len)
     if dirs:
         MODEL_DIRS = dirs
-        # registry replaces (not merges with) the env defaults
+        # registry replaces (not merges with) the env defaults. Prune against the
+        # ids the registry actually serves under — the ALIASES — because that is
+        # what SCHEDULER_MODELS was keyed by above and what _load_pipelines()
+        # looks up. Comparing against _model_id(dir) instead dropped the pool for
+        # every aliased entry, silently disabling prefix caching (finding 12).
+        registered = set(_REGISTRY_ALIASES)
         for k in list(SCHEDULER_MODELS):
-            if k not in {_model_id(d) for d in dirs}:
+            if k not in registered:
                 del SCHEDULER_MODELS[k]
     v = cfg.get("virtual") or {}
     if v.get("id"):
