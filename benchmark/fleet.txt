@@ -23,3 +23,5 @@ Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov
 HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov  # ByteDance Seed-Coder-8B (MIT, LlamaForCausalLM, native FIM); local int4 cw-sym AWQ+SE convert
 HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov  # Ministral-3-3B-Reasoning (llamafied text-only, Apache-2.0); Mistral [THINK] reasoner, server-driven think/nothink
 HarmenWessels/Ornith-1.0-9B-int4-symg128-ov  # Ornith-1.0 (ornith-ai, MIT): RL-post-trained agentic coder on Qwen3.5-9B; data-free int4 sym g128; reasoner, hermes-XML tool dialect
+OpenVINO/Qwen3.5-4B-int4-ov  # official Intel build (Apache-2.0), int4_asym g128 data-free; newer-gen contender vs Qwen3-4B; asym so GPU/CPU only
+OpenVINO/Qwen3.5-9B-int4-ov  # official Intel build (Apache-2.0), int4_asym g128 data-free; the BASELINE for Ornith-1.0-9B and OmniCoder-9B, both qwen3_5 derivatives

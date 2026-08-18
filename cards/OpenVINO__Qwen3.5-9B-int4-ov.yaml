@@ -1,0 +1,18 @@
+# Qwen3.5-9B instruct, official OpenVINO build (Apache-2.0). Benchmarked as the
+# BASELINE for the two 9B derivatives we already run — Ornith-1.0-9B (RL agentic
+# post-train, 22/25) and OmniCoder-9B (coding finetune, 16/25) — both of which are
+# the same arch (qwen3_5, 32 layers, hidden 4096, vocab 248320). Without this row
+# neither derivative's delta is attributable.
+# Quant: INT4_ASYM g128 ratio 1.0, data-free (Intel's recipe). Asym -> GPU/CPU only;
+# the NPU rejects asymmetric int4 (finding 14).
+# NB the Ornith comparison is clean (both measured here), but any OmniCoder gap stays
+# confounded: that IR is a community int4_SYM conversion, a different recipe.
+# VLM-shaped IR (qwen3_5) -> VLMPipeline; the benchmark skips autocomplete-fim.
+# Hybrid thinking (switchable, default nothink) — not an always-on reasoner, so
+# structured stays greedy (family default).
+# Tool language: hermes wrapper with the Qwen3-Coder XML body (<function=...>).
+hf_id: OpenVINO/Qwen3.5-9B-int4-ov
+alias: qwen3.5-9b
+family: qwen3.5
+device: GPU
+thinking: switchable

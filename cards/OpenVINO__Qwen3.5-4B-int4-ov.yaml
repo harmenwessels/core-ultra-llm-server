@@ -1,0 +1,19 @@
+# Qwen3.5-4B, official OpenVINO build (Apache-2.0). Fills the gap between the
+# Qwen3.5-2B and the 8-9B tier; contests Qwen3-4B (19/26) with a newer generation.
+# Quant: INT4_ASYM g128 ratio 1.0, data-free (Intel's recipe, not ours) — asym, so
+# GPU/CPU only: the NPU rejects asymmetric int4 (finding 14), an NPU seat would
+# need a sym re-convert.
+# VLM-shaped IR (qwen3_5) -> VLMPipeline; the benchmark skips autocomplete-fim.
+# Hybrid thinking (switchable, default nothink) — NOT a dedicated reasoner, so
+# structured stays greedy (family default); only always-on reasoners need sampling
+# on both classes.
+# Decoding: family qwen3.5 default (temp 0.6 / top_p 0.95 / top_k 20). Note the
+# sibling Echo9Zulu Qwen3.5-2B card pins codegen to greedy for sym-quant sampling
+# instability — not inherited here: that is a per-model measured override, and the
+# same-generation Ornith 9B sampled cleanly for 11/12.
+# Tool language: hermes wrapper with the Qwen3-Coder XML body (<function=...>).
+hf_id: OpenVINO/Qwen3.5-4B-int4-ov
+alias: qwen3.5-4b
+family: qwen3.5
+device: GPU
+thinking: switchable
