@@ -5,8 +5,8 @@ Methods and findings from benchmarking 19 models and converting several ourselve
 as machine-specific and the *rules* as the transferable result.
 
 **Test rig:** Dell XPS 13, Intel Core Ultra 155H (Meteor Lake), Arc iGPU (Xe-LPG, 128 EU),
-32 GB LPDDR5x, Windows 11, Intel driver 32.0.101.8724, OpenVINO GenAI 2026.3 nightly
-(`dev20260603`), Python 3.12. Current per-model results: [benchmark/README.md](benchmark/README.md)
+32 GB LPDDR5x, Windows 11, Intel driver 32.0.101.8974, OpenVINO GenAI 2026.3.0.0 (stable,
+released 2026-08-05), Python 3.12. Current per-model results: [benchmark/README.md](benchmark/README.md)
 (workload method); the superseded raw-decode overview is archived in the appendix below.
 
 ---
@@ -216,7 +216,8 @@ we built fails GPU compile on this machine, each with a distinct, reproducible s
 Dense models from the same families compile in seconds (LFM2.5-1.2B: 4 s). Conversion is NOT
 the blocker — both IRs export cleanly. Verdict: MoE-on-this-iGPU is closed until an OpenVINO
 release demonstrably fixes it; this pre-judges JetBrains Mellum2 (12B-A2.5B, `mellum` arch,
-not yet in the export registry) even after gate 2 lands.
+not yet in the export registry) even after gate 2 lands. (2026.3 adds MoE *disk offloading* — a
+memory fix, not obviously a compile fix; untested here, see open items.)
 
 ## Finding 11 — Prefill scales superlinearly and sets per-model context budgets
 
@@ -257,6 +258,68 @@ paged-attention kernel into BY_CHANNEL quant mode expecting metadata-extended KV
 (`block_size + block_size/16×4` = 20) while the GenAI allocator hands it plain 16-token
 blocks → `Incorrect block size ... Expected 20, but got 12`. Reproduces through nightly
 build 22103; found by us, not publicly reported. Action: never set the hint.
+
+## Finding 13b — Engine version is decode-neutral; the box drifts ~30% and fooled us once
+
+Replacing the from-source gemma-4 fork build (`2026.3.0.0-1-796cb43d0bf`, OV nightly `22085`) with
+the **2026.3.0.0 stable release** (`-3277-bd8d6542e3c`, OV `22451`) on 2026-08-18 changes decode
+throughput **not at all**. Interleaved A-B measurement, 3 invocations per arm, same driver
+(32.0.101.8974), same IRs, `hw/bench.py` at 256 tokens:
+
+| model | stable (3 invocations) | fork (3 invocations) | verdict |
+|---|---|---|---|
+| granite-4.1-8b-int4-cw | 13.1 / 13.7 / 13.7 | 13.7 / 13.8 / 13.0 | identical medians (13.7) |
+| Qwen3-8B-int4-cw | 14.4 / 15.1 / 15.0 | 14.7 / 14.8 / 10.8ᶜ | parity |
+
+TTFT *is* better on stable, and that survives every condition we measured: stable 0.11-0.17 s vs
+fork 0.15-0.25 s on the same models, ~25-35% faster.
+
+**The methodology lesson is the real finding, and it is a trap this project already had the
+ingredients to fall into.** A first pass compared ONE invocation per engine and produced an
+apparent "6-11% decode regression" — written up here, then falsified by the fleet sweep, which
+measured stable at 15.0 tok/s on the very model the single-shot run had scored at 13.0. Two
+separate variance scales are in play:
+- **Within an invocation**, the 3 measured runs agree to ≤0.1 tok/s. This tight spread is
+  seductive and means nothing about reproducibility across processes.
+- **Across invocations and across time**, the same engine + model + IR ranges over ~30%:
+  Qwen3-8B measured 15.0 tok/s early in a session and **10.3 tok/s** after ~90 min of sustained
+  benching — with the fork build reading 10.8 tok/s in the same late window. The box throttles
+  (or drops power state) under sustained load, and it moves *both* engines together.
+
+So: **never compare engines, drivers, or recipes with single invocations, and never across a long
+session.** Interleave the arms (A-B-A-B), take ≥3 invocations each, and compare medians *within
+one time window*. Absolute tok/s from any sweep is only meaningful with its machine state attached;
+the ordering between models within one sweep is the durable part.
+ᶜ the fork's 10.8 came from the late, thermally-drifted window — a stable-engine control taken
+minutes later read 10.3, which is what identifies the drift as machine state rather than engine.
+
+Second-order effect of the driver update (32.0.101.8724 → .8974): the driver is part of the
+compile-cache key, so **`.ovcache` was fully invalidated** — the first load per model pays the
+30-90 s compile again regardless of the engine change.
+
+### Post-upgrade speed reference (2026-08-18, GPU, 256 tokens, 3 runs, warm machine)
+
+One sweep, alphabetical order, single invocation per model — so read these as ±25% absolute and
+trust the *ordering*, per the finding above. The NPU arm is the autocomplete seat on its own device.
+
+| model | decode tok/s | TTFT s | | model | decode tok/s | TTFT s |
+|---|---|---|---|---|---|---|
+| Qwen2.5-Coder-0.5B | 71.2 | 0.04 | | Qwen3-4B | 24.4 | 0.09 |
+| LFM2.5-1.2B-Instruct | 65.2 | 0.12 | | gemma-4-E4B (QAT) | 17.9 | 0.15 |
+| MiniCPM5-1B | 61.7 | 0.07 | | Qwen3-8B-cw | 15.0 | 0.11 |
+| Qwen2.5-Coder-1.5B | 57.0 | 0.06 | | Seed-Coder-8B | 14.8 | 0.07 |
+| Qwen2.5-Coder-1.5B-symg128 | 52.8 | 0.07 | | Ministral-3-8B-Reasoning | 14.3 | 0.22 |
+| Qwen3.5-2B | 46.3 | 0.09 | | Ministral-3-8B-Instruct | 14.1 | 0.14 |
+| Qwen2.5-Coder-3B | 30.0 | 0.10 | | granite-4.1-8b-code | 13.1 | 0.15 |
+| Ministral-3-3B-Instruct | 29.6 | 0.08 | | granite-4.1-8b | 11.5 | 0.17 |
+| gemma-4-E2B (QAT) | 29.5 | 0.11 | | Ministral-3-14B-Reasoning | 9.2 | 0.32 |
+| Ministral-3-3B-Reasoning | 27.2 | 0.12 | | Ministral-3-14B-Instruct | 8.5 | 0.28 |
+| | | | | Coder-1.5B-symg128 **on NPU** | 17.7 | 2.23 |
+
+Against the June appendix rows measured on the *identical* artifact: Coder-1.5B 57.0 → 57.0,
+Qwen3-4B 24.9 → 24.4, Coder-3B 24.0 → 30.0, Qwen3.5-2B 34.6 → 46.3, Coder-0.5B 87.6 → 71.2.
+Scattered in both directions — consistent with machine-state noise dominating, not with a
+systematic engine or driver effect.
 
 ## Finding 14 — The NPU is a 1–2B express lane, and quantization damage is task-selective
 
@@ -504,7 +567,21 @@ architecture, ≤ ~6 GiB int4, permissive license, quality above incumbents). Sc
 Conclusion: as of 2026-06-06 the served lineup is at the practical optimum for this hardware —
 every higher-quality candidate is upstream-blocked or unreleased, not effort-blocked.
 
-## Open items (as of 2026-06)
+## Open items (as of 2026-06; engine section refreshed 2026-08-18)
+
+**What the 2026.3 stable release (2026-08-04/05) changes for the items below.** The engine
+delta itself is finding 13b; the release opens three doors, none of them yet walked through:
+- **MoE disk offloading** — the release claims 30B MoE (Qwen3-30B-A3B) on 16 GB boxes. That is a
+  *memory* fix, and finding 10's blocker here is a *GPU compile* deadlock, so it is not
+  automatically the unblock — but LFM2.5-8B-A1B (the top retest candidate, IR deleted for disk) is
+  worth one re-convert-and-compile attempt to see whether the expert-graph path changed.
+- **SmolLM3-3B, LFM2, LFM2.5-1.2B are now officially supported** on CPU/GPU/NPU. We already run
+  our own IRs for SmolLM3-3B (12/26) and LFM2.5-1.2B (14/26, the autocomplete-fim leader); an
+  official artifact is worth a diff only if ours underperforms it.
+- **EAGLE-3 speculative decoding now covers LLMs and VLMs** (plus top-K sampling). This is a
+  second speculative lever next to prompt-lookup (finding 6), and unlike prompt-lookup it does not
+  need n-gram overlap — the obvious candidate for the chat/agent turns where prompt-lookup *hurt*.
+  Needs a draft model, so budget iGPU memory against the KV pools.
 
 - **Qwen3.5-Coder**: not yet released — would likely obsolete the Qwen2.5-Coder autocomplete
   default the moment a small FIM-trained variant ships.
@@ -642,8 +719,20 @@ every higher-quality candidate is upstream-blocked or unreleased, not effort-blo
   same rt_info). This put **every fleet model on one engine for the first time** and unlocked the
   fair single-engine leaderboard (benchmark/README.md, `scripts/run_genai_sweep.ps1`): Gemma-4-12B 12/12,
   Qwen3-14B 12/12 (tie; Qwen faster), and the full Gemma ladder (E2B 8 / E4B 10 / 12B 12) vs Qwen
-  ladder (Coder-3B 6 / 8B 9 / 14B 12) — both scale cleanly. Branch build kept local pending the
-  #3944 merge; production server still runs the released GenAI (swap in once merged upstream).
+  ladder (Coder-3B 6 / 8B 9 / 14B 12) — both scale cleanly.
+  **FORK RETIRED 2026-08-18 — `gemma4_unified` is upstream in the OpenVINO 2026.3 stable release.**
+  The draft branch we built (#3944) was closed unmerged; the enablement landed instead as
+  openvino.genai **PR #4001** ("Add gemma-4-12b-it", merged 2026-07-03, maps the 12B onto the
+  existing Gemma4 VLM implementation, WWB similarity 0.968), plus **#4110** (`token_type_ids`
+  aligned with the PagedAttention op spec) and **#4213** (12B-it chat-template parse fix, ~4.5%
+  faster load). All three ship in **openvino-genai 2026.3.0.0** (released 2026-08-05), whose DLL
+  registers `gemma4_unified`. So the whole from-source toolchain — MSVC, py-build-cmake,
+  `--no-build-isolation`, the nightly index — is no longer needed: plain PyPI wheels serve every
+  fleet model, including the 12B. The baked `ACTIVATIONS_SCALE_FACTOR=64` IR fix is still ours and
+  still required (upstream default remains 8.0). Caveat: the 12B IR was deleted locally for disk,
+  so stable's 12B path is verified only by the registered type, not by a live run — re-download
+  before trusting it. E2B/E4B, granite-8b, Ministral-3-8B and Qwen3-8B were re-verified live on
+  stable 2026.3.0.0 (2026-08-18).
   **IMAGE/VLM path investigated 2026-06-13 — gemma-4 image inference splits by architecture, and
   the 12B's is a dead end for now.** Two distinct Gemma-4 vision arches: **`gemma4`** (E2B/E4B, the
   *edge* line) uses a full `vision_tower` + Per-Layer Embeddings (PLE; ships

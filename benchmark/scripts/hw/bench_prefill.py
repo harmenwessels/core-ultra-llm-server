@@ -17,7 +17,7 @@ import time
 import urllib.request
 
 BASE = "http://localhost:8000/v1"
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parents[3]  # repo root (../../../ from hw/)
 OUT_DIR = ROOT / "bench_results"
 
 FILLER = (
