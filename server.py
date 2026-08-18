@@ -291,6 +291,15 @@ within <tool_call></tool_call> XML tags:
 </tool_call>"""
 
 _TOOL_CALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
+# Qwen3-Coder dialect (Ornith-1.0, Qwen3-Coder): same <tool_call> wrapper, but the
+# payload is XML rather than JSON — the model's own template instructs it to emit
+# "<function=name><parameter=key>value</parameter></function>" and renders prior
+# assistant calls that way, so it is not a model slip to repair but a second
+# hermes-family syntax to speak.
+_TOOL_CALL_XML_RE = re.compile(
+    r"<tool_call>\s*(<function=.*?</function>)\s*</tool_call>", re.DOTALL)
+_XML_FUNC_RE = re.compile(r"<function=([^>\s]+)\s*>(.*?)</function>", re.DOTALL)
+_XML_PARAM_RE = re.compile(r"<parameter=([^>\s]+)\s*>(.*?)</parameter>", re.DOTALL)
 
 _TOOL_FORMATS: dict[str, str] = {}  # model id -> gemma | lfm | hermes
 _NATIVE_TEMPLATES: dict[str, object] = {}  # model id -> compiled jinja template
@@ -631,6 +640,25 @@ def _inject_tools(messages: list, tools: list) -> list:
     return out
 
 
+def _parse_xml_tool_payload(payload: str) -> dict | None:
+    """Parse the Qwen3-Coder XML call body into the hermes {name, arguments} shape.
+
+    Non-scalar arguments are rendered by the template with `| tojson`, so try
+    JSON per parameter and fall back to the literal text for plain strings.
+    """
+    m = _XML_FUNC_RE.search(payload)
+    if m is None:
+        return None
+    args: dict = {}
+    for key, raw in _XML_PARAM_RE.findall(m.group(2)):
+        raw = raw.strip("\n")
+        try:
+            args[key] = json.loads(raw)
+        except (ValueError, TypeError):
+            args[key] = raw
+    return {"name": m.group(1).strip(), "arguments": args}
+
+
 def _extract_tool_calls(text: str, id_prefix: str = "call_") -> tuple[str, list]:
     """Split generated text into (content, OpenAI tool_calls list).
 
@@ -657,6 +685,22 @@ def _extract_tool_calls(text: str, id_prefix: str = "call_") -> tuple[str, list]
         return ""
 
     content = _TOOL_CALL_RE.sub(_consume, text).strip()
+
+    def _consume_xml(m: re.Match) -> str:
+        obj = _parse_xml_tool_payload(m.group(1))
+        if obj is None:
+            return m.group(0)
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {
+                "name": obj["name"],
+                "arguments": json.dumps(obj["arguments"], ensure_ascii=False),
+            },
+        })
+        return ""
+
+    content = _TOOL_CALL_XML_RE.sub(_consume_xml, content).strip()
     if not calls:
         # fallback: smaller models (Coder-1.5B) emit the call JSON bare or in a
         # ```json fence, without the <tool_call> wrapper
