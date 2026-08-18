@@ -57,6 +57,20 @@
       "size": 7.6
     },
     {
+      "subject": "HarmenWessels/Ornith-1.0-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 7,
+      "cells": 7,
+      "seconds": 163.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
+    },
+    {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
       "kind": "single",
       "quality": 6,
@@ -231,7 +245,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -321,7 +335,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 2.1
     },
     {
       "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
@@ -416,7 +430,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.9
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -455,6 +469,20 @@
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 7.6
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.0-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 4,
+      "seconds": 184.0,
+      "decoding": "sampling",
+      "think": "think",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
     },
     {
       "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
@@ -512,7 +540,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.9
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -704,7 +732,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 2.1
     },
     {
       "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
@@ -737,7 +765,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
@@ -872,7 +900,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
@@ -886,7 +914,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.9
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -1277,6 +1305,22 @@
       "size": 0.0
     },
     {
+      "subject": "HarmenWessels/Ornith-1.0-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 11,
+      "cells": 12,
+      "seconds": 1040.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "rle-codec#0: FAIL (SyntaxError: invalid syntax (<string>, line 3))"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
+    },
+    {
       "subject": "HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov",
       "kind": "single",
       "quality": 10,
@@ -1477,7 +1521,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -1563,7 +1607,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 2.1
     },
     {
       "subject": "OpenVINO/Qwen3-0.6B-int4-ov",
@@ -1609,7 +1653,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.9
     },
     {
       "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
@@ -1846,7 +1890,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "OpenVINO/Qwen3-1.7B-int4-ov",
@@ -1982,7 +2026,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.9
     },
     {
       "subject": "OpenVINO/Qwen3-4B-int4-ov",
@@ -2016,7 +2060,24 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 2.1
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.0-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 29.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=['read_file'])",
+        "write-full: FAIL (writes=0 calls=['web_search'])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
