@@ -398,6 +398,13 @@ def _render_native(model_id: str, messages: list, tools: list | None,
     rp = _REASONING_SYSPROMPT.get(model_id)
     if rp and think:  # Mistral reasoner: inject the [THINK] system prompt
         messages = _inject_reasoning_sysprompt(messages, rp)
+    # An assistant turn that made a tool call carries content=None (the
+    # OpenAI shape, and exactly what _completion_message emits). Mistral's
+    # template takes len() of it and dies with "NoneType has no len()",
+    # which surfaced as an HTTP 500 on every tool-result continuation.
+    # Normalise to "" on a copy — never mutate the caller's messages.
+    messages = [{**m, "content": ""} if m.get("content") is None else m
+                for m in messages]
     return _NATIVE_TEMPLATES[model_id].render(
         messages=messages, tools=tools or None, add_generation_prompt=True,
         enable_thinking=think, bos_token=_BOS_TOKEN.get(model_id, ""))
@@ -1322,8 +1329,9 @@ async def chat_completions(request: Request):
             with _lock_for(model_id):
                 _apply_think_mode(model_id, pipe, think_mode)
                 t0 = time.perf_counter()
-                if model_id in _REASONING_SYSPROMPT \
-                        or _TOOL_FORMATS.get(model_id) == "mistral":
+                if isinstance(history, str) \
+                        and (model_id in _REASONING_SYSPROMPT
+                             or _TOOL_FORMATS.get(model_id) == "mistral"):
                     # GenAI's string decode skips special tokens, stripping the
                     # Mistral control tokens — [THINK]/[/THINK] (reasoning) AND
                     # [TOOL_CALLS]/[ARGS] (tool calls). Decode the raw ids keeping
