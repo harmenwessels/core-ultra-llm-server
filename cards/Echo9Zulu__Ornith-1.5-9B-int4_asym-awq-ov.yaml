@@ -11,6 +11,7 @@
 # Decoding mirrors our own 1.5 card so the comparison isolates the IR, not params:
 # vendor's precise-coding point for codegen, general point for the rest.
 hf_id: Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov
+published: true   # public on the HF hub — the leaderboard links it
 alias: ornith-9b-15-awq
 family: qwen3.5
 device: GPU

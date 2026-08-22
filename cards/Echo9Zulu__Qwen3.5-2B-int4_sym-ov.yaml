@@ -1,4 +1,5 @@
 hf_id: Echo9Zulu/Qwen3.5-2B-int4_sym-ov
+published: true   # public on the HF hub — the leaderboard links it
 alias: qwen3.5-2b
 family: qwen3.5
 device: GPU

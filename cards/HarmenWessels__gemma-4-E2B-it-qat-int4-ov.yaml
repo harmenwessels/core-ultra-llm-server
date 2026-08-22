@@ -1,4 +1,5 @@
 hf_id: HarmenWessels/gemma-4-E2B-it-qat-int4-ov
+published: true   # live on the HF hub — the leaderboard links it
 alias: gemma-4-e2b-it-qat-ov
 family: gemma4
 device: GPU

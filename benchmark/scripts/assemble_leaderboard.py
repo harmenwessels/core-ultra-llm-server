@@ -117,7 +117,13 @@ def render_overall(entries) -> str:
            "|---|---|---|---|---|---|"]
     for i, a in enumerate(rows, 1):
         if a["kind"] == "single":
-            name = f"[{a['subject']}](https://huggingface.co/{a['subject']})"
+            # Link only models we actually published: the leaderboard is public
+            # and an auto-generated link to an unpublished id 401s. A card opts
+            # in with `published: true`.
+            if bm.load_card(a["subject"]).get("published"):
+                name = f"[{a['subject']}](https://huggingface.co/{a['subject']})"
+            else:
+                name = a["subject"]
             sr = f'{a.get("size", "?")} GB'
             rec = a.get("recipe") or "—"
         else:

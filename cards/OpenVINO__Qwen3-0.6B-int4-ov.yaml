@@ -1,4 +1,5 @@
 hf_id: OpenVINO/Qwen3-0.6B-int4-ov
+published: true   # public on the HF hub — the leaderboard links it
 alias: qwen3-0.6b-ov
 family: qwen3
 device: GPU

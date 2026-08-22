@@ -1,4 +1,5 @@
 hf_id: HarmenWessels/granite-4.1-3b-int4-cw-code-ov
+published: true   # live on the HF hub — the leaderboard links it
 alias: granite-4.1-3b-cw-code-ov
 family: granite
 device: GPU

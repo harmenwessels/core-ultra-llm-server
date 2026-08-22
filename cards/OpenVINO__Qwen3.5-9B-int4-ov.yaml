@@ -12,6 +12,7 @@
 # structured stays greedy (family default).
 # Tool language: hermes wrapper with the Qwen3-Coder XML body (<function=...>).
 hf_id: OpenVINO/Qwen3.5-9B-int4-ov
+published: true   # public on the HF hub — the leaderboard links it
 alias: qwen3.5-9b
 family: qwen3.5
 device: GPU

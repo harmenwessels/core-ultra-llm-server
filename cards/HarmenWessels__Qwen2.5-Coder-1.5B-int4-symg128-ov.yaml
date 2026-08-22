@@ -1,4 +1,5 @@
 hf_id: HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov
+published: true   # live on the HF hub — the leaderboard links it
 alias: coder-1.5b-npu
 family: qwen2.5
 device: NPU

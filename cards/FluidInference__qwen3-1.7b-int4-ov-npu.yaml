@@ -1,4 +1,5 @@
 hf_id: FluidInference/qwen3-1.7b-int4-ov-npu
+published: true   # public on the HF hub — the leaderboard links it
 alias: qwen3-1.7b-ov-npu
 family: qwen3
 device: GPU

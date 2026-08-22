@@ -13,6 +13,7 @@
 # same-generation Ornith 9B sampled cleanly for 11/12.
 # Tool language: hermes wrapper with the Qwen3-Coder XML body (<function=...>).
 hf_id: OpenVINO/Qwen3.5-4B-int4-ov
+published: true   # public on the HF hub — the leaderboard links it
 alias: qwen3.5-4b
 family: qwen3.5
 device: GPU
