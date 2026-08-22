@@ -15,5 +15,12 @@ family: qwen3.5
 device: GPU
 decoding:
   generative: { temp: 0.6, top_p: 0.95, top_k: 20 }
+  # temp 0.6 CONFIRMED by experiment (2026-08-22), do not lower it. A probe sweep
+  # showed write-full passes at 0.2/greedy (it wanders to web_search at 0.6), but
+  # re-running ALL structured suites at 0.2 was a NET LOSS: edit 0/2->1/2, but
+  # agent-loop 7/7->6/7 and analysis 4/4->2/4 at 7x the wall-clock (185s->1264s)
+  # — the reasoner loops at low temperature, exactly as the default warns.
+  # edit-exact itself is unreachable at ANY setting: it calls read_file even when
+  # the file is in the prompt and a system prompt tells it to edit directly.
   structured: { greedy: false, temp: 0.6, top_p: 0.95, top_k: 20 }
 think_max_tokens: 8192
