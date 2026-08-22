@@ -343,6 +343,36 @@ Qwen3-4B 24.9 → 24.4, Coder-3B 24.0 → 30.0, Qwen3.5-2B 34.6 → 46.3, Coder-
 Scattered in both directions — consistent with machine-state noise dominating, not with a
 systematic engine or driver effect.
 
+## Finding 13c — Data-aware quantization is unavailable for VLM-shaped models
+
+AWQ / scale-estimation / any calibrated recipe is **impossible** on VLM-shaped IRs with our
+optimum-intel, for three stacked reasons found while trying to AWQ the Ornith 9B family
+(2026-08-22):
+
+1. The VLM path resolves the calibration set **by name from a fixed dict** —
+   `PREDEFINED_VISUAL_LM_DATASETS[config.dataset]` in `optimum/intel/openvino/quantization.py`.
+   Passing a corpus the way `scripts/convert_code_calibrated.py` does for a text LM raises
+   `TypeError: unhashable type: 'list'`. **So the granite code-calibration trick does NOT
+   generalize to VLM-shaped models** — that experiment is blocked, not merely unpromising.
+2. `contextual` is the only name that dict accepts for visual LMs, and **its images are gone**:
+   every URL under `textvision-data-quality.s3.us-west-1.amazonaws.com` returns
+   **HTTP 403 `AllAccessDisabled`**. The bucket is disabled, so the failure is total and
+   permanent, not flaky.
+3. The loader has no error handling around
+   `Image.open(requests.get(url, stream=True).raw)`, so one dead URL aborts a ~30 min run.
+
+Consequence: for `qwen3_5` and every other VLM-shaped IR, **data-free int4 is not a preference,
+it is the only reachable recipe**. This also explains the community `Ornith-1.5-9B-int4_asym-awq-ov`
+build: it used `textvqa`, a set only newer optimum-intel offers.
+
+**Trap worth remembering.** A tolerant shim (substituting a blank image per failed decode) makes
+the export *succeed* — producing a plausible artifact whose AWQ statistics were computed on 32
+identical grey rectangles. Only an explicit substitution counter revealed it. If a calibrated
+export ever "just works" after a dataset problem, count the samples that actually loaded.
+Second trap: `main_export(weight_format="int4", sym=True, awq=True, ...)` silently ignores those
+kwargs and yields plain `int8_asym` — the CLI builds an `OVWeightQuantizationConfig` from its
+flags, so drive `optimum.commands.optimum_cli.main` (or build the config explicitly) instead.
+
 ## Finding 14 — The NPU is a 1–2B express lane, and quantization damage is task-selective
 
 Overnight NPU campaign (2026-06-06/07), after the cw-sym discovery unblocked compilation:
@@ -588,6 +618,43 @@ architecture, ≤ ~6 GiB int4, permissive license, quality above incumbents). Sc
 
 Conclusion: as of 2026-06-06 the served lineup is at the practical optimum for this hardware —
 every higher-quality candidate is upstream-blocked or unreleased, not effort-blocked.
+
+## Ornith-1.5 — a version bump that regressed (2026-08-22)
+
+Ornith-1.0-9B scores **22/25** here (rank 6). Its successor Ornith-1.5-9B, converted with the
+IDENTICAL recipe and measured at each model's own vendor-recommended operating point, scores
+**16/25** — six cells lower and ~1.7x slower, on the same architecture, engine and think budget.
+
+Ruled out one by one before believing it: output degeneration (text is coherent), truncation
+(zero `length` finishes), code extraction (the probe already tries joined and per-block
+candidates), decoding parameters (re-run at the vendor's general point with
+`presence_penalty=1.5` recovered only +2 cells), and quantization — a four-recipe ablation:
+
+| build | changed | total |
+|---|---|---|
+| sym g128 data-free (ours) | — | 16/25 |
+| asym g64 + AWQ (community, repaired) | all four axes | 16/25 |
+| asym g128 data-free | symmetry | 14/25 |
+| sym g64 data-free | granularity | 11/25 |
+
+No recipe beats our default; **symmetric beat asymmetric, and coarser (g128) beat finer (g64) by
+5 cells** — counter to the usual intuition, echoing the MiniCPM5 granularity lesson.
+
+**Externally corroborated.** The vendor claims an improvement (Terminal-Bench 2.1: 46.2 for 1.5-9B
+vs 43.1 for 1.0-9B), but independent testers report the opposite in practice: a local A100/vLLM
+run (no quantization involved) saw it burn ~43k tokens in 7 minutes without completing an AWS
+task and emit hallucinated Chinese instead of a command; an HF discussion ("I was excited, until
+I ran it") reports at Q8/256k that it "trips over itself constantly" and needs 2-3 hours for basic
+HTML. Both match our signature exactly: complete, coherent, non-answering output at ~1.7x the
+token spend. Several threads also report the model self-identifying as "Claude", suggesting a
+rushed release. **Verdict: keep Ornith-1.0; do not serve 1.5.** Its own vendor recommending
+`presence_penalty=1.5` for general use reads as mitigation for that verbosity.
+
+Repairing the community IR was itself instructive: it ships **9B weights with a ~35B `text_config`**
+(64 layers, hidden 5120) and **tokenizer IRs built by optimum 2.3.0 that segfault** our
+openvino-tokenizers 2026.3.0.0. Both are fixable — swap `text_config` from the source model, swap
+the tokenizer/detokenizer from a local build of the same model — a recipe that should apply to any
+artifact exported by a newer toolchain.
 
 ## Open items (as of 2026-06; engine section refreshed 2026-08-18)
 

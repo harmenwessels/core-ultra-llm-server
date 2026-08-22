@@ -1,0 +1,29 @@
+# Ornith-1.5-9B (ornith-ai, MIT, released 2026-08-20) — successor to Ornith-1.0-9B.
+# Same architecture as 1.0 (qwen3_5, dense, 32 layers, hidden 4096, 262k ctx), and
+# converted with the IDENTICAL recipe (int4 sym g128, ratio 1.0, DATA-FREE — no
+# AWQ/scale-estimation) so any 1.0 vs 1.5 delta is attributable to the model rather
+# than the quantization. A community int4_ASYM+AWQ build exists
+# (Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov); deliberately not used, both for that
+# reason and because AWQ through the VLM `contextual` calibration measurably
+# degrades coding models (the settled OmniCoder-9B negative, RESEARCH rule 0c).
+# Decoding: the vendor advises temp 1.0 / top_p 0.95 / top_k 20 for GENERAL tasks
+# and temp 0.6 / top_p 0.95 / top_k 20 for PRECISE CODING — this suite is coding, so
+# 0.6, which also matches the 1.0 card exactly.
+# Reasoner: sampling on BOTH classes (greedy loops on reasoners); think cap 8192.
+# ASF left at the baked 8.0 — verified coherent over 300 tokens.
+# VLM-shaped IR -> VLMPipeline; the benchmark skips autocomplete-fim.
+# Tool language: hermes wrapper with the Qwen3-Coder XML body (<function=...>).
+hf_id: HarmenWessels/Ornith-1.5-9B-int4-symg128-ov
+alias: ornith-9b-15
+family: qwen3.5
+device: GPU
+# The vendor publishes TWO operating points and this card uses both, per class:
+#   precise coding -> temp 0.6, top_p 0.95, top_k 20, presence_penalty 0.0
+#   general tasks  -> temp 1.0, top_p 0.95, top_k 20, presence_penalty 1.5
+# codegen is the coding one; edit/agent-loop/analysis take the general one. The
+# first run (2026-08-22) used 0.6 with no penalty everywhere and scored 14/25 vs
+# Ornith-1.0's 22/25 — the structured suites were measured off-spec, hence this.
+decoding:
+  generative: { temp: 0.6, top_p: 0.95, top_k: 20, presence_penalty: 0.0 }
+  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 20, presence_penalty: 1.5 }
+think_max_tokens: 8192

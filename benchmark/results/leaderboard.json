@@ -229,6 +229,22 @@
       "size": 4.4
     },
     {
+      "subject": "Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 163.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "chain-depth: FAIL (turn 4: repeated call read_file)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 0.0
+    },
+    {
       "subject": "OpenVINO/Qwen3.5-4B-int4-ov",
       "kind": "single",
       "quality": 6,
@@ -311,6 +327,40 @@
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 4.9
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov",
+      "kind": "single",
+      "quality": 5,
+      "cells": 7,
+      "seconds": 316.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "no-repeat: FAIL (calls=[])",
+        "chain-depth: FAIL (stopped at turn 2: edits=1 green-tests-seen=0)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 5,
+      "cells": 7,
+      "seconds": 540.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "no-repeat: FAIL (calls=[])",
+        "chain-depth: FAIL (turn 7: repeated call read_file)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -437,6 +487,25 @@
       "detail": "data-free",
       "recipe": "data-free",
       "size": 6.1
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg64-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 7,
+      "seconds": 404.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "call-simple: FAIL (calls=[])",
+        "no-repeat: FAIL (calls=[])",
+        "stop-done: FAIL (calls=['read_file'])",
+        "chain-depth: FAIL (turn 2: repeated call run_tests)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
@@ -791,6 +860,22 @@
       "size": 4.9
     },
     {
+      "subject": "Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 351.0,
+      "decoding": "sampling",
+      "think": "think",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "route: FAIL (5/6 [chat:chat, edit:edit, design:None, chat:chat, edit:edit, design:d)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 0.0
+    },
+    {
       "subject": "OpenVINO/Qwen3-4B-int4-ov",
       "kind": "single",
       "quality": 3,
@@ -989,6 +1074,23 @@
       "size": 0.0
     },
     {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 4,
+      "seconds": 374.0,
+      "decoding": "sampling",
+      "think": "think",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:chat, edit:None, design)",
+        "plan: FAIL (symbols=4 numbered=False code=False)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
+    },
+    {
       "subject": "HarmenWessels/SmolLM3-3B-int4-symg128-ov",
       "kind": "single",
       "quality": 2,
@@ -1023,6 +1125,23 @@
       "size": 2.0
     },
     {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov",
+      "kind": "single",
+      "quality": 2,
+      "cells": 4,
+      "seconds": 1400.0,
+      "decoding": "sampling",
+      "think": "think",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "route: FAIL (0/6 [chat:None, edit:None, design:None, chat:None, edit:None, design:N)",
+        "diagnose: FAIL (content='{\"route\": \"chat\"}')"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
+    },
+    {
       "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
       "kind": "single",
       "quality": 2,
@@ -1055,6 +1174,24 @@
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 4.9
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg64-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 4,
+      "seconds": 440.0,
+      "decoding": "sampling",
+      "think": "think",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "route: FAIL (4/6 [chat:chat, edit:None, design:design, chat:chat, edit:None, design)",
+        "diagnose: FAIL (content='{\"route\": \"chat\"}')",
+        "recall-deep: FAIL (content='{\"route\": \"chat\"}')"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
     }
   ],
   "autocomplete-fim": [
@@ -1731,6 +1868,25 @@
       "size": 0.0
     },
     {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 8,
+      "cells": 12,
+      "seconds": 1773.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "merge-intervals#1: FAIL (missing definition)",
+        "rate-limiter#1: FAIL (SyntaxError: invalid syntax (<string>, line 1))",
+        "lru-cache#1: FAIL (NameError: name 'LRUCache' is not defined)",
+        "parse-duration#0: FAIL (missing definition)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
+    },
+    {
       "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
       "kind": "single",
       "quality": 7,
@@ -1749,6 +1905,66 @@
       "detail": "data-free",
       "recipe": "data-free",
       "size": 0.7
+    },
+    {
+      "subject": "Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov",
+      "kind": "single",
+      "quality": 7,
+      "cells": 12,
+      "seconds": 1334.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "merge-intervals#0: FAIL (NameError: name 'merge_intervals' is not defined)",
+        "merge-intervals#1: FAIL (SyntaxError: 'return' outside function (<string>, line 2))",
+        "rate-limiter#1: FAIL (SyntaxError: unterminated string literal (detected at line 5) (<string>, line 5))",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)",
+        "rle-codec#1: FAIL (SyntaxError: invalid syntax (<string>, line 1))"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 0.0
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov",
+      "kind": "single",
+      "quality": 7,
+      "cells": 12,
+      "seconds": 1545.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "merge-intervals#0: FAIL (missing definition)",
+        "parse-duration#0: FAIL (NameError: name 'parse_duration' is not defined)",
+        "parse-duration#1: FAIL (ValueError: not enough values to unpack (expected 2, got 1))",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)",
+        "rle-codec#1: FAIL (IndexError: string index out of range)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg64-ov",
+      "kind": "single",
+      "quality": 7,
+      "cells": 12,
+      "seconds": 2469.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "lru-cache#0: FAIL (NameError: name 'OrderedDict' is not defined)",
+        "lru-cache#1: FAIL (missing definition)",
+        "parse-duration#1: FAIL (parse_duration('2h45m') -> None)",
+        "rle-codec#0: FAIL (rle_encode('aaabccc') -> '02002')",
+        "group-anagrams#0: FAIL (missing definition)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -2158,6 +2374,22 @@
       "size": 4.4
     },
     {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg128-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 32.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=['read_file'])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
+    },
+    {
       "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
       "kind": "single",
       "quality": 1,
@@ -2460,6 +2692,23 @@
       "size": 4.4
     },
     {
+      "subject": "Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 29.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=['read_file'])",
+        "write-full: FAIL (writes=0 calls=['read_file'])"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 0.0
+    },
+    {
       "subject": "HarmenWessels/Ornith-1.0-9B-int4-symg128-ov",
       "kind": "single",
       "quality": 0,
@@ -2475,6 +2724,40 @@
       "detail": "data-free",
       "recipe": "data-free",
       "size": 6.1
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 33.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=['read_file'])",
+        "write-full: FAIL (writes=0 calls=['read_file'])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
+    },
+    {
+      "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg64-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 37.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=['read_file'])",
+        "write-full: FAIL (writes=0 calls=['read_file'])"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 0.0
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",

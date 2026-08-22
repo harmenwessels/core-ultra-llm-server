@@ -48,10 +48,15 @@ def _is_vlm(target: str) -> bool:
     return (d / "openvino_vision_embeddings_model.xml").exists()
 
 
+_PENALTIES = ("presence_penalty", "frequency_penalty", "repetition_penalty")
+
+
 def _sampling(dec: dict) -> dict:
+    # Penalties are independent of the greedy/sampling switch — a card may pin
+    # repetition_penalty on a greedy task — so they are collected first.
+    out = {k: dec[k] for k in _PENALTIES if dec.get(k) is not None}
     if dec.get("greedy") or not dec:
-        return {}
-    out = {}
+        return out
     for src, dst in (("temp", "temperature"), ("top_p", "top_p"), ("top_k", "top_k")):
         if dec.get(src) is not None:
             out[dst] = dec[src]
@@ -66,11 +71,13 @@ def _blocks(cf: dict, is_vlm: bool) -> int:
 
 def _decoding_record(cf: dict) -> dict:
     dec = cf["decoding"]
-    if dec.get("greedy") or not _sampling(dec):
+    if dec.get("greedy") or not dec.get("temp"):
         rec = {"strategy": "greedy"}
     else:
         rec = {"strategy": "sampling",
                **{k: dec.get(k) for k in ("temp", "top_p", "top_k")}}
+    # record the penalties too — provenance must show the exact operating point
+    rec.update({k: dec[k] for k in _PENALTIES if dec.get(k) is not None})
     rec["blocks"] = cf["blocks"]
     rec["task_class"] = cf["task_class"]
     return rec

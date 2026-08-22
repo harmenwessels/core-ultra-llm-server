@@ -880,6 +880,16 @@ def _build_generation_config(pipe, body: dict, default_max: int = 1024,
             cfg.top_k = int(top_k)
     else:
         cfg.do_sample = False
+    # Repetition controls. presence/frequency_penalty are the OpenAI names;
+    # repetition_penalty is GenAI-native with no OpenAI equivalent. Vendors do
+    # recommend these per operating point (Ornith-1.5 asks for
+    # presence_penalty=1.5 on general tasks), and without pass-through no card
+    # could ever express it. Set only what the caller sent, so the pipeline's
+    # own defaults stand otherwise.
+    for knob in ("presence_penalty", "frequency_penalty", "repetition_penalty"):
+        value = body.get(knob)
+        if value is not None:
+            setattr(cfg, knob, float(value))
     stop = body.get("stop")
     if stop:
         cfg.stop_strings = set([stop] if isinstance(stop, str) else stop)
