@@ -291,6 +291,15 @@ within <tool_call></tool_call> XML tags:
 </tool_call>"""
 
 _TOOL_CALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
+# Qwen3-Coder dialect (Ornith-1.0, Qwen3-Coder): same <tool_call> wrapper, but the
+# payload is XML rather than JSON — the model's own template instructs it to emit
+# "<function=name><parameter=key>value</parameter></function>" and renders prior
+# assistant calls that way, so it is not a model slip to repair but a second
+# hermes-family syntax to speak.
+_TOOL_CALL_XML_RE = re.compile(
+    r"<tool_call>\s*(<function=.*?</function>)\s*</tool_call>", re.DOTALL)
+_XML_FUNC_RE = re.compile(r"<function=([^>\s]+)\s*>(.*?)</function>", re.DOTALL)
+_XML_PARAM_RE = re.compile(r"<parameter=([^>\s]+)\s*>(.*?)</parameter>", re.DOTALL)
 
 _TOOL_FORMATS: dict[str, str] = {}  # model id -> gemma | lfm | hermes
 _NATIVE_TEMPLATES: dict[str, object] = {}  # model id -> compiled jinja template
@@ -389,6 +398,13 @@ def _render_native(model_id: str, messages: list, tools: list | None,
     rp = _REASONING_SYSPROMPT.get(model_id)
     if rp and think:  # Mistral reasoner: inject the [THINK] system prompt
         messages = _inject_reasoning_sysprompt(messages, rp)
+    # An assistant turn that made a tool call carries content=None (the
+    # OpenAI shape, and exactly what _completion_message emits). Mistral's
+    # template takes len() of it and dies with "NoneType has no len()",
+    # which surfaced as an HTTP 500 on every tool-result continuation.
+    # Normalise to "" on a copy — never mutate the caller's messages.
+    messages = [{**m, "content": ""} if m.get("content") is None else m
+                for m in messages]
     return _NATIVE_TEMPLATES[model_id].render(
         messages=messages, tools=tools or None, add_generation_prompt=True,
         enable_thinking=think, bos_token=_BOS_TOKEN.get(model_id, ""))
@@ -631,6 +647,25 @@ def _inject_tools(messages: list, tools: list) -> list:
     return out
 
 
+def _parse_xml_tool_payload(payload: str) -> dict | None:
+    """Parse the Qwen3-Coder XML call body into the hermes {name, arguments} shape.
+
+    Non-scalar arguments are rendered by the template with `| tojson`, so try
+    JSON per parameter and fall back to the literal text for plain strings.
+    """
+    m = _XML_FUNC_RE.search(payload)
+    if m is None:
+        return None
+    args: dict = {}
+    for key, raw in _XML_PARAM_RE.findall(m.group(2)):
+        raw = raw.strip("\n")
+        try:
+            args[key] = json.loads(raw)
+        except (ValueError, TypeError):
+            args[key] = raw
+    return {"name": m.group(1).strip(), "arguments": args}
+
+
 def _extract_tool_calls(text: str, id_prefix: str = "call_") -> tuple[str, list]:
     """Split generated text into (content, OpenAI tool_calls list).
 
@@ -657,6 +692,22 @@ def _extract_tool_calls(text: str, id_prefix: str = "call_") -> tuple[str, list]
         return ""
 
     content = _TOOL_CALL_RE.sub(_consume, text).strip()
+
+    def _consume_xml(m: re.Match) -> str:
+        obj = _parse_xml_tool_payload(m.group(1))
+        if obj is None:
+            return m.group(0)
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {
+                "name": obj["name"],
+                "arguments": json.dumps(obj["arguments"], ensure_ascii=False),
+            },
+        })
+        return ""
+
+    content = _TOOL_CALL_XML_RE.sub(_consume_xml, content).strip()
     if not calls:
         # fallback: smaller models (Coder-1.5B) emit the call JSON bare or in a
         # ```json fence, without the <tool_call> wrapper
@@ -829,6 +880,16 @@ def _build_generation_config(pipe, body: dict, default_max: int = 1024,
             cfg.top_k = int(top_k)
     else:
         cfg.do_sample = False
+    # Repetition controls. presence/frequency_penalty are the OpenAI names;
+    # repetition_penalty is GenAI-native with no OpenAI equivalent. Vendors do
+    # recommend these per operating point (Ornith-1.5 asks for
+    # presence_penalty=1.5 on general tasks), and without pass-through no card
+    # could ever express it. Set only what the caller sent, so the pipeline's
+    # own defaults stand otherwise.
+    for knob in ("presence_penalty", "frequency_penalty", "repetition_penalty"):
+        value = body.get(knob)
+        if value is not None:
+            setattr(cfg, knob, float(value))
     stop = body.get("stop")
     if stop:
         cfg.stop_strings = set([stop] if isinstance(stop, str) else stop)
@@ -883,7 +944,7 @@ def _run_streaming(pipe, model_id: str, inputs, gen_cfg,
 
 # --- virtual model: per-turn role router ------------------------------------
 # One model id (default virtual/agent) that routes each turn to the best
-# measured brain (BENCHMARKS.md role-fitness): a router classifies fresh
+# measured brain (benchmark/README.md role-fitness): a router classifies fresh
 # requests, the architect analyzes/plans (read-only tools), the executor
 # does edit->test->verify loops (full tools). Stateless across requests:
 # tool-result continuations are routed by the role encoded in our call ids;
@@ -1278,8 +1339,9 @@ async def chat_completions(request: Request):
             with _lock_for(model_id):
                 _apply_think_mode(model_id, pipe, think_mode)
                 t0 = time.perf_counter()
-                if model_id in _REASONING_SYSPROMPT \
-                        or _TOOL_FORMATS.get(model_id) == "mistral":
+                if isinstance(history, str) \
+                        and (model_id in _REASONING_SYSPROMPT
+                             or _TOOL_FORMATS.get(model_id) == "mistral"):
                     # GenAI's string decode skips special tokens, stripping the
                     # Mistral control tokens — [THINK]/[/THINK] (reasoning) AND
                     # [TOOL_CALLS]/[ARGS] (tool calls). Decode the raw ids keeping
@@ -1508,9 +1570,14 @@ def _load_models_config() -> None:
             _PROMPT_LEN_OVERRIDE[mid] = int(max_prompt_len)
     if dirs:
         MODEL_DIRS = dirs
-        # registry replaces (not merges with) the env defaults
+        # registry replaces (not merges with) the env defaults. Prune against the
+        # ids the registry actually serves under — the ALIASES — because that is
+        # what SCHEDULER_MODELS was keyed by above and what _load_pipelines()
+        # looks up. Comparing against _model_id(dir) instead dropped the pool for
+        # every aliased entry, silently disabling prefix caching (finding 12).
+        registered = set(_REGISTRY_ALIASES)
         for k in list(SCHEDULER_MODELS):
-            if k not in {_model_id(d) for d in dirs}:
+            if k not in registered:
                 del SCHEDULER_MODELS[k]
     v = cfg.get("virtual") or {}
     if v.get("id"):

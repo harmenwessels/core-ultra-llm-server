@@ -1,0 +1,19 @@
+# Ornith-1.0-9B (ornith-ai, MIT) — RL-post-trained agentic coder on Qwen3.5-9B.
+# Reasoning model: the template pre-fills the opener, so output carries a closing
+# </think> with no <think> — _split_reasoning already handles the unopened case.
+# Sampling on BOTH classes (greedy loops on reasoners); vendor-advised
+# temp 0.6 / top_p 0.95 / top_k 20 (they used temp 1.0 for their published
+# Terminal-Bench/SWE-bench numbers). think cap 8192 for the 9B class.
+# Quant: int4 sym g128 DATA-FREE — deliberately no AWQ/scale-estimation, because
+# the VLM calibration path only accepts `--dataset contextual` and that measurably
+# degrades coding models (settled negative from the OmniCoder-9B experiment).
+# IR is VLM-shaped (qwen3_5) -> VLMPipeline; the benchmark skips autocomplete-fim.
+# Tool language: hermes (<tool_call> + <tools>), rendered natively by its template.
+hf_id: HarmenWessels/Ornith-1.0-9B-int4-symg128-ov
+alias: ornith-9b
+family: qwen3.5
+device: GPU
+decoding:
+  generative: { temp: 0.6, top_p: 0.95, top_k: 20 }
+  structured: { greedy: false, temp: 0.6, top_p: 0.95, top_k: 20 }
+think_max_tokens: 8192

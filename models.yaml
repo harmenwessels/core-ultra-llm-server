@@ -1,8 +1,9 @@
 # Model registry — the per-model operating manual, executable.
 # Loaded by server.py (override path via MODELS_CONFIG env). Every setting
-# here was measured before it was written down: BENCHMARKS.md has the
+# here was measured before it was written down: benchmark/README.md has the
 # numbers, RESEARCH.md the findings. Env vars (MODEL_DIRS etc.), if set,
-# override this file for quick experiments.
+# override this file for quick experiments — note an env override also drops
+# the aliases and per-model settings below, so keep it to throwaway runs.
 
 models:
   - dir: models/HarmenWessels/granite-4.1-8b-int4-cw-ov

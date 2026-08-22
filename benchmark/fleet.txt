@@ -22,3 +22,13 @@ HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov
 Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov
 HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov  # ByteDance Seed-Coder-8B (MIT, LlamaForCausalLM, native FIM); local int4 cw-sym AWQ+SE convert
 HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov  # Ministral-3-3B-Reasoning (llamafied text-only, Apache-2.0); Mistral [THINK] reasoner, server-driven think/nothink
+HarmenWessels/Ornith-1.0-9B-int4-symg128-ov  # Ornith-1.0 (ornith-ai, MIT): RL-post-trained agentic coder on Qwen3.5-9B; data-free int4 sym g128; reasoner, hermes-XML tool dialect
+OpenVINO/Qwen3.5-4B-int4-ov  # official Intel build (Apache-2.0), int4_asym g128 data-free; newer-gen contender vs Qwen3-4B; asym so GPU/CPU only
+OpenVINO/Qwen3.5-9B-int4-ov  # official Intel build (Apache-2.0), int4_asym g128 data-free; the BASELINE for Ornith-1.0-9B and OmniCoder-9B, both qwen3_5 derivatives
+OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov  # quality floor / fastest autocomplete candidate
+HarmenWessels/MiniCPM5-1B-int4-g128-ov  # converted 2026-06, never benchmarked
+HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov  # the NPU router/FIM artifact (sym-g128); GPU row for reference
+HarmenWessels/Ornith-1.5-9B-int4-symg128-ov  # Ornith-1.5 (ornith-ai, MIT, 2026-08-20): successor to 1.0, identical convert recipe for an attributable comparison
+Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov  # community asym-g64-AWQ(textvqa) build of Ornith-1.5 — quantization ablation vs our sym-g128 data-free
+HarmenWessels/Ornith-1.5-9B-int4-symg64-ov  # Ornith-1.5 quantization ablation (one variable vs the sym-g128 baseline)
+HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov  # Ornith-1.5 quantization ablation (one variable vs the sym-g128 baseline)

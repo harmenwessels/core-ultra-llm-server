@@ -17,7 +17,7 @@ import time
 
 import openvino_genai as ov_genai
 
-DEFAULT_CACHE = pathlib.Path(__file__).resolve().parent.parent / ".ovcache"
+DEFAULT_CACHE = pathlib.Path(__file__).resolve().parents[3] / ".ovcache"
 
 CODE = '''
 def process_orders(orders, inventory, prices):

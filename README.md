@@ -19,8 +19,9 @@ quantization recipes, prompt-lookup decoding) and the model-conversion playbook,
 ## Requirements
 
 - Intel Core Ultra CPU with integrated Arc graphics (tested: Core Ultra 155H / Meteor Lake)
-- Windows 11 with a current Intel graphics driver (tested: 32.0.101.8724)
-- Python 3.12 (3.13 is not yet supported by the pinned OpenVINO nightly toolchain)
+- Windows 11 with a current Intel graphics driver (tested: 32.0.101.8974)
+- Python 3.12 (what this project is built and tested on; the OpenVINO 2026.3 wheels also ship
+  for 3.13/3.14, untested here)
 - A Hugging Face account for model downloads (`hf auth login` — anonymous downloads of
   multi-GB files stall)
 
@@ -80,7 +81,7 @@ the benchmark — see [benchmark/](benchmark/README.md).
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `MODEL_DIRS` | the two models above | `;`-separated list of model directories to serve |
+| `MODEL_DIRS` | — (`models.yaml` governs) | `;`-separated list of model directories to serve. Setting it **bypasses the registry entirely**: no aliases, no per-model device/KV-pool/tool-format — use it for throwaway experiments, not as a deployment mechanism |
 | `MODEL_DIR` | — | single-model override |
 | `DEVICE` | `GPU` | OpenVINO device (`CPU` as debug fallback) |
 | `HOST` / `PORT` | `127.0.0.1` / `8000` | bind address |
@@ -199,8 +200,8 @@ Best model per task type on a Core Ultra 155H Arc iGPU:
 | Task type | Best single | Q | Best combo | Q |
 |---|---|---|---|---|
 | codegen | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | 12/12 | — | — |
-| edit | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | 2/2 | — | — |
-| agent-loop | HarmenWessels/granite-4.1-8b-int4-cw-ov | 7/7 | — | — |
+| edit | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | 2/2 | — | — |
+| agent-loop | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | 7/7 | — | — |
 | analysis | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | 4/4 | — | — |
 | autocomplete-fim | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | 1/1 | — | — |
 
@@ -218,7 +219,7 @@ scripts/check_gpu.py            verify OpenVINO sees the Arc iGPU
 scripts/download_model.py       fetch OpenVINO IR models from Hugging Face
 benchmark/                      per-task-type benchmark: README leaderboard, scripts/, run records
 benchmark/scripts/hw/bench.py   TTFT + decode-throughput microbenchmark (3 measured runs)
-requirements.txt                pinned dependency versions (incl. OpenVINO nightly index)
+requirements.txt                pinned dependency versions (OpenVINO 2026.3 stable)
 models/<owner>/<name>/          downloaded models, mirroring HF repo ids (gitignored)
 .ovcache/                       compiled-blob cache (gitignored)
 ```

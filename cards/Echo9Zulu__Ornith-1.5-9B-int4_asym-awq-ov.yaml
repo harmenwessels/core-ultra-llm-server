@@ -1,0 +1,20 @@
+# Ornith-1.5-9B, COMMUNITY conversion by Echo9Zulu — the fourth point in the
+# quantization ablation. It differs from our baseline on FOUR axes at once, so it
+# cannot attribute a difference; it only answers "does any recipe rescue 1.5?".
+#   ours      : int4 sym  g128, no AWQ, data-free      -> 16/25
+#   this build: int4 ASYM g64,  AWQ,    calib=textvqa
+# Note the calibration set is textvqa (visual QA) because the export runs through
+# the VLM path — the exact shape RESEARCH rule 0c says degrades coding models
+# (the settled OmniCoder-9B negative). Card metadata claims apache-2.0 while the
+# source model is MIT, and its openvino_config bakes an absolute local path;
+# neither affects inference, both are provenance smells worth remembering.
+# Decoding mirrors our own 1.5 card so the comparison isolates the IR, not params:
+# vendor's precise-coding point for codegen, general point for the rest.
+hf_id: Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov
+alias: ornith-9b-15-awq
+family: qwen3.5
+device: GPU
+decoding:
+  generative: { temp: 0.6, top_p: 0.95, top_k: 20, presence_penalty: 0.0 }
+  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 20, presence_penalty: 1.5 }
+think_max_tokens: 8192

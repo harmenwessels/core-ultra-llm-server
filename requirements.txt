@@ -1,14 +1,15 @@
-# Pinned after Gate 2/3 passed (2026-06-04) for reproducibility.
+# Pinned to the OpenVINO 2026.3 stable release (2026-08-04) — the first release
+# whose GenAI ships gemma-4 *unified* dispatch, so the nightly index and the
+# from-source GenAI build this project needed for Gemma-4-12B are both retired.
 # Install on Windows with Python 3.12:
 #   py -3.12 -m venv .venv
 #   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
---extra-index-url https://storage.openvinotoolkit.org/simple/wheels/nightly
 
-# OpenVINO nightly stack (Gemma 4 support requires nightly, newer than 2026.2 stable)
-openvino==2026.3.0.dev20260603
-openvino-genai==2026.3.0.0.dev20260603
-openvino-tokenizers==2026.3.0.0.dev20260603
-nncf==3.2.0
+# OpenVINO stable stack
+openvino==2026.3.0
+openvino-genai==2026.3.0.0
+openvino-tokenizers==2026.3.0.0
+nncf==3.3.0
 
 # Model download
 huggingface_hub==1.17.0
