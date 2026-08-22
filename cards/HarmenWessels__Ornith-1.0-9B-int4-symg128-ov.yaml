@@ -10,6 +10,7 @@
 # IR is VLM-shaped (qwen3_5) -> VLMPipeline; the benchmark skips autocomplete-fim.
 # Tool language: hermes (<tool_call> + <tools>), rendered natively by its template.
 hf_id: HarmenWessels/Ornith-1.0-9B-int4-symg128-ov
+published: true   # uploaded 2026-08-22 — the leaderboard links it
 alias: ornith-9b
 family: qwen3.5
 device: GPU
