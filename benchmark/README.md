@@ -8,12 +8,15 @@ tool that tells us what to put in it.
 ## Method
 
 - **Backend:** OpenVINO **GenAI only** (`.venv-genai`). One engine, no cross-engine confounds.
-  Since 2026-08-18 that is the **2026.3.0.0 stable release**; every record currently in the tables
-  was produced by its predecessor, the source-built gemma-4 fork build (`2026.3.0.0-1`) — hence the
-  build id in the Engine column. The two engines measure **the same decode throughput** (stable has
-  ~25-35% faster TTFT; RESEARCH finding 13b), so those records remain comparable in practice — but
-  the retest queue below will still flag them as engine-stale once the first stable record lands,
-  which is the conservative default and worth honouring for any close ranking.
+  Since 2026-09-14 that is the **2026.3.1.0 patch release** (`-3290`); records tagged `2026.3.0.0-3277`
+  came from the 2026.3.0 stable release (2026-08-18 → 2026-09-13) and `2026.3.0.0-1` from the earlier
+  source-built gemma-4 fork — hence the build id in the Engine column. All three engines score
+  **identically** cell-for-cell on the models re-run across them; 2026.3.0 vs the fork was decode-neutral
+  (finding 13b), and 2026.3.1 is **+6-10% decode** over 2026.3.0 in an interleaved A-B (finding 13d),
+  so older records remain comparable in practice. The retest queue below still flags them as
+  engine-stale — the conservative default, worth honouring for any close ranking. The Intel GPU driver
+  (`32.0.101.8974` → `.8991` on 2026-08-24) changed nothing measurable; records carry `engine.gpu_driver`
+  since 2026-09-13.
 - **Task types (5 suites):** `codegen` · `edit` · `autocomplete-fim` · `agent-loop`
   · `analysis` (diagnose / plan / route / recall).
 - **Scoring:** per (entry, task type) → **quality** = probe pass-rate, **runtime** = total
@@ -121,15 +124,15 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 3 | [HarmenWessels/gemma-4-12B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-12B-it-qat-int4-ov) | 23/25 | 2019 | 0.0 GB | qat |
 | 4 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | 23/26 | 3091 | 7.6 GB | awq+se |
 | 5 | [HarmenWessels/granite-4.1-8b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-code-ov) | 22/26 | 859 | 4.4 GB | awq+se |
-| 6 | [HarmenWessels/Ornith-1.0-9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ornith-1.0-9B-int4-symg128-ov) | 22/25 | 1416 | 6.1 GB | data-free |
+| 6 | [HarmenWessels/Ornith-1.0-9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ornith-1.0-9B-int4-symg128-ov) | 22/25 | 1447 | 6.1 GB | data-free |
 | 7 | [HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov](https://huggingface.co/HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov) | 21/26 | 676 | 4.8 GB | awq+se |
 | 8 | [OpenVINO/Qwen3-4B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-4B-int4-ov) | 21/26 | 786 | 2.3 GB | awq |
 | 9 | [HarmenWessels/gemma-4-E2B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | 21/25 | 1438 | 4.4 GB | qat |
 | 10 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | 21/26 | 1517 | 4.9 GB | awq+se |
-| 11 | [OpenVINO/Qwen3-8B-int4-cw-ov](https://huggingface.co/OpenVINO/Qwen3-8B-int4-cw-ov) | 21/26 | 1535 | 4.7 GB | data-free |
-| 12 | [OpenVINO/Qwen3.5-4B-int4-ov](https://huggingface.co/OpenVINO/Qwen3.5-4B-int4-ov) | 21/25 | 2117 | 3.5 GB | data-free |
-| 13 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | 21/26 | 2920 | 4.9 GB | awq+se |
-| 14 | [HarmenWessels/gemma-4-E4B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | 20/25 | 1906 | 6.6 GB | qat |
+| 11 | [OpenVINO/Qwen3-8B-int4-cw-ov](https://huggingface.co/OpenVINO/Qwen3-8B-int4-cw-ov) | 21/26 | 1612 | 4.7 GB | data-free |
+| 12 | [HarmenWessels/gemma-4-E4B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | 21/25 | 1621 | 6.6 GB | qat |
+| 13 | [OpenVINO/Qwen3.5-4B-int4-ov](https://huggingface.co/OpenVINO/Qwen3.5-4B-int4-ov) | 21/25 | 2117 | 3.5 GB | data-free |
+| 14 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | 21/26 | 2920 | 4.9 GB | awq+se |
 | 15 | [HarmenWessels/granite-4.1-8b-int4-cw-ov](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov) | 19/26 | 781 | 4.4 GB | awq+se |
 | 16 | [OpenVINO/Qwen3.5-9B-int4-ov](https://huggingface.co/OpenVINO/Qwen3.5-9B-int4-ov) | 18/25 | 3101 | 6.1 GB | data-free |
 | 17 | [HarmenWessels/granite-4.1-3b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-code-ov) | 17/26 | 586 | 0.0 GB | awq+se |
@@ -147,7 +150,7 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 29 | [Echo9Zulu/Qwen3.5-2B-int4_sym-ov](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | 11/25 | 2735 | 2.1 GB | data-free |
 | 30 | HarmenWessels/Ornith-1.5-9B-int4-symg64-ov | 11/25 | 3350 | 0.0 GB | data-free |
 | 31 | [OpenVINO/Qwen3-0.6B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-0.6B-int4-ov) | 10/26 | 255 | 0.0 GB | data-free |
-| 32 | [OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 10/26 | 316 | 0.9 GB | data-free |
+| 32 | [OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 10/26 | 337 | 0.9 GB | data-free |
 | 33 | [HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov) | 9/26 | 253 | 0.9 GB | data-free |
 | 34 | [HarmenWessels/MiniCPM5-1B-int4-g128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-1B-int4-g128-ov) | 7/26 | 328 | 0.8 GB | data-free |
 | 35 | [OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 6/26 | 233 | 0.3 GB | data-free |
@@ -155,7 +158,7 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 
 ## Per-task-type leaderboard
 
-_256 runs._
+_168 runs._
 
 ### codegen
 
@@ -168,15 +171,15 @@ _256 runs._
 | 5 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 0.0 GB | 12/12 | 1502 | 125 | qat | sampling | nothink | 2026.3.0.0-1 |
 | 6 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 12/12 | 1731 | 144 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
 | 7 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 11/12 | 370 | 31 | awq | sampling | nothink | 2026.3.0.0-3277 |
-| 8 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 11/12 | 950 | 79 | data-free | sampling | nothink | 2026.3.0.0-3277 |
-| 9 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 11/12 | 1040 | 87 | data-free | sampling | nothink | 2026.3.0.0-3277 |
-| 10 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 11/12 | 1061 | 88 | qat | sampling | nothink | 2026.3.0.0-3277 |
+| 8 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 11/12 | 980 | 82 | data-free | sampling | nothink | 2026.3.1.0-3290 |
+| 9 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 11/12 | 1061 | 88 | qat | sampling | nothink | 2026.3.0.0-3277 |
+| 10 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 11/12 | 1073 | 89 | data-free | sampling | nothink | 2026.3.0.0-3277 |
 | 11 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 10/12 | 664 | 55 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 12 | OpenVINO/Qwen3.5-4B-int4-ov | single | 3.5 GB | 10/12 | 963 | 80 | data-free | sampling | nothink | 2026.3.0.0-3277 |
 | 13 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 10/12 | 1070 | 89 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
-| 14 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 9/12 | 514 | 43 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
-| 15 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 9/12 | 622 | 52 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
-| 16 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 9/12 | 1574 | 131 | qat | sampling | nothink | 2026.3.0.0-3277 |
+| 14 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 10/12 | 1278 | 106 | qat | sampling | nothink | 2026.3.1.0-3290 |
+| 15 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 9/12 | 514 | 43 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
+| 16 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 9/12 | 622 | 52 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 17 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 9/12 | 1609 | 134 | data-free | sampling | nothink | 2026.3.0.0-3277 |
 | 18 | Echo9Zulu/OmniCoder-9B-int4_sym-ov | single | 0.0 GB | 9/12 | 1992 | 166 | data-free | greedy | nothink | 2026.3.0.0-1 |
 | 19 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 0.0 GB | 8/12 | 264 | 22 | awq+se | greedy | nothink | 2026.3.0.0-1 |
@@ -191,7 +194,7 @@ _256 runs._
 | 28 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 5/12 | 183 | 15 | data-free | sampling | nothink | 2026.3.0.0-3277 |
 | 29 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 0.0 GB | 5/12 | 457 | 38 | awq+se | sampling | nothink | 2026.3.0.0-1 |
 | 30 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.0 GB | 4/12 | 119 | 10 | data-free | sampling | nothink | 2026.3.0.0-1 |
-| 31 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 4/12 | 250 | 21 | data-free | sampling | nothink | 2026.3.0.0-3277 |
+| 31 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 4/12 | 268 | 22 | data-free | sampling | nothink | 2026.3.1.0-3290 |
 | 32 | OpenVINO/Qwen3-1.7B-int4-ov | single | 0.0 GB | 4/12 | 343 | 29 | data-free | sampling | nothink | 2026.3.0.0-1 |
 | 33 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 4/12 | 827 | 69 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 34 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 3/12 | 208 | 17 | data-free | sampling | nothink | 2026.3.0.0-3277 |
@@ -212,20 +215,20 @@ _256 runs._
 | 8 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 1/2 | 29 | 14 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
 | 9 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 1/2 | 30 | 15 | qat | greedy | nothink | 2026.3.0.0-3277 |
 | 10 | HarmenWessels/Ornith-1.5-9B-int4-symg128-ov | single | 0.0 GB | 1/2 | 32 | 16 | data-free | sampling | nothink | 2026.3.0.0-3277 |
-| 11 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 1/2 | 35 | 18 | qat | greedy | nothink | 2026.3.0.0-3277 |
-| 12 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 1/2 | 39 | 20 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
-| 13 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 1/2 | 44 | 22 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
+| 11 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 1/2 | 39 | 20 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
+| 12 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 1/2 | 44 | 22 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
+| 13 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 1/2 | 50 | 25 | qat | greedy | nothink | 2026.3.1.0-3290 |
 | 14 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 0.0 GB | 1/2 | 74 | 37 | qat | greedy | nothink | 2026.3.0.0-1 |
 | 15 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 0/2 | 5 | 2 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 16 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 0/2 | 6 | 3 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 17 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 0/2 | 7 | 4 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 18 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.0 GB | 0/2 | 7 | 4 | data-free | greedy | nothink | 2026.3.0.0-1 |
 | 19 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 0/2 | 10 | 5 | data-free | greedy | nothink | 2026.3.0.0-3277 |
-| 20 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 0/2 | 10 | 5 | data-free | greedy | nothink | 2026.3.0.0-3277 |
+| 20 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 0/2 | 11 | 6 | data-free | greedy | nothink | 2026.3.1.0-3290 |
 | 21 | OpenVINO/Qwen3-1.7B-int4-ov | single | 0.0 GB | 0/2 | 11 | 6 | data-free | greedy | nothink | 2026.3.0.0-1 |
 | 22 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 0.0 GB | 0/2 | 14 | 7 | awq+se | greedy | nothink | 2026.3.0.0-1 |
 | 23 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 0/2 | 15 | 8 | scale_estimation | greedy | nothink | 2026.3.0.0-3277 |
-| 24 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 0/2 | 15 | 8 | data-free | greedy | nothink | 2026.3.0.0-3277 |
+| 24 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 0/2 | 16 | 8 | data-free | greedy | nothink | 2026.3.1.0-3290 |
 | 25 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 0.0 GB | 0/2 | 17 | 8 | awq+se | greedy | nothink | 2026.3.0.0-1 |
 | 26 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 0/2 | 18 | 9 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 27 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 0/2 | 18 | 9 | awq | greedy | nothink | 2026.3.0.0-3277 |
@@ -243,17 +246,17 @@ _256 runs._
 
 | # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 7/7 | 42 | 6 | qat | greedy | nothink | 2026.3.0.0-3277 |
+| 1 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 7/7 | 45 | 6 | qat | greedy | nothink | 2026.3.1.0-3290 |
 | 2 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 7/7 | 56 | 8 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 3 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 7/7 | 76 | 11 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 4 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 7/7 | 109 | 16 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
-| 5 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 7/7 | 163 | 23 | data-free | sampling | nothink | 2026.3.0.0-3277 |
+| 5 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 7/7 | 160 | 23 | data-free | sampling | nothink | 2026.3.0.0-3277 |
 | 6 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 7/7 | 177 | 25 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
 | 7 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 6/7 | 31 | 4 | scale_estimation | greedy | nothink | 2026.3.0.0-3277 |
 | 8 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 6/7 | 33 | 5 | awq | greedy | nothink | 2026.3.0.0-3277 |
 | 9 | OpenVINO/Qwen3-1.7B-int4-ov | single | 0.0 GB | 6/7 | 36 | 5 | data-free | greedy | nothink | 2026.3.0.0-1 |
 | 10 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 0.0 GB | 6/7 | 40 | 6 | awq+se | greedy | nothink | 2026.3.0.0-1 |
-| 11 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 6/7 | 59 | 8 | data-free | greedy | nothink | 2026.3.0.0-3277 |
+| 11 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 6/7 | 66 | 9 | data-free | greedy | nothink | 2026.3.1.0-3290 |
 | 12 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 6/7 | 92 | 13 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 13 | OpenVINO/Qwen3-14B-int4-ov | single | 0.0 GB | 6/7 | 106 | 15 | data-free | greedy | nothink | 2026.3.0.0-1 |
 | 14 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 0.0 GB | 6/7 | 127 | 18 | qat | greedy | nothink | 2026.3.0.0-1 |
@@ -274,7 +277,7 @@ _256 runs._
 | 29 | Echo9Zulu/OmniCoder-9B-int4_sym-ov | single | 0.0 GB | 4/7 | 347 | 50 | data-free | greedy | nothink | 2026.3.0.0-1 |
 | 30 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 4/7 | 524 | 75 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 31 | HarmenWessels/Ornith-1.5-9B-int4-symg64-ov | single | 0.0 GB | 3/7 | 404 | 58 | data-free | sampling | nothink | 2026.3.0.0-3277 |
-| 32 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 2/7 | 21 | 3 | data-free | greedy | nothink | 2026.3.0.0-3277 |
+| 32 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 2/7 | 21 | 3 | data-free | greedy | nothink | 2026.3.1.0-3290 |
 | 33 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 2/7 | 23 | 3 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 34 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 2/7 | 26 | 4 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 35 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 2/7 | 27 | 4 | data-free | greedy | nothink | 2026.3.0.0-3277 |
@@ -285,10 +288,10 @@ _256 runs._
 | # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 4/4 | 140 | 35 | awq+se | greedy | think | 2026.3.0.0-3277 |
-| 2 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 4/4 | 184 | 46 | data-free | sampling | think | 2026.3.0.0-3277 |
+| 2 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 4/4 | 185 | 46 | data-free | sampling | think | 2026.3.0.0-3277 |
 | 3 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 0.0 GB | 4/4 | 316 | 79 | qat | greedy | think | 2026.3.0.0-1 |
 | 4 | OpenVINO/Qwen3-14B-int4-ov | single | 0.0 GB | 4/4 | 797 | 199 | data-free | greedy | think | 2026.3.0.0-1 |
-| 5 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 3/4 | 33 | 8 | data-free | greedy | think | 2026.3.0.0-3277 |
+| 5 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 3/4 | 35 | 9 | data-free | greedy | think | 2026.3.1.0-3290 |
 | 6 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 0.0 GB | 3/4 | 42 | 10 | awq+se | greedy | think | 2026.3.0.0-1 |
 | 7 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 3/4 | 42 | 10 | scale_estimation | greedy | think | 2026.3.0.0-3277 |
 | 8 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 3/4 | 72 | 18 | awq+se | greedy | think | 2026.3.0.0-3277 |
@@ -298,11 +301,11 @@ _256 runs._
 | 12 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 0.0 GB | 3/4 | 182 | 46 | awq+se | greedy | think | 2026.3.0.0-1 |
 | 13 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 3/4 | 203 | 51 | awq+se | greedy | think | 2026.3.0.0-3277 |
 | 14 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 3/4 | 213 | 53 | qat | greedy | think | 2026.3.0.0-3277 |
-| 15 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 3/4 | 255 | 64 | qat | greedy | think | 2026.3.0.0-3277 |
+| 15 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 3/4 | 248 | 62 | qat | greedy | think | 2026.3.1.0-3290 |
 | 16 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 3/4 | 313 | 78 | awq+se | greedy | think | 2026.3.0.0-3277 |
 | 17 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 0.0 GB | 3/4 | 351 | 88 | awq+se | sampling | think | 2026.3.0.0-3277 |
 | 18 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 3/4 | 361 | 90 | awq | greedy | think | 2026.3.0.0-3277 |
-| 19 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 3/4 | 504 | 126 | data-free | greedy | think | 2026.3.0.0-3277 |
+| 19 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 3/4 | 542 | 136 | data-free | greedy | think | 2026.3.1.0-3290 |
 | 20 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 3/4 | 928 | 232 | data-free | greedy | think | 2026.3.0.0-3277 |
 | 21 | OpenVINO/Qwen3.5-4B-int4-ov | single | 3.5 GB | 3/4 | 955 | 239 | data-free | greedy | think | 2026.3.0.0-3277 |
 | 22 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 3/4 | 1143 | 286 | awq+se | sampling | think | 2026.3.0.0-3277 |
@@ -327,14 +330,14 @@ _256 runs._
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 1/1 | 1 | 1 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 2 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 1/1 | 1 | 1 | data-free | greedy | nothink | 2026.3.0.0-3277 |
-| 3 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 1/1 | 2 | 2 | data-free | greedy | nothink | 2026.3.0.0-3277 |
+| 3 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 1/1 | 2 | 2 | data-free | greedy | nothink | 2026.3.1.0-3290 |
 | 4 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 1/1 | 2 | 2 | scale_estimation | greedy | nothink | 2026.3.0.0-3277 |
 | 5 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 6 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
 | 7 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 0.0 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.3.0.0-1 |
 | 8 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 1/1 | 4 | 4 | awq | greedy | nothink | 2026.3.0.0-3277 |
 | 9 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 1/1 | 5 | 5 | awq+se | greedy | nothink | 2026.3.0.0-3277 |
-| 10 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 1/1 | 7 | 7 | data-free | greedy | nothink | 2026.3.0.0-3277 |
+| 10 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 1/1 | 8 | 8 | data-free | greedy | nothink | 2026.3.1.0-3290 |
 | 11 | OpenVINO/Qwen3-14B-int4-ov | single | 0.0 GB | 1/1 | 14 | 14 | data-free | greedy | nothink | 2026.3.0.0-1 |
 | 12 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 0/1 | 1 | 1 | data-free | greedy | nothink | 2026.3.0.0-3277 |
 | 13 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 0/1 | 1 | 1 | data-free | greedy | nothink | 2026.3.0.0-3277 |
@@ -352,49 +355,160 @@ _256 runs._
 
 ## Retest queue
 
-- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/OmniCoder-9B-int4_sym-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/gemma-4-12B-it-qat-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/SmolLM3-3B-int4-symg128-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-0.6B-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-1.7B-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-14B-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/OmniCoder-9B-int4_sym-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/gemma-4-12B-it-qat-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/SmolLM3-3B-int4-symg128-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-0.6B-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-1.7B-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-14B-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/SmolLM3-3B-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-0.6B-int4-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-1.7B-int4-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-14B-int4-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/OmniCoder-9B-int4_sym-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/gemma-4-12B-it-qat-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/SmolLM3-3B-int4-symg128-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-0.6B-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-1.7B-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-14B-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- Echo9Zulu/OmniCoder-9B-int4_sym-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/gemma-4-12B-it-qat-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/granite-4.1-3b-int4-cw-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- HarmenWessels/SmolLM3-3B-int4-symg128-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-0.6B-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-1.7B-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
-- OpenVINO/Qwen3-14B-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.0.0-3277-bd8d6542e3c
+- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/OmniCoder-9B-int4_sym-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Qwen3.5-2B-int4_sym-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-12B-it-qat-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-E2B-it-qat-int4-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-code-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/MiniCPM5-1B-int4-g128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg64-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/SmolLM3-3B-int4-symg128-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-0.6B-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-1.7B-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-14B-int4-ov / agent-loop: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-4B-int4-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-4B-int4-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-9B-int4-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/OmniCoder-9B-int4_sym-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Qwen3.5-2B-int4_sym-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-12B-it-qat-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-E2B-it-qat-int4-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-code-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/MiniCPM5-1B-int4-g128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg64-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/SmolLM3-3B-int4-symg128-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-0.6B-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-1.7B-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-14B-int4-ov / analysis: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-4B-int4-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-4B-int4-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-9B-int4-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-code-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/MiniCPM5-1B-int4-g128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/SmolLM3-3B-int4-symg128-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-0.6B-int4-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-1.7B-int4-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-14B-int4-ov / autocomplete-fim: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-4B-int4-ov / autocomplete-fim: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/OmniCoder-9B-int4_sym-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Qwen3.5-2B-int4_sym-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-12B-it-qat-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-E2B-it-qat-int4-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-code-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/MiniCPM5-1B-int4-g128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg64-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/SmolLM3-3B-int4-symg128-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-0.6B-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-1.7B-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-14B-int4-ov / codegen: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-4B-int4-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-4B-int4-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-9B-int4-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/OmniCoder-9B-int4_sym-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- Echo9Zulu/Qwen3.5-2B-int4_sym-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-12B-it-qat-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/gemma-4-E2B-it-qat-int4-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-code-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-3b-int4-cw-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-code-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/granite-4.1-8b-int4-cw-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/MiniCPM5-1B-int4-g128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Ornith-1.5-9B-int4-symg64-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- HarmenWessels/SmolLM3-3B-int4-symg128-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-0.6B-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-1.7B-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-14B-int4-ov / edit: engine 2026.3.0.0-1-796cb43d0bf-enable/google-gemma-4-12B != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3-4B-int4-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-4B-int4-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
+- OpenVINO/Qwen3.5-9B-int4-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.3.1.0-3290-56d9685302d
 - Echo9Zulu/OmniCoder-9B-int4_sym-ov: not yet run on autocomplete-fim
 - Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov: not yet run on autocomplete-fim
 - HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov: not yet run on autocomplete-fim
@@ -410,11 +524,11 @@ _256 runs._
 **OpenVINO/Qwen3-8B-int4-cw-ov / codegen**:
   - parse-duration#0: FAIL (NameError: name 'parse_duration' is not defined)
 
-**HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / codegen**:
-  - rle-codec#0: FAIL (SyntaxError: invalid syntax (<string>, line 3))
-
 **HarmenWessels/gemma-4-E2B-it-qat-int4-ov / codegen**:
   - lru-cache#0: FAIL (AttributeError: 'dict' object has no attribute 'move_to_end')
+
+**HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / codegen**:
+  - rle-codec#0: FAIL (SyntaxError: invalid syntax (<string>, line 3))
 
 **HarmenWessels/granite-4.1-8b-int4-cw-code-ov / codegen**:
   - lru-cache#0: FAIL (_lru() -> [1, 2, 3, 1])
@@ -428,6 +542,10 @@ _256 runs._
   - rate-limiter#1: FAIL (SyntaxError: invalid decimal literal (<string>, line 1))
   - rle-codec#1: FAIL (rle_decode('a3b1c3') -> 'aaa')
 
+**HarmenWessels/gemma-4-E4B-it-qat-int4-ov / codegen**:
+  - group-anagrams#0: FAIL (missing definition)
+  - group-anagrams#1: FAIL (missing definition)
+
 **HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / codegen**:
   - lru-cache#1: FAIL (missing definition)
   - parse-duration#0: FAIL (parse_duration('2h45m') -> 14400)
@@ -437,11 +555,6 @@ _256 runs._
   - merge-intervals#1: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [[1, 3]])
   - lru-cache#1: FAIL (_lru() -> [1, 2, -1, 1])
   - parse-duration#1: FAIL (ValueError: invalid literal for int() with base 10: '')
-
-**HarmenWessels/gemma-4-E4B-it-qat-int4-ov / codegen**:
-  - lru-cache#1: FAIL (NameError: name 'ru_key' is not defined)
-  - group-anagrams#0: FAIL (missing definition)
-  - group-anagrams#1: FAIL (missing definition)
 
 **OpenVINO/Qwen3.5-9B-int4-ov / codegen**:
   - parse-duration#0: FAIL (parse_duration('2h45m') -> 2700)
@@ -622,14 +735,14 @@ _256 runs._
 **HarmenWessels/Ornith-1.5-9B-int4-symg128-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=['read_file'])
 
-**HarmenWessels/gemma-4-E4B-it-qat-int4-ov / edit**:
-  - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)
-
 **HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / edit**:
   - write-full: FAIL (exec/assert failed: '[' was never closed (<string>, line 15))
 
 **HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / edit**:
   - write-full: FAIL (writes=0 calls=[])
+
+**HarmenWessels/gemma-4-E4B-it-qat-int4-ov / edit**:
+  - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)
 
 **HarmenWessels/gemma-4-12B-it-qat-int4-ov / edit**:
   - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)

@@ -1,14 +1,15 @@
-# Pinned to the OpenVINO 2026.3 stable release (2026-08-04) — the first release
-# whose GenAI ships gemma-4 *unified* dispatch, so the nightly index and the
-# from-source GenAI build this project needed for Gemma-4-12B are both retired.
+# Pinned to the OpenVINO 2026.3.1 patch release (2026-08-26). 2026.3 was the first
+# release whose GenAI ships gemma-4 *unified* dispatch (nightly index and the
+# from-source GenAI build retired); 2026.3.1 measured +6-10% decode over 2026.3.0
+# in an interleaved A-B on this box, identical quality (benchmark/README.md).
 # Install on Windows with Python 3.12:
 #   py -3.12 -m venv .venv
 #   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
 # OpenVINO stable stack
-openvino==2026.3.0
-openvino-genai==2026.3.0.0
-openvino-tokenizers==2026.3.0.0
+openvino==2026.3.1
+openvino-genai==2026.3.1.0
+openvino-tokenizers==2026.3.1.0
 nncf==3.3.0
 
 # Model download

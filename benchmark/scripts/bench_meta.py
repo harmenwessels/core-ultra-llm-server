@@ -15,6 +15,8 @@ import json
 import os
 import pathlib
 import re
+import subprocess
+import sys
 import time
 import xml.etree.ElementTree as ET
 
@@ -171,7 +173,35 @@ def engine_info() -> dict:
         info["openvino_version"] = getattr(openvino, "__version__", "unknown")
     except Exception:  # noqa: BLE001
         pass
+    info["gpu_driver"] = gpu_driver_version()
     return info
+
+
+_GPU_DRIVER_CACHE = None
+
+
+def gpu_driver_version() -> str:
+    """Intel GPU driver version (e.g. '32.0.101.8991').
+
+    The GPU plugin exposes no driver-version property, so this asks WMI. The
+    driver is part of the compile-cache key and has moved throughput before, so
+    a record that omits it cannot attribute a speed delta to engine vs driver.
+    """
+    global _GPU_DRIVER_CACHE
+    if _GPU_DRIVER_CACHE is None:
+        _GPU_DRIVER_CACHE = "unknown"
+        if sys.platform == "win32":
+            try:
+                out = subprocess.run(
+                    ["powershell", "-NoProfile", "-Command",
+                     "(Get-CimInstance Win32_VideoController | Where-Object Name "
+                     "-match 'Intel' | Select-Object -First 1).DriverVersion"],
+                    capture_output=True, text=True, timeout=20).stdout.strip()
+                if out:
+                    _GPU_DRIVER_CACHE = out.splitlines()[0].strip()
+            except Exception:  # noqa: BLE001
+                pass
+    return _GPU_DRIVER_CACHE
 
 
 # --------------------------------------------------------------------------- #

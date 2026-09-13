@@ -5,8 +5,8 @@ Methods and findings from benchmarking 19 models and converting several ourselve
 as machine-specific and the *rules* as the transferable result.
 
 **Test rig:** Dell XPS 13, Intel Core Ultra 155H (Meteor Lake), Arc iGPU (Xe-LPG, 128 EU),
-32 GB LPDDR5x, Windows 11, Intel driver 32.0.101.8974, OpenVINO GenAI 2026.3.0.0 (stable,
-released 2026-08-05), Python 3.12. Current per-model results: [benchmark/README.md](benchmark/README.md)
+32 GB LPDDR5x, Windows 11, Intel driver 32.0.101.8991, OpenVINO GenAI 2026.3.1.0 (stable patch,
+released 2026-08-26; adopted 2026-09-14), Python 3.12. Current per-model results: [benchmark/README.md](benchmark/README.md)
 (workload method); the superseded raw-decode overview is archived in the appendix below.
 
 ---
@@ -342,6 +342,44 @@ Against the June appendix rows measured on the *identical* artifact: Coder-1.5B 
 Qwen3-4B 24.9 → 24.4, Coder-3B 24.0 → 30.0, Qwen3.5-2B 34.6 → 46.3, Coder-0.5B 87.6 → 71.2.
 Scattered in both directions — consistent with machine-state noise dominating, not with a
 systematic engine or driver effect.
+
+## Finding 13d — Driver .8991 changes nothing; the 2026.3.1 patch is +6–10% decode, quality-identical
+
+Two variables moved between the August records and 2026-09-13: the Intel driver
+(32.0.101.8974 → .8991, 2026-08-24) and the OpenVINO patch release (2026.3.0 → 2026.3.1,
+2026-08-26: Gemma-4 chat-template fix for Minja, a Qwen3.5 `is undefined` template rewrite in
+`InputsEmbedderQwen3_5`, Gemma-4-26B/31B and LFM-on-NPU accuracy fixes; nothing on the GPU plugin).
+Measured in two stages so each is attributable, using the 13b rules (interleaved arms, ≥3
+invocations, medians within one window).
+
+**Stage 1 — driver, engine held at 2026.3.0.** Four models re-swept (Qwen2.5-Coder-1.5B, Qwen3-8B-cw,
+Ornith-1.0-9B, gemma-4-E4B): **73/102 cells both times, with the identical cells failing** — even
+under temp-0.6/1.0 sampling. Wall-clock +2…12%, the same size as the anchors' in-session wander
+(Qwen3-8B read 14.1 → 11.4 → 13.7 tok/s inside ten minutes, granite in lockstep), so not attributable.
+Verdict: the driver update is a no-op for quality and speed here. Its only visible effect is the
+compile-cache invalidation (`.ovcache` rebuilt on first load, per 13b).
+
+**Stage 2 — engine, driver held at .8991.** Interleaved A-B-A-B-A-B, same IRs, 256 tokens:
+
+| model | A = 2026.3.0 | B = 2026.3.1 | pairs B>A | Δ medians |
+|---|---|---|---|---|
+| Qwen3-8B-int4-cw | 12.6 / 11.9 / 13.8 → 12.6 | 14.0 / 13.6 / 13.9 → 13.9 | 3/3 | +10% |
+| granite-4.1-8b-int4-cw | 12.0 / 11.4 / 13.0 → 12.0 | 12.5 / 12.7 / 13.1 → 12.7 | 3/3 | +6% |
+| TTFT | 0.12–0.16 s | 0.12–0.17 s | — | same |
+
+B won every adjacent pair (6/6, ≈1.6% by chance under drift that moves both arms together) and
+its readings were tighter. Magnitude stays "likely +6–10%": the effect is smaller than the drift
+band. The same four models re-swept on 2026.3.1: **74/102 vs 73/102**, the single flip a temp-1.0
+`lru-cache#1` on E4B (its August failure was a `NameError` typo — sampling, not engine); wall-clock
+−4/−5% on Coder-1.5B and Qwen3-8B, **−23% on gemma-4-E4B with every one of its 12 codegen cells
+faster** (2–45%, median ~18% — suggestive that gemma-4's path gained more than llama-style models,
+single non-interleaved pass, not a finding). Ornith's first 2026.3.1 pass read +20% and was
+discarded: a venv build ran on the CPU during it. Rule added to the run-benchmark skill: **no
+installs during a sweep**.
+
+Consequences: `.venv` / `.venv-genai` / `requirements.txt` moved to 2026.3.1 on 2026-09-14; older
+records stay comparable in practice; run-records carry `engine.gpu_driver` from 2026-09-13 so the
+next driver update is attributable from the records alone.
 
 ## Finding 13c — Data-aware quantization is unavailable for VLM-shaped models
 

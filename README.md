@@ -19,7 +19,7 @@ quantization recipes, prompt-lookup decoding) and the model-conversion playbook,
 ## Requirements
 
 - Intel Core Ultra CPU with integrated Arc graphics (tested: Core Ultra 155H / Meteor Lake)
-- Windows 11 with a current Intel graphics driver (tested: 32.0.101.8974)
+- Windows 11 with a current Intel graphics driver (tested: 32.0.101.8991)
 - Python 3.12 (what this project is built and tested on; the OpenVINO 2026.3 wheels also ship
   for 3.13/3.14, untested here)
 - A Hugging Face account for model downloads (`hf auth login` — anonymous downloads of
