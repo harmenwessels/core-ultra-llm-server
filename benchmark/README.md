@@ -134,8 +134,8 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 9 | [HarmenWessels/gemma-4-E2B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | 21/25 | 1438 | 4.4 GB | qat |
 | 10 | [OpenVINO/Qwen3-8B-int4-cw-ov](https://huggingface.co/OpenVINO/Qwen3-8B-int4-cw-ov) | 21/26 | 1612 | 4.7 GB | data-free |
 | 11 | [HarmenWessels/gemma-4-E4B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | 21/25 | 1621 | 6.6 GB | qat |
-| 12 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | 21/26 | 2911 | 4.9 GB | awq+se |
-| 13 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | 20/26 | 1525 | 4.9 GB | awq+se |
+| 12 | [HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov) | 21/26 | 2911 | 4.9 GB | awq+se |
+| 13 | [HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov) | 20/26 | 1525 | 4.9 GB | awq+se |
 | 14 | [OpenVINO/Qwen3.5-4B-int4-ov](https://huggingface.co/OpenVINO/Qwen3.5-4B-int4-ov) | 20/25 | 2196 | 3.5 GB | data-free |
 | 15 | [OpenVINO/Qwen3.5-9B-int4-ov](https://huggingface.co/OpenVINO/Qwen3.5-9B-int4-ov) | 20/25 | 2791 | 6.1 GB | data-free |
 | 16 | [HarmenWessels/MiniCPM5-2B-int4-symg128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-2B-int4-symg128-ov) | 19/26 | 433 | 1.6 GB | awq+se |
@@ -144,9 +144,9 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 19 | [HarmenWessels/granite-4.1-3b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-code-ov) | 17/26 | 586 | 0.0 GB | awq+se |
 | 20 | [HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov) | 17/26 | 1084 | 3.2 GB | awq+se |
 | 21 | [OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 16/26 | 465 | 1.8 GB | scale_estimation |
-| 22 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | 16/26 | 828 | 2.0 GB | awq+se |
+| 22 | [HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov) | 16/26 | 828 | 2.0 GB | awq+se |
 | 23 | [Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov](https://huggingface.co/Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov) | 16/25 | 1877 | 0.0 GB | awq+se |
-| 24 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | 16/26 | 1892 | 2.0 GB | awq+se |
+| 24 | [HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov) | 16/26 | 1892 | 2.0 GB | awq+se |
 | 25 | HarmenWessels/Ornith-1.5-9B-int4-symg128-ov | 16/25 | 2719 | 0.0 GB | data-free |
 | 26 | [Echo9Zulu/OmniCoder-9B-int4_sym-ov](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 16/25 | 4110 | 0.0 GB | data-free |
 | 27 | [HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov](https://huggingface.co/HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov) | 15/26 | 159 | 0.7 GB | data-free |

@@ -4,6 +4,7 @@
 # [/THINK]); advised temp 0.7 / top_p 0.95. think cap 8192 (8B reasons longer).
 # int4 sym g128 AWQ+SE. Template borrowed from unsloth. PROVENANCE: community llamafied.
 hf_id: HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
 alias: ministral-3-8b-reasoning
 family: ministral3
 device: GPU
