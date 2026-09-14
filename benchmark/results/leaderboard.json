@@ -19,10 +19,10 @@
       "kind": "single",
       "quality": 7,
       "cells": 7,
-      "seconds": 56.0,
+      "seconds": 58.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -33,10 +33,10 @@
       "kind": "single",
       "quality": 7,
       "cells": 7,
-      "seconds": 76.0,
+      "seconds": 72.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -61,7 +61,7 @@
       "kind": "single",
       "quality": 7,
       "cells": 7,
-      "seconds": 113.0,
+      "seconds": 126.0,
       "decoding": "greedy",
       "think": "nothink",
       "engine": "2026.3.1.0-3290-56d9685302d",
@@ -75,7 +75,7 @@
       "kind": "single",
       "quality": 7,
       "cells": 7,
-      "seconds": 166.0,
+      "seconds": 141.0,
       "decoding": "sampling",
       "think": "nothink",
       "engine": "2026.3.1.0-3290-56d9685302d",
@@ -105,10 +105,10 @@
       "kind": "single",
       "quality": 6,
       "cells": 7,
-      "seconds": 33.0,
+      "seconds": 34.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "chain-depth: FAIL (stopped at turn 0: edits=0 green-tests-seen=0)"
       ],
@@ -130,7 +130,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 1.2
     },
     {
       "subject": "HarmenWessels/MiniCPM5-2B-int4-symg128-ov",
@@ -162,7 +162,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "HarmenWessels/K2-Horizon-7B-int4-symg128-ov",
@@ -197,6 +197,22 @@
       "size": 4.7
     },
     {
+      "subject": "HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 91.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "chain-depth: FAIL (turn 3: repeated call run_tests)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.9
+    },
+    {
       "subject": "OpenVINO/Qwen3-14B-int4-ov",
       "kind": "single",
       "quality": 6,
@@ -210,7 +226,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 9.7
     },
     {
       "subject": "HarmenWessels/Ornith-1.0-9B-int4-symg128-ov",
@@ -242,23 +258,39 @@
       ],
       "detail": "qat",
       "recipe": "qat",
-      "size": 0.0
+      "size": 8.2
     },
     {
       "subject": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
       "kind": "single",
       "quality": 6,
       "cells": 7,
-      "seconds": 134.0,
+      "seconds": 151.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
-        "no-repeat: FAIL (calls=[])"
+        "chain-depth: FAIL (turn 3: repeated call read_file)"
       ],
       "detail": "qat",
       "recipe": "qat",
       "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 7,
+      "seconds": 153.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "no-repeat: FAIL (calls=[])"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.9
     },
     {
       "subject": "Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov",
@@ -281,7 +313,7 @@
       "kind": "single",
       "quality": 6,
       "cells": 7,
-      "seconds": 214.0,
+      "seconds": 207.0,
       "decoding": "greedy",
       "think": "nothink",
       "engine": "2026.3.1.0-3290-56d9685302d",
@@ -327,23 +359,6 @@
       "size": 2.0
     },
     {
-      "subject": "HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov",
-      "kind": "single",
-      "quality": 5,
-      "cells": 7,
-      "seconds": 100.0,
-      "decoding": "greedy",
-      "think": "nothink",
-      "engine": "2026.3.1.0-3290-56d9685302d",
-      "fails": [
-        "call-simple: FAIL (calls=[])",
-        "chain-depth: FAIL (turn 3: repeated call run_tests)"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 4.9
-    },
-    {
       "subject": "HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov",
       "kind": "single",
       "quality": 5,
@@ -351,7 +366,7 @@
       "seconds": 107.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "call-restraint: FAIL (calls=[('web_search', {'query': 'What does the acronym API stand for?')",
         "chain-depth: FAIL (turn 1: repeated call run_tests)"
@@ -361,28 +376,11 @@
       "size": 4.8
     },
     {
-      "subject": "HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov",
-      "kind": "single",
-      "quality": 5,
-      "cells": 7,
-      "seconds": 156.0,
-      "decoding": "sampling",
-      "think": "nothink",
-      "engine": "2026.3.1.0-3290-56d9685302d",
-      "fails": [
-        "no-repeat: FAIL (calls=[])",
-        "chain-depth: FAIL (turn 3: repeated call read_file)"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 4.9
-    },
-    {
       "subject": "OpenVINO/Qwen3.5-4B-int4-ov",
       "kind": "single",
       "quality": 5,
       "cells": 7,
-      "seconds": 250.0,
+      "seconds": 239.0,
       "decoding": "greedy",
       "think": "nothink",
       "engine": "2026.3.1.0-3290-56d9685302d",
@@ -444,7 +442,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "HarmenWessels/MiniCPM5-1B-int4-g128-ov",
@@ -480,7 +478,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.4
     },
     {
       "subject": "HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov",
@@ -541,7 +539,7 @@
       "kind": "single",
       "quality": 4,
       "cells": 7,
-      "seconds": 250.0,
+      "seconds": 257.0,
       "decoding": "greedy",
       "think": "nothink",
       "engine": "2026.3.1.0-3290-56d9685302d",
@@ -570,7 +568,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 6.1
     },
     {
       "subject": "HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov",
@@ -670,7 +668,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     }
   ],
   "analysis": [
@@ -679,10 +677,10 @@
       "kind": "single",
       "quality": 4,
       "cells": 4,
-      "seconds": 140.0,
+      "seconds": 161.0,
       "decoding": "greedy",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -700,7 +698,21 @@
       "fails": [],
       "detail": "qat",
       "recipe": "qat",
-      "size": 0.0
+      "size": 8.2
+    },
+    {
+      "subject": "OpenVINO/Qwen3.5-4B-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 4,
+      "seconds": 665.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 3.5
     },
     {
       "subject": "OpenVINO/Qwen3-14B-int4-ov",
@@ -714,7 +726,21 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 9.7
+    },
+    {
+      "subject": "OpenVINO/Qwen3.5-9B-int4-ov",
+      "kind": "single",
+      "quality": 4,
+      "cells": 4,
+      "seconds": 915.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
@@ -746,7 +772,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -769,12 +795,28 @@
       "kind": "single",
       "quality": 3,
       "cells": 4,
-      "seconds": 72.0,
+      "seconds": 73.0,
       "decoding": "greedy",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "diagnose: FAIL (content='the test fails because the `median` function returns `3.5` fo)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 80.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "diagnose: FAIL (content='the test fails because the expected median value for the list)"
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -788,29 +830,13 @@
       "seconds": 81.0,
       "decoding": "greedy",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "recall-deep: FAIL (content='(answer omitted from transcript for brevity) (answer omitted )"
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 4.8
-    },
-    {
-      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
-      "kind": "single",
-      "quality": 3,
-      "cells": 4,
-      "seconds": 86.0,
-      "decoding": "greedy",
-      "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "diagnose: FAIL (content='the test fails because the expected median value for the list)"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 4.4
     },
     {
       "subject": "HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov",
@@ -858,7 +884,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 1.2
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
@@ -874,7 +900,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov",
@@ -897,10 +923,10 @@
       "kind": "single",
       "quality": 3,
       "cells": 4,
-      "seconds": 213.0,
+      "seconds": 208.0,
       "decoding": "greedy",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "route: FAIL (3/6 [chat:None, edit:None, design:design, chat:None, edit:edit, design)"
       ],
@@ -929,10 +955,10 @@
       "kind": "single",
       "quality": 3,
       "cells": 4,
-      "seconds": 313.0,
+      "seconds": 311.0,
       "decoding": "greedy",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:None, edit:edit, design)"
       ],
@@ -961,10 +987,10 @@
       "kind": "single",
       "quality": 3,
       "cells": 4,
-      "seconds": 361.0,
+      "seconds": 355.0,
       "decoding": "greedy",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "plan: FAIL (symbols=0 numbered=False code=False)"
       ],
@@ -1005,6 +1031,22 @@
       "size": 4.7
     },
     {
+      "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
+      "kind": "single",
+      "quality": 3,
+      "cells": 4,
+      "seconds": 773.0,
+      "decoding": "greedy",
+      "think": "think",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "route: FAIL (3/6 [chat:None, edit:edit, design:None, chat:chat, edit:edit, design:N)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 2.1
+    },
+    {
       "subject": "HarmenWessels/K2-Horizon-7B-int4-symg128-ov",
       "kind": "single",
       "quality": 3,
@@ -1021,48 +1063,16 @@
       "size": 5.7
     },
     {
-      "subject": "OpenVINO/Qwen3.5-9B-int4-ov",
-      "kind": "single",
-      "quality": 3,
-      "cells": 4,
-      "seconds": 928.0,
-      "decoding": "greedy",
-      "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design)"
-      ],
-      "detail": "data-free",
-      "recipe": "data-free",
-      "size": 6.1
-    },
-    {
-      "subject": "OpenVINO/Qwen3.5-4B-int4-ov",
-      "kind": "single",
-      "quality": 3,
-      "cells": 4,
-      "seconds": 955.0,
-      "decoding": "greedy",
-      "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "route: FAIL (0/6 [chat:None, edit:None, design:None, chat:None, edit:None, design:c)"
-      ],
-      "detail": "data-free",
-      "recipe": "data-free",
-      "size": 3.5
-    },
-    {
       "subject": "HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov",
       "kind": "single",
       "quality": 3,
       "cells": 4,
-      "seconds": 1143.0,
+      "seconds": 1551.0,
       "decoding": "sampling",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
-        "plan: FAIL (EXC: timed out)"
+        "route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:chat, edit:design, desi)"
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -1082,7 +1092,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 6.1
     },
     {
       "subject": "HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov",
@@ -1167,7 +1177,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.4
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -1184,7 +1194,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg128-ov",
@@ -1272,33 +1282,16 @@
       "size": 0.0
     },
     {
-      "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
-      "kind": "single",
-      "quality": 2,
-      "cells": 4,
-      "seconds": 1631.0,
-      "decoding": "greedy",
-      "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "route: FAIL (4/6 [chat:None, edit:None, design:design, chat:chat, edit:edit, design)",
-        "plan: FAIL (symbols=0 numbered=False code=False)"
-      ],
-      "detail": "data-free",
-      "recipe": "data-free",
-      "size": 2.1
-    },
-    {
       "subject": "HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov",
       "kind": "single",
       "quality": 2,
       "cells": 4,
-      "seconds": 1642.0,
+      "seconds": 1480.0,
       "decoding": "sampling",
       "think": "think",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
-        "route: FAIL (5/6 [chat:None, edit:edit, design:design, chat:chat, edit:edit, design)",
+        "route: FAIL (4/6 [chat:None, edit:edit, design:design, chat:chat, edit:design, desi)",
         "recall-deep: FAIL (content='')"
       ],
       "detail": "awq+se",
@@ -1445,7 +1438,7 @@
       "seconds": 4.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq",
       "recipe": "awq",
@@ -1459,7 +1452,7 @@
       "seconds": 5.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -1491,7 +1484,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 9.7
     },
     {
       "subject": "HarmenWessels/MiniCPM5-1B-int4-g128-ov",
@@ -1539,7 +1532,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.4
     },
     {
       "subject": "Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov",
@@ -1555,7 +1548,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-code-ov",
@@ -1571,7 +1564,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -1587,7 +1580,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov",
@@ -1619,17 +1612,17 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 1.2
     },
     {
       "subject": "HarmenWessels/granite-4.1-8b-int4-cw-code-ov",
       "kind": "single",
       "quality": 0,
       "cells": 1,
-      "seconds": 5.0,
+      "seconds": 4.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "merge-fim: FAIL"
       ],
@@ -1654,22 +1647,6 @@
       "size": 3.2
     },
     {
-      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
-      "kind": "single",
-      "quality": 0,
-      "cells": 1,
-      "seconds": 7.0,
-      "decoding": "greedy",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "merge-fim: FAIL"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 4.4
-    },
-    {
       "subject": "HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov",
       "kind": "single",
       "quality": 0,
@@ -1677,7 +1654,7 @@
       "seconds": 7.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "merge-fim: FAIL"
       ],
@@ -1693,13 +1670,29 @@
       "seconds": 7.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "merge-fim: FAIL"
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 4.9
+    },
+    {
+      "subject": "HarmenWessels/granite-4.1-8b-int4-cw-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 1,
+      "seconds": 8.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "merge-fim: FAIL"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.4
     },
     {
       "subject": "HarmenWessels/K2-Horizon-7B-int4-symg128-ov",
@@ -1718,14 +1711,14 @@
       "size": 5.7
     },
     {
-      "subject": "HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov",
+      "subject": "HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov",
       "kind": "single",
       "quality": 0,
       "cells": 1,
       "seconds": 11.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "merge-fim: FAIL"
       ],
@@ -1734,14 +1727,14 @@
       "size": 7.6
     },
     {
-      "subject": "HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov",
+      "subject": "HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov",
       "kind": "single",
       "quality": 0,
       "cells": 1,
-      "seconds": 11.0,
+      "seconds": 13.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "merge-fim: FAIL"
       ],
@@ -1756,10 +1749,10 @@
       "kind": "single",
       "quality": 12,
       "cells": 12,
-      "seconds": 465.0,
+      "seconds": 462.0,
       "decoding": "sampling",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -1777,17 +1770,31 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 9.7
     },
     {
-      "subject": "HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov",
+      "subject": "OpenVINO/Qwen3.5-4B-int4-ov",
       "kind": "single",
       "quality": 12,
       "cells": 12,
-      "seconds": 1072.0,
+      "seconds": 998.0,
       "decoding": "sampling",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 3.5
+    },
+    {
+      "subject": "HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov",
+      "kind": "single",
+      "quality": 12,
+      "cells": 12,
+      "seconds": 1064.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -1812,10 +1819,10 @@
       "kind": "single",
       "quality": 12,
       "cells": 12,
-      "seconds": 1183.0,
+      "seconds": 1422.0,
       "decoding": "sampling",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -1833,17 +1840,17 @@
       "fails": [],
       "detail": "qat",
       "recipe": "qat",
-      "size": 0.0
+      "size": 8.2
     },
     {
       "subject": "HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov",
       "kind": "single",
       "quality": 12,
       "cells": 12,
-      "seconds": 1731.0,
+      "seconds": 1615.0,
       "decoding": "sampling",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -1854,12 +1861,12 @@
       "kind": "single",
       "quality": 11,
       "cells": 12,
-      "seconds": 370.0,
+      "seconds": 386.0,
       "decoding": "sampling",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
-        "rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)"
+        "lru-cache#0: FAIL (NameError: name 'LRUCache' is not defined)"
       ],
       "detail": "awq",
       "recipe": "awq",
@@ -1886,16 +1893,32 @@
       "kind": "single",
       "quality": 11,
       "cells": 12,
-      "seconds": 1061.0,
+      "seconds": 1045.0,
       "decoding": "sampling",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
-        "lru-cache#0: FAIL (AttributeError: 'dict' object has no attribute 'move_to_end')"
+        "group-anagrams#0: FAIL (missing definition)"
       ],
       "detail": "qat",
       "recipe": "qat",
       "size": 4.4
+    },
+    {
+      "subject": "HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov",
+      "kind": "single",
+      "quality": 11,
+      "cells": 12,
+      "seconds": 1057.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "parse-duration#0: FAIL (NameError: name 'parse_duration' is not defined)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.9
     },
     {
       "subject": "HarmenWessels/Ornith-1.0-9B-int4-symg128-ov",
@@ -1918,10 +1941,10 @@
       "kind": "single",
       "quality": 10,
       "cells": 12,
-      "seconds": 664.0,
+      "seconds": 605.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "lru-cache#0: FAIL (_lru() -> [1, 2, 3, 1])",
         "rle-codec#0: FAIL (NameError: name 'aaabccc' is not defined)"
@@ -1929,40 +1952,6 @@
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 4.4
-    },
-    {
-      "subject": "OpenVINO/Qwen3.5-4B-int4-ov",
-      "kind": "single",
-      "quality": 10,
-      "cells": 12,
-      "seconds": 963.0,
-      "decoding": "sampling",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "merge-intervals#0: FAIL (NameError: name 'merge_intervals' is not defined)",
-        "parse-duration#0: FAIL (SyntaxError: invalid syntax (<string>, line 2))"
-      ],
-      "detail": "data-free",
-      "recipe": "data-free",
-      "size": 3.5
-    },
-    {
-      "subject": "HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov",
-      "kind": "single",
-      "quality": 10,
-      "cells": 12,
-      "seconds": 1070.0,
-      "decoding": "sampling",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "rate-limiter#1: FAIL (SyntaxError: invalid decimal literal (<string>, line 1))",
-        "rle-codec#1: FAIL (rle_decode('a3b1c3') -> 'aaa')"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 4.9
     },
     {
       "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
@@ -1980,6 +1969,23 @@
       "detail": "qat",
       "recipe": "qat",
       "size": 6.6
+    },
+    {
+      "subject": "OpenVINO/Qwen3.5-9B-int4-ov",
+      "kind": "single",
+      "quality": 10,
+      "cells": 12,
+      "seconds": 1877.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "parse-duration#1: FAIL (SyntaxError: unterminated string literal (detected at line 28) (<string>, line 28))",
+        "rle-codec#0: FAIL (NameError: name 'text' is not defined)"
+      ],
+      "detail": "data-free",
+      "recipe": "data-free",
+      "size": 6.1
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov",
@@ -2004,10 +2010,10 @@
       "kind": "single",
       "quality": 9,
       "cells": 12,
-      "seconds": 622.0,
+      "seconds": 657.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "merge-intervals#1: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [[1, 3]])",
         "lru-cache#1: FAIL (_lru() -> [1, 2, -1, 1])",
@@ -2016,24 +2022,6 @@
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 4.4
-    },
-    {
-      "subject": "OpenVINO/Qwen3.5-9B-int4-ov",
-      "kind": "single",
-      "quality": 9,
-      "cells": 12,
-      "seconds": 1609.0,
-      "decoding": "sampling",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "parse-duration#0: FAIL (parse_duration('2h45m') -> 2700)",
-        "parse-duration#1: FAIL (SyntaxError: unterminated string literal (detected at line 19) (<string>, line 19))",
-        "rle-codec#0: FAIL (NameError: name 'text' is not defined)"
-      ],
-      "detail": "data-free",
-      "recipe": "data-free",
-      "size": 6.1
     },
     {
       "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
@@ -2051,7 +2039,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 6.1
     },
     {
       "subject": "HarmenWessels/MiniCPM5-2B-int4-symg128-ov",
@@ -2089,7 +2077,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "HarmenWessels/Ornith-1.5-9B-int4-symg128-ov",
@@ -2209,7 +2197,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -2233,27 +2221,6 @@
       "size": 1.8
     },
     {
-      "subject": "HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov",
-      "kind": "single",
-      "quality": 6,
-      "cells": 12,
-      "seconds": 532.0,
-      "decoding": "sampling",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "lru-cache#0: FAIL (NameError: name 'LRUCache' is not defined)",
-        "lru-cache#1: FAIL (SyntaxError: closing parenthesis ')' does not match opening parenthesis '[' (<string>, line 28))",
-        "parse-duration#0: FAIL (AttributeError: module 're' has no attribute 'constants')",
-        "parse-duration#1: FAIL (NameError: name 'parse_duration' is not defined)",
-        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)",
-        "rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 2.0
-    },
-    {
       "subject": "HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov",
       "kind": "single",
       "quality": 6,
@@ -2273,6 +2240,27 @@
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 3.2
+    },
+    {
+      "subject": "HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov",
+      "kind": "single",
+      "quality": 6,
+      "cells": 12,
+      "seconds": 883.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "lru-cache#0: FAIL (NameError: name 'LRUCache' is not defined)",
+        "lru-cache#1: FAIL (SyntaxError: unterminated string literal (detected at line 1) (<string>, line 1))",
+        "parse-duration#0: FAIL (SyntaxError: unterminated string literal (detected at line 21) (<string>, line 21))",
+        "parse-duration#1: FAIL (NameError: name 'parse_duration' is not defined)",
+        "rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)",
+        "rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 2.0
     },
     {
       "subject": "HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov",
@@ -2339,7 +2327,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.4
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov",
@@ -2385,17 +2373,17 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 1.2
     },
     {
       "subject": "Echo9Zulu/Qwen3.5-2B-int4_sym-ov",
       "kind": "single",
       "quality": 4,
       "cells": 12,
-      "seconds": 827.0,
+      "seconds": 811.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "rate-limiter#0: FAIL (_seq() -> [True, False, False, True])",
         "lru-cache#0: FAIL (_lru() -> [1, -1, -1, 1])",
@@ -2456,7 +2444,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov",
@@ -2517,10 +2505,10 @@
       "kind": "single",
       "quality": 2,
       "cells": 2,
-      "seconds": 28.0,
+      "seconds": 26.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -2531,10 +2519,10 @@
       "kind": "single",
       "quality": 2,
       "cells": 2,
-      "seconds": 28.0,
+      "seconds": 26.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
@@ -2548,7 +2536,7 @@
       "seconds": 34.0,
       "decoding": "sampling",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -2562,7 +2550,7 @@
       "seconds": 35.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "awq+se",
       "recipe": "awq+se",
@@ -2573,10 +2561,10 @@
       "kind": "single",
       "quality": 2,
       "cells": 2,
-      "seconds": 40.0,
+      "seconds": 39.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
@@ -2594,7 +2582,7 @@
       "fails": [],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 9.7
     },
     {
       "subject": "HarmenWessels/MiniCPM5-2B-int4-symg128-ov",
@@ -2617,10 +2605,10 @@
       "kind": "single",
       "quality": 1,
       "cells": 2,
-      "seconds": 17.0,
+      "seconds": 18.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "edit-exact: FAIL (edits=0 calls=['read_file'])"
       ],
@@ -2629,30 +2617,14 @@
       "size": 2.1
     },
     {
-      "subject": "HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov",
-      "kind": "single",
-      "quality": 1,
-      "cells": 2,
-      "seconds": 29.0,
-      "decoding": "sampling",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "write-full: FAIL (writes=0 calls=['web_search'])"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 7.6
-    },
-    {
       "subject": "HarmenWessels/gemma-4-E2B-it-qat-int4-ov",
       "kind": "single",
       "quality": 1,
       "cells": 2,
-      "seconds": 30.0,
+      "seconds": 29.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)"
       ],
@@ -2693,22 +2665,6 @@
       "size": 3.2
     },
     {
-      "subject": "HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov",
-      "kind": "single",
-      "quality": 1,
-      "cells": 2,
-      "seconds": 39.0,
-      "decoding": "greedy",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "write-full: FAIL (exec/assert failed: '[' was never closed (<string>, line 15))"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 7.6
-    },
-    {
       "subject": "HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov",
       "kind": "single",
       "quality": 1,
@@ -2723,6 +2679,38 @@
       "detail": "awq+se",
       "recipe": "awq+se",
       "size": 2.0
+    },
+    {
+      "subject": "HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 45.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "write-full: FAIL (exec/assert failed: '[' was never closed (<string>, line 15))"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 7.6
+    },
+    {
+      "subject": "HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov",
+      "kind": "single",
+      "quality": 1,
+      "cells": 2,
+      "seconds": 48.0,
+      "decoding": "sampling",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "write-full: FAIL (writes=0 calls=['edit_file'])"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 7.6
     },
     {
       "subject": "HarmenWessels/gemma-4-E4B-it-qat-int4-ov",
@@ -2770,7 +2758,7 @@
       ],
       "detail": "qat",
       "recipe": "qat",
-      "size": 0.0
+      "size": 8.2
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov",
@@ -2838,7 +2826,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.4
     },
     {
       "subject": "HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov",
@@ -2889,7 +2877,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 1.2
     },
     {
       "subject": "HarmenWessels/granite-4.1-3b-int4-cw-ov",
@@ -2906,7 +2894,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     },
     {
       "subject": "OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov",
@@ -2943,6 +2931,23 @@
       "size": 4.7
     },
     {
+      "subject": "HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov",
+      "kind": "single",
+      "quality": 0,
+      "cells": 2,
+      "seconds": 17.0,
+      "decoding": "greedy",
+      "think": "nothink",
+      "engine": "2026.3.1.0-3290-56d9685302d",
+      "fails": [
+        "edit-exact: FAIL (edits=0 calls=[])",
+        "write-full: FAIL (writes=0 calls=['read_file'])"
+      ],
+      "detail": "awq+se",
+      "recipe": "awq+se",
+      "size": 4.8
+    },
+    {
       "subject": "HarmenWessels/SmolLM3-3B-int4-symg128-ov",
       "kind": "single",
       "quality": 0,
@@ -2960,23 +2965,6 @@
       "size": 0.0
     },
     {
-      "subject": "HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov",
-      "kind": "single",
-      "quality": 0,
-      "cells": 2,
-      "seconds": 18.0,
-      "decoding": "greedy",
-      "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
-      "fails": [
-        "edit-exact: FAIL (edits=0 calls=[])",
-        "write-full: FAIL (writes=0 calls=['read_file'])"
-      ],
-      "detail": "awq+se",
-      "recipe": "awq+se",
-      "size": 4.8
-    },
-    {
       "subject": "OpenVINO/Qwen3-4B-int4-ov",
       "kind": "single",
       "quality": 0,
@@ -2984,7 +2972,7 @@
       "seconds": 18.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "edit-exact: FAIL (old-match=True old='return [sum(values[i:i + window]) / window\\n      )",
         "write-full: FAIL (writes=0 calls=[])"
@@ -3001,7 +2989,7 @@
       "seconds": 24.0,
       "decoding": "greedy",
       "think": "nothink",
-      "engine": "2026.3.0.0-3277-bd8d6542e3c",
+      "engine": "2026.3.1.0-3290-56d9685302d",
       "fails": [
         "edit-exact: FAIL (old-match=True old='')",
         "write-full: FAIL (writes=0 calls=[])"
@@ -3110,7 +3098,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 0.7
     },
     {
       "subject": "Echo9Zulu/OmniCoder-9B-int4_sym-ov",
@@ -3127,7 +3115,7 @@
       ],
       "detail": "data-free",
       "recipe": "data-free",
-      "size": 0.0
+      "size": 6.1
     },
     {
       "subject": "HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov",
@@ -3161,7 +3149,7 @@
       ],
       "detail": "awq+se",
       "recipe": "awq+se",
-      "size": 0.0
+      "size": 1.8
     }
   ]
 }

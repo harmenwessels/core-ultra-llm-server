@@ -36,3 +36,8 @@ HarmenWessels/MiniCPM5-2B-int4-symg128-ov  # openbmb MiniCPM5-2B (Apache-2.0, ll
 HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov  # IFM K2-Horizon-0.9B (Apache-2.0): always-reasoning; llamafied export (exact — all K2 switches off); server family "k2"
 HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov  # IFM K2-Horizon-3.7B (Apache-2.0): always-reasoning; claims SWE-bench Verified 68.6; trust-remote-code export via llama-shaped config (grouped RMSNorm)
 HarmenWessels/K2-Horizon-7B-int4-symg128-ov  # IFM K2-Horizon-7B (Apache-2.0, ~9B real params): always-reasoning; g128 — the channel-wise build was word salad on CPU and GPU (finding 5 addendum)
+HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov  # Ministral-3-3B-Instruct (llamafied text-only, Apache-2.0); Mistral [INST] template, no reasoning
+HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov  # Ministral-3-8B-Instruct (llamafied text-only, Apache-2.0)
+HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov  # Ministral-3-8B-Reasoning (llamafied text-only, Apache-2.0); [THINK] reasoner
+HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov  # Ministral-3-14B-Instruct (llamafied text-only, Apache-2.0); ASF 512
+HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov  # Ministral-3-14B-Reasoning (llamafied text-only, Apache-2.0); [THINK] reasoner, ASF 512
