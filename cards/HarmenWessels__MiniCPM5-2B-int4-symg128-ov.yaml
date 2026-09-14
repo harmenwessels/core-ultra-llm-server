@@ -8,6 +8,7 @@
 # parses this dialect since 2026-09-14). Autocomplete: raw prefix (same treatment
 # as MiniCPM5-1B; FIM tokens exist in the vocab but FIM training is undocumented).
 hf_id: HarmenWessels/MiniCPM5-2B-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
 alias: minicpm5-2b
 family: minicpm
 device: GPU

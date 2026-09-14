@@ -11,6 +11,7 @@
 # budget", not K2 as intended. Sampling on BOTH classes (reasoners loop greedy).
 # Recipe: int4 sym g128 AWQ+SE (wikitext2), OV 2026.3.1 / optimum-intel main.
 hf_id: HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
 alias: k2-horizon-0.9b
 family: k2
 device: GPU
