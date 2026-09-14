@@ -5,6 +5,7 @@
 # Template borrowed from unsloth. PROVENANCE: community llamafied. Watch: large
 # model may need ACTIVATIONS_SCALE_FACTOR bump if f16 garbage (cf. gemma-12B).
 hf_id: HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
 alias: ministral-3-14b-reasoning
 family: ministral3
 device: GPU
