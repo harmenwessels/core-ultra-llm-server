@@ -124,7 +124,7 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | # | Model | Passed | Total s | Size/Roles | Recipe |
 |---|---|---|---|---|---|
 | 1 | [OpenVINO/Qwen3-14B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-14B-int4-ov) | 25/26 | 1901 | 0.0 GB | data-free |
-| 2 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | 24/26 | 1486 | 7.6 GB | awq+se |
+| 2 | [HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov) | 24/26 | 1486 | 7.6 GB | awq+se |
 | 3 | [HarmenWessels/gemma-4-12B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-12B-it-qat-int4-ov) | 23/25 | 2019 | 0.0 GB | qat |
 | 4 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | 23/26 | 3080 | 7.6 GB | awq+se |
 | 5 | [HarmenWessels/granite-4.1-8b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-code-ov) | 22/26 | 859 | 4.4 GB | awq+se |
