@@ -110,6 +110,14 @@ Gemma 4 E2B (whose g128 build already rides the curve) gained 0%. And group-wise
 for every Qwen we tested. **Rule: when converting, benchmark recipes; never assume.**
 (Quality caveat: cw quantizes more coarsely than g128; we measured speed, not perplexity.)
 
+Addendum (2026-09-14): **channel-wise int4 is not safe by size class alone.** IFM K2-Horizon-7B
+(~9B real params, grouped RMSNorm with 4 groups, 250k untied vocab) exported with the 8B+ default
+`--group-size -1` + AWQ+SE produced word salad — on CPU (f32) as well as GPU, so not an f16/ASF
+overflow — while the identical source, export path and calibration at **g128** is coherent and
+passes every preflight probe. The 3.7B sibling was g128 from the start and fine. Rule updated:
+channel-wise stays the default for llama/qwen/granite-style 8B+ models where it measured
+neutral; a new architecture gets g128 first, and cw only after an A-B on that family.
+
 ## Finding 6 — Prompt-lookup gain is predicted by output/prompt n-gram overlap
 
 Speculative decoding without a draft model (drafts from prompt n-grams, batched verification).
@@ -485,6 +493,26 @@ remaining failures are 1.2B capability limits, not protocol). Qwen/MiniCPM/OmniC
 templates are natively hermes. Net language map: gemma → native adapter (big win),
 lfm → native adapter (fair reading), everything else → hermes (correct by training).
 
+Round 3 (2026-09-14), two new dialects and one rule that replaces two special cases:
+- **MiniCPM5** is *not* natively hermes after all — its template declares tools hermes-style
+  but emits calls as attribute XML, `<function name="x"><param name="k">v</param></function>`
+  (CDATA for unsafe strings), inline with no `<tool_call>` wrapper. And `<function`/`</function>`/
+  `<param`/`</param>` are **special tokens**, so GenAI's string decode deleted them: the server
+  saw `name="read_file"> name="path">config.yaml` — zero calls, every time. **MiniCPM5-1B's
+  2/7 agent-loop / 0/2 edit were scored with its markup stripped** (re-run queued).
+- **IFM K2-Horizon** grades thinking instead of switching it (`reasoning_effort` → `<ifm|think>`
+  / `think_fast` / `think_faster`, closer mirrors the opener, no off switch) and calls tools as
+  `<ifm|tool_call>name <ifm|arg_key>k</ifm|arg_key><ifm|arg_value>v</ifm|arg_value>` with string
+  arguments unquoted — so the parser types values by the tool's own JSON schema first. Its 51 KB
+  template uses HF `{% generation %}` masks and `is sameas`: jinja2 needs the former stripped,
+  Minja cannot parse the latter at all — and GenAI parses `chat_template.jinja` at *construction*,
+  so the vendor file must live as `chat_template.vendor.jinja` (server-side render only). Both
+  vendor templates also raise on OpenAI's JSON-string `arguments`; the native path now hands
+  them a dict copy.
+- The rule: **which models need `skip_special_tokens=False` is a tokenizer fact, not a family
+  fact.** The server now reads `tokenizer.json` at load and keeps special tokens whenever any
+  tool/think delimiter is one — Ministral and MiniCPM5 today, whoever ships next tomorrow.
+
 ## Finding 17 — Three engines, one memory: place roles by contention, not just speed
 
 All three engines (CPU, iGPU, NPU) share one physical RAM pool and its bandwidth —
@@ -657,9 +685,75 @@ architecture, ≤ ~6 GiB int4, permissive license, quality above incumbents). Sc
 Conclusion: as of 2026-06-06 the served lineup is at the practical optimum for this hardware —
 every higher-quality candidate is upstream-blocked or unreleased, not effort-blocked.
 
+## MiniCPM5-2B and IFM K2-Horizon 0.9B / 3.7B / 7B (2026-09-14)
+
+Four converts in one night, each through a different door; the scores are the newest record
+per suite (benchmark/README.md has the ranked tables).
+
+| model | size | codegen | edit | agent | analysis | fim | total | wall |
+|---|---|---|---|---|---|---|---|---|
+| **K2-Horizon-7B** (int4 sym g128 AWQ+SE) | 5.2 GB | **12/12** | 1/2 | 6/7 | 3/4 | 0/1 | **22/26** | 2023 s |
+| **MiniCPM5-2B** (int4 sym g128 AWQ+SE) | 1.5 GB | 8/12 | 1/2 | 6/7 | 3/4 | 1/1 | **19/26** | 433 s |
+| K2-Horizon-3.7B (int4 sym g128 AWQ+SE) | 3.1 GB | 6/12 | 1/2 | **7/7** | 3/4 | 0/1 | 17/26 | 1084 s |
+| K2-Horizon-0.9B (llamafied, int4 sym g128 AWQ+SE) | 0.6 GB | 1/12 | 0/2 | 4/7 | 3/4 | 0/1 | 8/26 | 703 s |
+
+**MiniCPM5-2B is the best sub-3B model in the fleet by a wide margin** — 19/26 at 1.5 GB and
+433 s of wall-clock puts it level with granite-8b (19/26) and one cell under Qwen3-8B, while
+being the fastest model anywhere near that score. The 2B-class-SOTA claim survives contact.
+Two things had to be fixed to see it: its tool markup (`<function`/`<param`) is **special
+tokens** that the string decode silently deleted (finding 16 round 3), and it is a hybrid
+thinker that **loops under greedy think-mode** ("The user says… So we need… The user says…"
+for 25–36k chars at both 6144 and 12288 budgets); sampling on the structured class closes the
+reasoning in 2k–8k chars and the analysis suite goes from 487–654 s to 173 s at the same 3/4.
+The same special-token fix corrected **MiniCPM5-1B's record from 7/26 to 9/26** (agent-loop
+2/7 → 4/7) — its earlier tool score measured a decode bug, not the model.
+
+**K2-Horizon-7B puts up a perfect codegen** — the sixth model to do so, at half Qwen3-14B's size
+and ~2× its speed (12/12 in 1097 s vs 920 s for the 14B and 465 s for Seed-Coder-8B, the only
+faster perfect score). 22/26 lands it in the top tier. IFM's SWE-bench Verified claim
+(68.6 for the 3.7B) shows here as **agent discipline** — the 3.7B is 7/7 on the loop suite —
+rather than single-shot codegen, where it is an ordinary 6/12; the codegen switch turns on
+between 3.7B and 7B. The 0.9B is a reasoner (3/4 analysis, level with Qwen3-8B) that cannot
+code (1/12). All three run at the lowest of their three effort grades for the nothink tasks:
+IFM recommends temp 1.0 and "at least 32,768 output tokens", which is ~25 min per answer on
+this iGPU, so these scores are *K2 under our budget*, not K2 as intended.
+
+Doors used (all in the convert/preflight skills now): the 0.9B is an **exact llamafication** —
+every K2 switch is off in its shipped config and `layernorm_num_groups` is 1, so a llama config
+with YaRN rope reproduces it bit-for-bit (`scripts/k2_llamafy.py` asserts each condition); the 3.7B/7B
+carry grouped RMSNorm (2 and 4 groups) and go through trust-remote-code with llama's OV export
+config registered under `k2_horizon`, in a second convert env (`.venv-convert-k2`: optimum-intel
+main, transformers 5.10.2 — K2's `@strict` config needs ≥5.6). The 7B's first build with the 8B+
+channel-wise default was word salad on CPU and GPU alike; g128 is coherent (finding 5 addendum).
+
+**Side effect worth its own line: making the native template path work for tool history moved
+existing scores.** The vendor templates iterate `tool_call.arguments` as a dict; OpenAI history
+carries a JSON string. Before tonight that raised inside the Qwen3.5 template (→ silent hermes
+fallback for every multi-turn Ornith / Qwen3.5 request) and made Ministral's template `tojson`
+the string into a quoted literal. With a dict copy handed to the template, re-measured under
+the faithful rendering: Qwen3.5-9B agent-loop **4/7 → 6/7**, Qwen3.5-4B 6/7 → 5/7 (greedy,
+`stop-done`), Ornith-1.0 7/7 → 6/7 (`chain-depth`, identical on two samples), Ministral-8B-
+Instruct 6/7 → 5/7, Coder-1.5B-symg128 2/7 → 3/7; the other four Ministrals and Qwen3.5-2B
+unchanged. Faithful rendering stays (finding 16's principle); the records are the honest ones.
+
+**And a methodology finding that explains a scare.** Ornith-1.0's analysis suite read 4/4 in
+~185 s on four consecutive passes, then 2/4 in ~2000 s on three consecutive passes with the
+*same* six-sub-case failure pattern each time — with the engine (A-B on 2026.3.0 vs 2026.3.1),
+the server (old vs new `server.py`), the IR, the cache blobs and the rendered prompt all ruled
+out one by one. The explanation: **GenAI's `rng_seed` defaults to 0 and nothing set it**, so a
+"sampled" run is one deterministic trajectory per prompt, and Ornith's route/diagnose sit on a
+knife edge (stop after the JSON vs keep answering / keep reasoning) that numerical noise flips.
+Consequences: (a) every sampled score in the tables to date is a single-trajectory measurement,
+and best-of-N blocks were replays of block 0; (b) from 2026-09-14 the bench sends OpenAI `seed`
+= block index and the server maps it to `rng_seed`, so block 0 reproduces history and later
+blocks are real draws; (c) Ornith's analysis is recorded at its newest measurement — the model
+genuinely does this at temp 0.6, and only a multi-seed design can price it.
+
 ## Ornith-1.5 — a version bump that regressed (2026-08-22)
 
-Ornith-1.0-9B scores **22/25** here (rank 6). Its successor Ornith-1.5-9B, converted with the
+Ornith-1.0-9B scored **22/25** here (rank 6) when this was written; re-measured 2026-09-14 under
+faithful native tool rendering and seeded best-of-2 it stands at 19/25 (rank 18) — see the
+MiniCPM5/K2 entry above for why. Its successor Ornith-1.5-9B, converted with the
 IDENTICAL recipe and measured at each model's own vendor-recommended operating point, scores
 **16/25** — six cells lower and ~1.7x slower, on the same architecture, engine and think budget.
 

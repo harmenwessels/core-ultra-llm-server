@@ -148,12 +148,14 @@ def run_codegen(target, combo, stamp, is_vlm):
     for tname, task in bc.TASKS.items():
         for pi, prompt in enumerate(task["asks"]):
             verdict, secs, used, resp = "FAIL (no run)", 0.0, 0, None
-            for _ in range(nblocks):
+            for bi in range(nblocks):
                 used += 1
                 try:
+                    # seed = block index: block 0 reproduces the historical
+                    # (rng_seed 0) trajectory, later blocks are new draws
                     content, dt, resp = _chat(
                         target, [{"role": "user", "content": prompt}],
-                        CODEGEN_MAX, sampling, think)
+                        CODEGEN_MAX, {**sampling, "seed": bi}, think)
                     v = bc.probe(task, content)
                 except Exception as e:  # noqa: BLE001
                     dt, v = 0.0, f"FAIL (EXC: {type(e).__name__})"
@@ -178,9 +180,9 @@ def run_roles(target, task_type, combo, stamp, is_vlm):
     for name in ROLE_TASKS[task_type]:
         fn = _PROBE_BY_NAME[name]
         passed, verdict, secs, used, turns = False, "FAIL (no run)", 0.0, 0, None
-        for _ in range(nblocks):
+        for bi in range(nblocks):
             used += 1
-            br.EXTRA_BODY = dict(extra)
+            br.EXTRA_BODY = {**extra, "seed": bi}  # block index as seed (see codegen)
             br.drain_transcript()  # discard stale turns from a prior block
             try:
                 ok, dt, detail = fn(target)

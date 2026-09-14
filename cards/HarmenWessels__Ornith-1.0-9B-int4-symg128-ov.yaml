@@ -9,6 +9,12 @@
 # degrades coding models (settled negative from the OmniCoder-9B experiment).
 # IR is VLM-shaped (qwen3_5) -> VLMPipeline; the benchmark skips autocomplete-fim.
 # Tool language: hermes (<tool_call> + <tools>), rendered natively by its template.
+# 2026-09-14: the native path now really renders tool HISTORY (arguments handed as a
+# dict; the template's `| items` used to raise -> silent hermes fallback). Under it:
+# agent-loop 6/7 (chain-depth, stable on two samples). Analysis is knife-edge at
+# temp 0.6: four 4/4 passes then 2/4 x4 with the same sub-case pattern -- GenAI
+# sampling was rng_seed 0 (one trajectory per prompt); now seeded per block, and
+# best-of-2 still reads 2/4 (route 5/6, diagnose wrong on both draws).
 hf_id: HarmenWessels/Ornith-1.0-9B-int4-symg128-ov
 published: true   # uploaded 2026-08-22 — the leaderboard links it
 alias: ornith-9b

@@ -32,3 +32,7 @@ HarmenWessels/Ornith-1.5-9B-int4-symg128-ov  # Ornith-1.5 (ornith-ai, MIT, 2026-
 Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov  # community asym-g64-AWQ(textvqa) build of Ornith-1.5 — quantization ablation vs our sym-g128 data-free
 HarmenWessels/Ornith-1.5-9B-int4-symg64-ov  # Ornith-1.5 quantization ablation (one variable vs the sym-g128 baseline)
 HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov  # Ornith-1.5 quantization ablation (one variable vs the sym-g128 baseline)
+HarmenWessels/MiniCPM5-2B-int4-symg128-ov  # openbmb MiniCPM5-2B (Apache-2.0, llama arch): 2B-class SOTA claim (LCB v6 69.1); int4 sym g128 AWQ+SE; attribute-XML tool dialect (special tokens -> raw decode)
+HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov  # IFM K2-Horizon-0.9B (Apache-2.0): always-reasoning; llamafied export (exact — all K2 switches off); server family "k2"
+HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov  # IFM K2-Horizon-3.7B (Apache-2.0): always-reasoning; claims SWE-bench Verified 68.6; trust-remote-code export via llama-shaped config (grouped RMSNorm)
+HarmenWessels/K2-Horizon-7B-int4-symg128-ov  # IFM K2-Horizon-7B (Apache-2.0, ~9B real params): always-reasoning; g128 — the channel-wise build was word salad on CPU and GPU (finding 5 addendum)
