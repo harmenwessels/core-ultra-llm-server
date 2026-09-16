@@ -41,3 +41,5 @@ HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov  # Ministral-3-8B-Instruct
 HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov  # Ministral-3-8B-Reasoning (llamafied text-only, Apache-2.0); [THINK] reasoner
 HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov  # Ministral-3-14B-Instruct (llamafied text-only, Apache-2.0); ASF 512
 HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov  # Ministral-3-14B-Reasoning (llamafied text-only, Apache-2.0); [THINK] reasoner, ASF 512
+HarmenWessels/Spark-X2.5-4B-int4-symg128-ov  # XHToken Spark-X2.5-4B (Apache-2.0); hybrid thinker, GLM-style <arg_key> tools (server family "spark"); g_proj kept fp16 for the iGPU; local only
+HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov  # XHToken Spark-X2.5-1.7B (Apache-2.0); same arch/recipe as the 4B, g_proj fp16; NPU candidate (int4 sym); local only

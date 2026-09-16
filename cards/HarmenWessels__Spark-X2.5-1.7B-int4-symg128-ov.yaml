@@ -1,0 +1,19 @@
+# XHToken Spark-X2.5-1.7B (Apache-2.0): the 4B's little sibling — same arch
+# (hybrid 3 sliding-512 : 1 full, per-head sigmoid attention gates, 1M context),
+# hidden 2048, 28 layers, 8 Q / 2 KV heads, head_dim 256, 131k tied vocab.
+# Converted exactly like the 4B (scripts/spark_export_remote.py): int4 sym g128
+# + AWQ + scale-estimation, `g_proj` ([8x2048] here) kept fp16 — the iGPU's fused
+# int4 q_k_v_proj+g_proj kernel is what garbled the 4B. Tokenizer IR built with
+# the id-0 BOS patch. int4 SYM -> NPU-eligible; NPU seat pending a load test.
+# Hybrid thinker (template pre-opens <think>), GLM-style <arg_key> tool calls —
+# server family "spark". Vendor decoding as the 4B: temp 1.0 / top_p 0.95 /
+# top_k -1 (0 here). Sampling on both classes (reasoners loop greedy).
+hf_id: HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov
+published: false   # local until GPU-verified and the 4B's benchmark is in
+alias: spark-x2.5-1.7b
+family: spark
+device: GPU
+decoding:
+  generative: { temp: 1.0, top_p: 0.95, top_k: 0 }
+  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 0 }
+think_max_tokens: 4096

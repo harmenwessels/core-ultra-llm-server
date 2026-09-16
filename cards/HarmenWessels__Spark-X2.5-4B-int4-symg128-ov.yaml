@@ -1,0 +1,25 @@
+# XHToken Spark-X2.5-4B (Apache-2.0, released 2026-08-24): dense 4.11B, hybrid
+# attention (3 sliding-512 : 1 full), per-head sigmoid attention-output gates,
+# 1M native context. Vendor claims SWE-bench Verified 41.6 / Pro 44.4, BFCL-V4
+# 65.1, tau2-bench 75.1 at 4B. Self-converted with trust-remote-code through
+# Gemma2's OV export config (scripts/spark_export_remote.py): int4 sym g128 +
+# AWQ + scale-estimation (wikitext2), EXCEPT `g_proj` kept fp16 — with both the
+# fused q_k_v_proj and the [16x2560] gate at int4 the Arc iGPU's fused kernel
+# emits garbage (CPU fine; bisected 2026-09-15; NOT an ASF case). Tokenizer IR
+# built with scripts/ov_tokenizer_id0_patch.py (BOS is id 0, which upstream
+# openvino_tokenizers silently drops).
+# Hybrid thinker: template pre-opens <think> when enable_thinking (default on),
+# emits `</think>` alone when off; Qwen3-style split. Tool calls are GLM-4.5's
+# grammar — <tool_call>name<arg_key>k</arg_key><arg_value>v</arg_value> — server
+# family "spark" (native render + _parse_spark_calls, added 2026-09-15).
+# Vendor decoding: temp 1.0 / top_p 0.95 / top_k -1 (= 0 here). Sampling on
+# BOTH classes (reasoners loop greedy). think budget from preflight.
+hf_id: HarmenWessels/Spark-X2.5-4B-int4-symg128-ov
+published: false   # local only until the GPU/int4 fix and BOS fix are on the hub
+alias: spark-x2.5-4b
+family: spark
+device: GPU
+decoding:
+  generative: { temp: 1.0, top_p: 0.95, top_k: 0 }
+  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 0 }
+think_max_tokens: 6144

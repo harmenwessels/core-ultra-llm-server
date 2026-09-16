@@ -202,7 +202,7 @@ Best model per task type on a Core Ultra 155H Arc iGPU:
 | codegen | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | 12/12 | — | — |
 | edit | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | 2/2 | — | — |
 | agent-loop | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | 7/7 | — | — |
-| analysis | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | 4/4 | — | — |
+| analysis | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | 4/4 | — | — |
 | autocomplete-fim | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | 1/1 | — | — |
 
 <!--BEST-SETUP END-->

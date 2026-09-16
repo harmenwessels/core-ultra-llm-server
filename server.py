@@ -393,6 +393,14 @@ def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
             # Mistral (Ministral-3 / tekken): definitions in [AVAILABLE_TOOLS],
             # calls emitted as [TOOL_CALLS]name[ARGS]{json} — NOT Hermes.
             fmt = "mistral"
+        elif "<arg_key>" in template and "<tool_call>" in template:
+            # Spark-X2.5 (GLM-4.5's grammar; SGLang calls the parser "spark25"):
+            # tools in <tools>{json}</tools>, calls emitted as
+            # <tool_call>name<arg_key>k</arg_key><arg_value>v</arg_value>…</tool_call>
+            # — the <tool_call> wrapper looks Hermes but the body is not JSON.
+            # Must precede the native-hermes branch, which its `{% if tools %}`
+            # would otherwise match.
+            fmt = "spark"
         elif "<|tool_call_start|>" in template or "List of tools:" in template:
             fmt = "lfm"
         elif re.search(r"\{%-?\s*(?:if|for)[^%]*tools", template):
@@ -713,9 +721,50 @@ def _parse_k2_calls(text: str, tools: list, id_prefix: str) -> tuple[str, list]:
     return content, calls
 
 
+_SPARK_CALL_RE = re.compile(r"<tool_call>\s*([^\s<]+)\s*(.*?)</tool_call>", re.DOTALL)
+_SPARK_ARG_RE = re.compile(r"<arg_key>(.*?)</arg_key>\s*<arg_value>(.*?)</arg_value>",
+                           re.DOTALL)
+
+
+def _parse_spark_calls(text: str, tools: list, id_prefix: str) -> tuple[str, list]:
+    """Parse Spark-X2.5 / GLM-4.5-style calls: same shape as K2's minus the
+    outer block and the arg_type hint. The template renders string arguments
+    verbatim (no quotes) and everything else as JSON, so type by the tool's own
+    parameter schema first, JSON second, string last."""
+    schemas = {t["function"]["name"]:
+               (t["function"].get("parameters") or {}).get("properties") or {}
+               for t in tools}
+    calls: list[dict] = []
+
+    def _typed(name: str, key: str, raw: str):
+        raw = raw.strip("\n")
+        if schemas.get(name, {}).get(key, {}).get("type") == "string":
+            return raw
+        try:
+            return json.loads(raw)
+        except (ValueError, TypeError):
+            return raw
+
+    def _consume(m: re.Match) -> str:
+        name = m.group(1).strip()
+        args = {k.strip(): _typed(name, k.strip(), v)
+                for k, v in _SPARK_ARG_RE.findall(m.group(2))}
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {"name": name,
+                         "arguments": json.dumps(args, ensure_ascii=False)},
+        })
+        return ""
+
+    content = _SPARK_CALL_RE.sub(_consume, text).strip()
+    return content, calls
+
+
 _NATIVE_PARSERS = {
     "gemma": _parse_gemma_calls,
     "k2": _parse_k2_calls,
+    "spark": _parse_spark_calls,
     "lfm": _parse_lfm_calls,
     "mistral": _parse_mistral_calls,
     "native-hermes": lambda text, tools, id_prefix:
