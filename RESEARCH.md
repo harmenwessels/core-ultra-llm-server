@@ -526,6 +526,53 @@ the NPU's best. Final auxiliary placement: **router on CPU** (fast, exact), **lo
 autocomplete on NPU** (typing-time is when the CPU belongs to the IDE), big brains on GPU.
 NPU long-form remains ~16× slower than GPU — short-output roles only on both auxiliaries.
 
+## Finding 18 — The tokenizer IR is a silent third quality gate
+
+Two openvino_tokenizers (2026.3.0) conversion bugs put wrong tokens in front of models
+for months without a single error, and only a fleet-wide audit found them (2026-09-17,
+`scripts/audit_tokenizers.py`: OV tokenizer vs the Rust `tokenizers` reference on every
+special token, a rendered chat turn and indented code):
+
+- **Added token id 0 is dropped** (`... if token["id"]` in `BPETokenizationStep`).
+  DeepSeek-style tokenizers put BOS at id 0 and their templates emit it as text at every
+  turn, so every prompt began with 11–12 byte-fallback junk tokens. Seed-Coder-8B, which
+  had lived at 22/26, scores **25/26 (#1 overall)** with the tokenizer IR regenerated —
+  agent-loop 5→7, analysis 3→4; codegen was already 12/12, so the damage was where
+  instruction-following matters most.
+- **`\uXXXX` in a Split regex breaks the `\s+(?!\S)` whitespace lookahead** (K2-Horizon's
+  `(?:\p{L}|\p{M}|‌|‍)+`). PCRE2 rejects `\u`, the op evidently falls back to
+  an engine without lookahead, and every Python indent became an N-space token plus a
+  *bare* word instead of N−1 spaces plus " word" — a distribution shift on all indented
+  code, on three fleet members. Rewriting to `\x{XXXX}` (valid for both engines) fixes it.
+
+Both are fixed at conversion time by `scripts/ov_tokenizer_id0_patch.py`, which also
+regenerates only the tokenizer IRs of an existing model dir. The lesson generalizes: a
+model that loads, answers and even scores well can still be reading corrupted input;
+the live probes in /model-preflight cannot see it. The audit is now a preflight gate.
+
+A related server-side bug fell out of the same audit: some IRs bake in their own BOS
+prepend (LFM2.5, K2, MiniCPM5-2B, the Ministral *Reasoning* builds — per-artifact, not
+per-family: the Ministral *Instruct* builds do not), and the native-render path was
+emitting the literal too, so eight fleet models saw BOS,BOS on every prompt. The server
+now detects the auto-prepend at load (`_tokenizer_adds_bos`) and blanks the template's
+`bos_token`.
+
+## Finding 19 — "Garbage on GPU, fine on CPU" has a second cause, and ASF is not it
+
+Spark-X2.5-4B's int4 IR was fully coherent on CPU and emitted one or two right tokens
+then repeated-token collapse on the iGPU — *from the first sentence, non-deterministically
+across processes*. The reflex fix, `ACTIVATIONS_SCALE_FACTOR`, was swept 0.5→64 and every
+value was garbage: this class is not activation range. Bisection over NNCF `ignored_scope`
+(N=3–4 fresh processes per variant, because single runs pass by luck) localized it to the
+GPU plugin's **horizontal fusion of two int4 MatMuls that share an input**: the fused
+[6144×2560] `q_k_v_proj` and the tiny [16×2560] per-head sigmoid gate `g_proj`. Keeping
+*either* at fp16 is clean; keeping `out_proj` fp16 is not. The shipped IRs exclude `g_proj`
+(~0.01 GB). Two rules from it: (1) CPU-clean/GPU-garbage needs the failure *shape*
+(length-scaling + deterministic → ASF; immediate + varies per process → kernel) before any
+fix is tried; (2) GPU coherence verdicts on this class need N≥3 fresh processes
+(`scripts/gpu_trials.py`). Look first for a small projection sharing an input with a big
+one — gates, routers, auxiliary heads.
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`

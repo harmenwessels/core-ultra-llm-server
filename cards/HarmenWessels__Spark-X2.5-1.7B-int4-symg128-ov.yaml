@@ -4,16 +4,22 @@
 # Converted exactly like the 4B (scripts/spark_export_remote.py): int4 sym g128
 # + AWQ + scale-estimation, `g_proj` ([8x2048] here) kept fp16 — the iGPU's fused
 # int4 q_k_v_proj+g_proj kernel is what garbled the 4B. Tokenizer IR built with
-# the id-0 BOS patch. int4 SYM -> NPU-eligible; NPU seat pending a load test.
+# the id-0 BOS patch. int4 SYM compiles on the NPU (48 s) and FIM runs in 6.2 s vs the
+# incumbent Coder-1.5B's 7.5 s — but output collapses into repetition on every prompt
+# there (device numerics, Finding 14 class; also a chat model, no raw-prefix FIM). No NPU seat.
 # Hybrid thinker (template pre-opens <think>), GLM-style <arg_key> tool calls —
 # server family "spark". Vendor decoding as the 4B: temp 1.0 / top_p 0.95 /
-# top_k -1 (0 here). Sampling on both classes (reasoners loop greedy).
+# top_k -1. Sampling on both classes (reasoners loop greedy).
 hf_id: HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov
 published: false   # local until GPU-verified and the 4B's benchmark is in
 alias: spark-x2.5-1.7b
 family: spark
 device: GPU
+# Operating point (2026-09-17): the vendor's temp 1.0 / no top_k measured worse here —
+# 1.7B codegen 1/12 with syntax-class failures, 4B analysis 2/4 at ~2x the request
+# timeout — so the card runs the fleet default (temp 0.7 / top_p 0.8 / top_k 20) on
+# both classes with a 4096 think cap. Card rule: the measured best-use point wins.
 decoding:
-  generative: { temp: 1.0, top_p: 0.95, top_k: 0 }
-  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 0 }
+  generative: { temp: 0.7, top_p: 0.8, top_k: 20 }
+  structured: { greedy: false, temp: 0.7, top_p: 0.8, top_k: 20 }
 think_max_tokens: 4096

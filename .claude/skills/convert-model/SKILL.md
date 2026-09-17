@@ -76,6 +76,31 @@ the log for `[exit`, `badbit`/`No space`, `Traceback`.
 
 ## 5. After convert
 - Verify `models/<id>/openvino_model.xml` exists; free the source HF cache.
+- **Audit the tokenizer IR** — `python scripts/audit_tokenizers.py models/<owner>`
+  (in `.venv-convert`; compares the OV tokenizer against the Rust `tokenizers`
+  reference on every special token, a rendered chat turn and a code snippet).
+  openvino_tokenizers 2026.3 has two silent conversion bugs, both fixed by running
+  `python scripts/ov_tokenizer_id0_patch.py <model_dir>` (regenerates only the
+  tokenizer IRs, no model re-export): (a) an added token with **id 0** is dropped
+  (DeepSeek-style BOS → 11 junk tokens per turn; Seed-Coder 22/26 → 25/26 fixed);
+  (b) `\uXXXX` escapes in the Split regex kill the `\s+(?!\S)` lookahead (K2 —
+  every Python indent tokenized as N spaces + bare word). A mismatch is a hidden
+  score depression, not cosmetic. Bake both into any in-process export wrapper
+  (`spark_export_remote.py` shows the pattern).
+- **GPU garbage while CPU is clean: two DIFFERENT causes, test before assuming.**
+  Run `python scripts/gpu_trials.py <model_dir> 4` — N≥3 fresh processes, because
+  the second cause is non-deterministic per process (one lucky pass preceded 8/8
+  failures on Spark). Then:
+  - *Long-output degeneration that scales with sequence length, deterministic* →
+    ASF (below).
+  - *1–2 right tokens then collapse, from the first sentence, varying between
+    processes, and ASF sweeps change nothing* → a fused-int4 GPU kernel. Spark-X2.5:
+    the [16×2560] per-head gate `g_proj` shares its input with the fused
+    `q_k_v_proj`; both at int4 = garbage, either at fp16 = clean. Bisect with
+    `nncf.compress_weights(..., ignored_scope=...)` on an fp16 IR per block / per
+    projection; exclude the culprit via `OVWeightQuantizationConfig(ignored_scope=)`
+    (the CLI cannot express it — drive the API, see `spark_export_remote.py`).
+    Look for a tiny projection sharing an input with a big one (gates, routers).
 - **Large models: ACTIVATIONS_SCALE_FACTOR (size-dependent).** optimum bakes
   `8.0` into rt_info; large hidden dims overflow f16 → garbage on the iGPU
   (0/12 codegen + runaway-slow generation, a wall of repeated chars). The value
@@ -90,8 +115,13 @@ the log for `[exit`, `badbit`/`No space`, `Traceback`.
   servers, fully remove `.ovcache`, then start fresh. **Verify on a realistic-length
   prompt** (use /model-preflight; its hardened coherence check rejects repetition-
   garbage). NB: the marginal 14B also exposed a separate server bug — the
-  native-render path must pass the real BOS token (the OV tokenizer doesn't add
-  one); a missing BOS alone produced backtick-garbage. → [[conversion-playbook-and-watch-items]].
+  native-render path must pass the real BOS token when the OV tokenizer doesn't
+  add one (Ministral Instruct builds); a missing BOS alone produced backtick-garbage.
+  The converse also bit: some IRs DO bake in a BOS prepend (LFM2.5, K2, MiniCPM5-2B,
+  the Ministral *Reasoning* builds — per-artifact, not per-family) and the server
+  then doubled it. Since 2026-09-17 `server.py` detects the auto-BOS at load
+  (`_tokenizer_adds_bos`) and blanks the template's `bos_token`; nothing to do per
+  model. → [[conversion-playbook-and-watch-items]].
 - Run **/model-preflight** (card + server-compat + live probes) before adding the
   id to `benchmark/fleet.txt`.
 

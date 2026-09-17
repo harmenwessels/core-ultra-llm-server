@@ -353,6 +353,14 @@ def _needs_raw_decode(model_dir: pathlib.Path) -> bool:
                for t in tj.get("added_tokens", []))
 
 
+def _tokenizer_adds_bos(pipe) -> bool:
+    """Does the pipeline's own tokenizer prepend a BOS to an empty string?"""
+    try:
+        return len(pipe.get_tokenizer().encode("").input_ids.data[0]) > 0
+    except Exception:  # noqa: BLE001 — VLM pipelines / odd tokenizers: assume not
+        return False
+
+
 def _read_bos(model_dir: pathlib.Path) -> str:
     try:
         cfg = json.loads((model_dir / "tokenizer_config.json").read_text(encoding="utf-8"))
@@ -1025,6 +1033,15 @@ def _load_pipelines() -> None:
         _prompt_lookup_enabled[model_id] = use_pl
         _TOOL_FORMATS[model_id] = _detect_tool_format(model_dir, model_id)
         _BOS_TOKEN[model_id] = _read_bos(model_dir)
+        if _BOS_TOKEN[model_id] and _tokenizer_adds_bos(pipe):
+            # The OV tokenizer IR bakes in its own BOS prepend for some models
+            # (LFM2.5, K2, MiniCPM5-2B, the Ministral Reasoning builds — but
+            # NOT the Ministral Instruct builds, so this is per-artifact, not
+            # per-family). Passing the literal too made every native-rendered
+            # prompt start BOS,BOS. Found by the 2026-09-17 fleet tokenizer audit.
+            log.info("%s: OV tokenizer prepends BOS itself — template gets an "
+                     "empty bos_token", model_id)
+            _BOS_TOKEN[model_id] = ""
         if _needs_raw_decode(model_dir):
             _RAW_DECODE.add(model_id)
             log.info("%s: tool/think markers are special tokens — decoding raw "

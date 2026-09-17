@@ -44,8 +44,21 @@ probe.** Only add the model to `benchmark/fleet.txt` after D passes.
      encodes the template's special tokens as **single** tokens
      (`[INST]`,`[THINK]`,`[/THINK]`,`[TOOL_CALLS]`,`[ARGS]`,…) — if it does, the
      borrow is vocab-compatible.
+   - **Tokenizer IR fidelity** — `python scripts/audit_tokenizers.py models/<owner>`
+     must report the model OK (OV tokenizer == Rust `tokenizers` on every special
+     token, a rendered chat turn, and indented code). Two silent openvino_tokenizers
+     bugs bit this fleet (id-0 BOS dropped; `\uXXXX` in the Split regex breaks the
+     whitespace lookahead) — fix with `scripts/ov_tokenizer_id0_patch.py <dir>`.
+     The live probes below will NOT catch these: the model still answers, just worse.
 
 3. **Advised decoding (PER MODEL — they differ!)** — fetch the *official* vendor
+   model card and quote the recommended `temperature`/`top_p`. Do NOT assume —
+   and do not assume it is *best* here either: Spark-X2.5's vendor temp 1.0 /
+   no top_k measured far worse than the fleet default on a 1.7B (codegen 1/12,
+   syntax-class failures). The card rule is that a measured operating point
+   overrides the vendor's; when a vendor setting is unusually hot, A/B it against
+   the family/fleet default before the first full sweep, not after.
+   Fetch the *official* vendor
    model card and quote the recommended `temperature`/`top_p`. Do NOT assume.
    Example from this repo: Ministral-3 Instruct = **0.1**, Reasoning 3B/8B =
    **0.7**, Reasoning 14B = **1.0**. Put these in the card (see B).

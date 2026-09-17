@@ -12,14 +12,20 @@
 # emits `</think>` alone when off; Qwen3-style split. Tool calls are GLM-4.5's
 # grammar — <tool_call>name<arg_key>k</arg_key><arg_value>v</arg_value> — server
 # family "spark" (native render + _parse_spark_calls, added 2026-09-15).
-# Vendor decoding: temp 1.0 / top_p 0.95 / top_k -1 (= 0 here). Sampling on
-# BOTH classes (reasoners loop greedy). think budget from preflight.
+# Vendor decoding: temp 1.0 / top_p 0.95 / top_k -1. Sampling on BOTH classes
+# (reasoners loop greedy).
 hf_id: HarmenWessels/Spark-X2.5-4B-int4-symg128-ov
 published: false   # local only until the GPU/int4 fix and BOS fix are on the hub
 alias: spark-x2.5-4b
 family: spark
 device: GPU
+# Operating point (2026-09-17, A/B of two full sweeps): SPLIT. Generative keeps the
+# vendor's temp 1.0 / top_p 0.95 / no top_k — the fleet default scored the same
+# (7 vs 8/12, one-case flips) but ran 60% longer (2215 s vs 1363 s; three cases at
+# 350-470 s). Structured takes the fleet default + a 4096 think cap: analysis 2/4 in
+# 3585 s (2x the request timeout) -> 3/4 in 1991 s, the cap doing the work. The 1.7B
+# sibling prefers the fleet default on BOTH classes (12 -> 17/26); this is 4B-specific.
 decoding:
   generative: { temp: 1.0, top_p: 0.95, top_k: 0 }
-  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 0 }
-think_max_tokens: 6144
+  structured: { greedy: false, temp: 0.7, top_p: 0.8, top_k: 20 }
+think_max_tokens: 4096
