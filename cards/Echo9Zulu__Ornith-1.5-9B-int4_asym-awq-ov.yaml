@@ -1,5 +1,7 @@
-# Ornith-1.5-9B, COMMUNITY conversion by Echo9Zulu — the fourth point in the
-# quantization ablation. It differs from our baseline on FOUR axes at once, so it
+# Ornith-1.5-9B, COMMUNITY conversion by Echo9Zulu — since 2026-09-18 the ONLY
+# Ornith-1.5 IR in the fleet: our three self-converted ablation variants were removed
+# (rejected model, one downloadable build kept for re-benchmarking; numbers in
+# RESEARCH.md 'Ornith-1.5'). Originally the fourth point in the quantization ablation. It differs from our baseline on FOUR axes at once, so it
 # cannot attribute a difference; it only answers "does any recipe rescue 1.5?".
 #   ours      : int4 sym  g128, no AWQ, data-free      -> 16/25
 #   this build: int4 ASYM g64,  AWQ,    calib=textvqa

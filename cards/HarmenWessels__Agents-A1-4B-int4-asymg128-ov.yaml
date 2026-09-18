@@ -14,7 +14,7 @@
 # server already parses. VLM-shaped IR -> VLMPipeline; benchmark skips fim.
 # Vendor decoding: temp 0.85 / top_p 0.95 / top_k 20 / presence_penalty 1.1.
 hf_id: HarmenWessels/Agents-A1-4B-int4-asymg128-ov
-published: false   # local experiment; publish only if it earns a fleet seat
+published: true   # uploaded 2026-09-18 — the leaderboard links it (rejected model, kept for reproducibility)
 alias: agents-a1-4b
 family: qwen3.5
 device: GPU

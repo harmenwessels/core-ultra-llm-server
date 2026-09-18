@@ -28,10 +28,7 @@ OpenVINO/Qwen3.5-9B-int4-ov  # official Intel build (Apache-2.0), int4_asym g128
 OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov  # quality floor / fastest autocomplete candidate
 HarmenWessels/MiniCPM5-1B-int4-g128-ov  # converted 2026-06, never benchmarked
 HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov  # the NPU router/FIM artifact (sym-g128); GPU row for reference
-HarmenWessels/Ornith-1.5-9B-int4-symg128-ov  # Ornith-1.5 (ornith-ai, MIT, 2026-08-20): successor to 1.0, identical convert recipe for an attributable comparison
-Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov  # community asym-g64-AWQ(textvqa) build of Ornith-1.5 — quantization ablation vs our sym-g128 data-free
-HarmenWessels/Ornith-1.5-9B-int4-symg64-ov  # Ornith-1.5 quantization ablation (one variable vs the sym-g128 baseline)
-HarmenWessels/Ornith-1.5-9B-int4-asymg128-ov  # Ornith-1.5 quantization ablation (one variable vs the sym-g128 baseline)
+Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov  # Ornith-1.5 (ornith-ai, MIT, 2026-08-20): successor to 1.0 that REGRESSED (16/25 vs 1.0's 19/25; RESEARCH.md 'Ornith-1.5'); the community asym-g64-AWQ build is the one IR kept so it stays re-benchmarkable — our three ablation variants (sym g128 16, asym g128 14, sym g64 11) were removed 2026-09-18, notes kept
 HarmenWessels/MiniCPM5-2B-int4-symg128-ov  # openbmb MiniCPM5-2B (Apache-2.0, llama arch): 2B-class SOTA claim (LCB v6 69.1); int4 sym g128 AWQ+SE; attribute-XML tool dialect (special tokens -> raw decode)
 HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov  # IFM K2-Horizon-0.9B (Apache-2.0): always-reasoning; llamafied export (exact — all K2 switches off); server family "k2"
 HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov  # IFM K2-Horizon-3.7B (Apache-2.0): always-reasoning; claims SWE-bench Verified 68.6; trust-remote-code export via llama-shaped config (grouped RMSNorm)
@@ -43,3 +40,4 @@ HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov  # Ministral-3-14B-Instru
 HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov  # Ministral-3-14B-Reasoning (llamafied text-only, Apache-2.0); [THINK] reasoner, ASF 512
 HarmenWessels/Spark-X2.5-4B-int4-symg128-ov  # XHToken Spark-X2.5-4B (Apache-2.0); hybrid thinker, GLM-style <arg_key> tools (server family "spark"); g_proj kept fp16 for the iGPU
 HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov  # XHToken Spark-X2.5-1.7B (Apache-2.0); same arch/recipe as the 4B, g_proj fp16; no NPU seat (output collapses there)
+HarmenWessels/Agents-A1-4B-int4-asymg128-ov  # InternScience Agents-A1-4B (Apache-2.0): Qwen3.5-4B agentic fine-tune, base recipe (int4 asym g128 data-free) — REGRESSES vs its base on this suite; kept published for reproducibility
