@@ -819,6 +819,10 @@ candidates), decoding parameters (re-run at the vendor's general point with
 No recipe beats our default; **symmetric beat asymmetric, and coarser (g128) beat finer (g64) by
 5 cells** — counter to the usual intuition, echoing the MiniCPM5 granularity lesson.
 
+*2026-09-18: the three self-converted variants were removed from the fleet and never published;
+the community asym-g64-AWQ build is the one Ornith-1.5 IR kept, so the model stays
+re-benchmarkable. This table is the record of the other three.*
+
 **Externally corroborated.** The vendor claims an improvement (Terminal-Bench 2.1: 46.2 for 1.5-9B
 vs 43.1 for 1.0-9B), but independent testers report the opposite in practice: a local A100/vLLM
 run (no quantization involved) saw it burn ~43k tokens in 7 minutes without completing an AWS
