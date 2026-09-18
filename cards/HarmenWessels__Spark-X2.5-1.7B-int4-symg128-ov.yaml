@@ -11,7 +11,7 @@
 # server family "spark". Vendor decoding as the 4B: temp 1.0 / top_p 0.95 /
 # top_k -1. Sampling on both classes (reasoners loop greedy).
 hf_id: HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov
-published: false   # local until GPU-verified and the 4B's benchmark is in
+published: true   # uploaded 2026-09-18 — the leaderboard links it
 alias: spark-x2.5-1.7b
 family: spark
 device: GPU

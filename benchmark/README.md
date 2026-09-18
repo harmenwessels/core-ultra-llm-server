@@ -140,13 +140,13 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 15 | [HarmenWessels/gemma-4-E2B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | 21/25 | 1433 | 4.4 GB | qat |
 | 16 | [OpenVINO/Qwen3-8B-int4-cw-ov](https://huggingface.co/OpenVINO/Qwen3-8B-int4-cw-ov) | 21/26 | 1612 | 4.7 GB | data-free |
 | 17 | [HarmenWessels/gemma-4-E4B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | 21/25 | 1621 | 6.6 GB | qat |
-| 18 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | 20/26 | 2287 | 2.3 GB | awq+se |
+| 18 | [HarmenWessels/Spark-X2.5-4B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Spark-X2.5-4B-int4-symg128-ov) | 20/26 | 2287 | 2.3 GB | awq+se |
 | 19 | [HarmenWessels/MiniCPM5-2B-int4-symg128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-2B-int4-symg128-ov) | 19/26 | 551 | 1.6 GB | awq+se |
 | 20 | [HarmenWessels/granite-4.1-8b-int4-cw-ov](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov) | 19/26 | 820 | 4.4 GB | awq+se |
 | 21 | [HarmenWessels/Ornith-1.0-9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ornith-1.0-9B-int4-symg128-ov) | 19/25 | 1967 | 6.1 GB | data-free |
 | 22 | [HarmenWessels/granite-4.1-3b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-code-ov) | 18/26 | 486 | 1.8 GB | awq+se |
 | 23 | [Echo9Zulu/OmniCoder-9B-int4_sym-ov](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 18/25 | 3978 | 6.1 GB | data-free |
-| 24 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | 17/26 | 1920 | 1.0 GB | awq+se |
+| 24 | [HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov) | 17/26 | 1920 | 1.0 GB | awq+se |
 | 25 | [OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 16/26 | 502 | 1.8 GB | scale_estimation |
 | 26 | [HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov) | 16/26 | 947 | 2.0 GB | awq+se |
 | 27 | [Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov](https://huggingface.co/Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov) | 16/25 | 1877 | 0.0 GB | awq+se |

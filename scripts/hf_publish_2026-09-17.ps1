@@ -11,8 +11,20 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $hf   = Join-Path $root '.venv-convert\Scripts\hf.exe'
 
-$who = & $hf auth whoami 2>&1 | Select-String -Pattern 'User=(\S+)' | ForEach-Object { $_.Matches[0].Groups[1].Value }
-if ($who -ne 'HarmenWessels') { throw "hf auth is '$who', expected HarmenWessels (hf auth switch)" }
+# The hf CLI prints "✓" and other non-cp1252 glyphs; on a Windows console with the
+# default codepage Python dies with "'charmap' codec can't encode character" before
+# printing anything useful — so force UTF-8 for every hf call in this script. It also
+# colours its output interactively (ANSI escapes between "User=" and the name).
+$env:PYTHONIOENCODING = 'utf-8'
+$env:PYTHONUTF8 = '1'
+$env:NO_COLOR = '1'
+$raw = (& $hf auth whoami 2>&1 | ForEach-Object { "$_" }) -join "`n"
+$clean = $raw -replace "`e\[[0-9;]*[A-Za-z]", ''
+$who = if ($clean -match '(?im)^\s*user\s*[=:]\s*(\S+)') { $Matches[1] } else { '' }
+if ($who -ne 'HarmenWessels') {
+  Write-Host "could not confirm the hf account. Raw output:`n$clean" -ForegroundColor Yellow
+  throw "hf auth is '$who', expected HarmenWessels (hf auth switch)"
+}
 
 $new = @(
   @{ id = 'HarmenWessels/Spark-X2.5-4B-int4-symg128-ov';   msg = 'Spark-X2.5-4B int4 sym g128 AWQ+SE, g_proj fp16 (iGPU fused-int4 kernel fix), id-0 BOS tokenizer fix' },

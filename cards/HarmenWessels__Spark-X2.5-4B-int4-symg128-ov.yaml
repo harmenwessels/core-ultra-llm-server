@@ -15,7 +15,7 @@
 # Vendor decoding: temp 1.0 / top_p 0.95 / top_k -1. Sampling on BOTH classes
 # (reasoners loop greedy).
 hf_id: HarmenWessels/Spark-X2.5-4B-int4-symg128-ov
-published: false   # local only until the GPU/int4 fix and BOS fix are on the hub
+published: true   # uploaded 2026-09-18 — the leaderboard links it
 alias: spark-x2.5-4b
 family: spark
 device: GPU
