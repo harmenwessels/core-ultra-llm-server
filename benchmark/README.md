@@ -150,7 +150,7 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 25 | [OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 16/26 | 502 | 1.8 GB | scale_estimation |
 | 26 | [HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov) | 16/26 | 947 | 2.0 GB | awq+se |
 | 27 | [Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov](https://huggingface.co/Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov) | 16/25 | 1877 | 0.0 GB | awq+se |
-| 28 | HarmenWessels/Agents-A1-4B-int4-asymg128-ov | 16/25 | 2558 | 3.5 GB | data-free |
+| 28 | [HarmenWessels/Agents-A1-4B-int4-asymg128-ov](https://huggingface.co/HarmenWessels/Agents-A1-4B-int4-asymg128-ov) | 16/25 | 2558 | 3.5 GB | data-free |
 | 29 | [HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov](https://huggingface.co/HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov) | 15/26 | 233 | 0.7 GB | data-free |
 | 30 | [OpenVINO/Qwen3-1.7B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-1.7B-int4-ov) | 15/26 | 615 | 1.2 GB | data-free |
 | 31 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | 12/26 | 914 | 0.0 GB | awq+se |
