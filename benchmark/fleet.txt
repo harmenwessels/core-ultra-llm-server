@@ -41,3 +41,4 @@ HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov  # Ministral-3-14B-Reaso
 HarmenWessels/Spark-X2.5-4B-int4-symg128-ov  # XHToken Spark-X2.5-4B (Apache-2.0); hybrid thinker, GLM-style <arg_key> tools (server family "spark"); g_proj kept fp16 for the iGPU
 HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov  # XHToken Spark-X2.5-1.7B (Apache-2.0); same arch/recipe as the 4B, g_proj fp16; no NPU seat (output collapses there)
 HarmenWessels/Agents-A1-4B-int4-asymg128-ov  # InternScience Agents-A1-4B (Apache-2.0): Qwen3.5-4B agentic fine-tune, base recipe (int4 asym g128 data-free) — REGRESSES vs its base on this suite; kept published for reproducibility
+HarmenWessels/SmolLM3-3B-int4-symg128-ov  # HuggingFaceTB SmolLM3-3B (Apache-2.0): re-converted 2026-09-18 (June IR was never uploaded); hybrid thinker whose think mode is unreliable here -> analysis nothink, structured sampled; NPU candidate

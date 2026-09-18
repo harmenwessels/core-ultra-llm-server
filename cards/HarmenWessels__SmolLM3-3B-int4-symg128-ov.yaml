@@ -3,8 +3,21 @@
 # (wikitext2). sym-g128 keeps NPU eligibility while preserving 3B quality (channel-wise
 # hurt small models — cf. granite-3b-cw). OV exported via a llama-aliased export config
 # (this optimum build registers smollm3 for onnx only).
+# Re-converted 2026-09-18 (the June IR was deleted before it was ever uploaded): smollm3 is
+# now natively registered in optimum-intel (no llama alias), same recipe, tokenizer IR through
+# scripts/ov_tokenizer_id0_patch.py, audit clean, GPU 3/3 on OpenVINO 2026.4. Hybrid thinker
+# (enable_thinking defaults true -> "/think" reasoning_mode; server pattern D). NPU candidate.
+# Think mode is unreliable through the template: June's analysis run (think, greedy) produced
+# ZERO reasoning_content and 12-14K-char looping answers; on 2026.4 a think request either
+# skips thinking (codegen prompt) or thinks and ends with no answer (empty content). Nothink
+# answers are direct and bounded, so analysis runs nothink here and the structured class
+# samples (greedy loops). The preflight think-split probe fails by design for this card.
 hf_id: HarmenWessels/SmolLM3-3B-int4-symg128-ov
+published: false   # upload after tonight's 2026.4 sweep
 alias: smollm3-3b
 family: smollm3
 device: GPU
-decoding: {}
+decoding:
+  structured: { greedy: false, temp: 0.6, top_p: 0.95, top_k: 20 }
+think_by_task:
+  analysis: nothink
