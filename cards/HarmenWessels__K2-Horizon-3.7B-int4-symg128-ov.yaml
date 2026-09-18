@@ -1,0 +1,21 @@
+# IFM K2-Horizon-3.7B (Apache-2.0, released 2026-09-03/11): dense reasoning model,
+# exported with trust-remote-code through a llama-shaped export config (grouped RMSNorm, n_groups=2, traces as plain ops). Claims SWE-bench Verified 68.6 vs Qwen3.5-4B 41.2.
+# ALWAYS reasons — no off switch; reasoning_effort picks the opener (<ifm|think> /
+# think_fast / think_faster), the closer mirrors it; server family "k2" (native
+# render of chat_template.vendor.jinja — GenAI's Minja cannot parse the vendor
+# template, so it must not sit in chat_template.jinja). Tool calls:
+# <ifm|tool_call>name <ifm|arg_key>/<ifm|arg_value> (server parser since 2026-09-14).
+# Vendor decoding: temp 1.0 / top_p 0.95 and "at least 32,768 output tokens" —
+# impossible here (~25 min/answer), so this card runs the nothink tasks at the
+# lowest effort and analysis at think_max_tokens; scores are "K2 under our
+# budget", not K2 as intended. Sampling on BOTH classes (reasoners loop greedy).
+# Recipe: int4 sym g128 AWQ+SE (wikitext2), OV 2026.3.1 / optimum-intel main.
+hf_id: HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
+alias: k2-horizon-3.7b
+family: k2
+device: GPU
+decoding:
+  generative: { temp: 1.0, top_p: 0.95, top_k: 0 }
+  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 0 }
+think_max_tokens: 8192

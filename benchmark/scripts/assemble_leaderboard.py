@@ -117,7 +117,13 @@ def render_overall(entries) -> str:
            "|---|---|---|---|---|---|"]
     for i, a in enumerate(rows, 1):
         if a["kind"] == "single":
-            name = f"[{a['subject']}](https://huggingface.co/{a['subject']})"
+            # Link only models we actually published: the leaderboard is public
+            # and an auto-generated link to an unpublished id 401s. A card opts
+            # in with `published: true`.
+            if bm.load_card(a["subject"]).get("published"):
+                name = f"[{a['subject']}](https://huggingface.co/{a['subject']})"
+            else:
+                name = a["subject"]
             sr = f'{a.get("size", "?")} GB'
             rec = a.get("recipe") or "—"
         else:
@@ -140,7 +146,9 @@ def render_tables(entries) -> str:
             avg = round(e["seconds"] / e["cells"], 0) if e["cells"] else 0
             sr = (f'{e.get("size","?")} GB' if e["kind"] == "single" else e["detail"])
             rec = e.get("recipe", "—") if e["kind"] == "single" else "combo"
-            eng = (e["engine"] or "?").split("-")[0]
+            # keep the build number: "2026.3.0.0-1" (fork) vs "2026.3.0.0-3277"
+            # (stable) are different engines and must not render identically
+            eng = "-".join((e["engine"] or "?").split("-")[:2])
             out.append(f"| {i} | {e['subject']} | {e['kind']} | {sr} | "
                        f"{e['quality']}/{e['cells']} | {e['seconds']:.0f} | {avg:.0f} | "
                        f"{rec} | {e['decoding']} | {e['think']} | {eng} |")

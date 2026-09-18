@@ -20,7 +20,7 @@ import time
 
 import openvino_genai as ov_genai
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parents[3]  # repo root (../../../ from hw/)
 OUT_DIR = ROOT / "bench_results"
 MODEL = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else
                      ROOT / "models" / "HarmenWessels" /

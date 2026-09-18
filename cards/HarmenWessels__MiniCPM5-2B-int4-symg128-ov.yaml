@@ -1,0 +1,21 @@
+# MiniCPM5-2B (openbmb, Apache-2.0) — plain LlamaForCausalLM, 2.5B, 131k ctx,
+# hybrid thinker on the Qwen3 pattern (<think>, enable_thinking pre-fill). Local
+# int4 sym g128 AWQ+SE (wikitext2) on OV 2026.3.1 / optimum-intel main.
+# Vendor decoding: temp 1.0 / top_p 0.95 / min_p 0 (repetition_penalty 1.05 only
+# if it loops). Claims 2B-class SOTA incl. LiveCodeBench v6 69.1 (vs Qwen3.5-4B 56.4).
+# Tool language: its template renders tools natively; calls come back as
+# attribute XML <function name="x"><param name="k">v</param></function> (server
+# parses this dialect since 2026-09-14). Autocomplete: raw prefix (same treatment
+# as MiniCPM5-1B; FIM tokens exist in the vocab but FIM training is undocumented).
+hf_id: HarmenWessels/MiniCPM5-2B-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
+alias: minicpm5-2b
+family: minicpm
+device: GPU
+decoding:
+  generative: { temp: 1.0, top_p: 0.95, top_k: 0 }
+  # Hybrid thinker -> sampling on structured too. Greedy think-mode analysis
+  # looped ("The user says... So we need... The user says...") for 25-36k chars
+  # at both 6144 and 12288 budgets (2026-09-14); raising the budget bought nothing.
+  structured: { greedy: false, temp: 1.0, top_p: 0.95, top_k: 0 }
+think_max_tokens: 8192

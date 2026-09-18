@@ -1,4 +1,5 @@
 hf_id: Echo9Zulu/OmniCoder-9B-int4_sym-ov
+published: true   # public on the HF hub — the leaderboard links it
 alias: omnicoder-9b_sym-ov
 family: omnicoder
 device: GPU

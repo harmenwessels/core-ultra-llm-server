@@ -48,10 +48,15 @@ def _is_vlm(target: str) -> bool:
     return (d / "openvino_vision_embeddings_model.xml").exists()
 
 
+_PENALTIES = ("presence_penalty", "frequency_penalty", "repetition_penalty")
+
+
 def _sampling(dec: dict) -> dict:
+    # Penalties are independent of the greedy/sampling switch — a card may pin
+    # repetition_penalty on a greedy task — so they are collected first.
+    out = {k: dec[k] for k in _PENALTIES if dec.get(k) is not None}
     if dec.get("greedy") or not dec:
-        return {}
-    out = {}
+        return out
     for src, dst in (("temp", "temperature"), ("top_p", "top_p"), ("top_k", "top_k")):
         if dec.get(src) is not None:
             out[dst] = dec[src]
@@ -66,11 +71,13 @@ def _blocks(cf: dict, is_vlm: bool) -> int:
 
 def _decoding_record(cf: dict) -> dict:
     dec = cf["decoding"]
-    if dec.get("greedy") or not _sampling(dec):
+    if dec.get("greedy") or not dec.get("temp"):
         rec = {"strategy": "greedy"}
     else:
         rec = {"strategy": "sampling",
                **{k: dec.get(k) for k in ("temp", "top_p", "top_k")}}
+    # record the penalties too — provenance must show the exact operating point
+    rec.update({k: dec[k] for k in _PENALTIES if dec.get(k) is not None})
     rec["blocks"] = cf["blocks"]
     rec["task_class"] = cf["task_class"]
     return rec
@@ -141,12 +148,14 @@ def run_codegen(target, combo, stamp, is_vlm):
     for tname, task in bc.TASKS.items():
         for pi, prompt in enumerate(task["asks"]):
             verdict, secs, used, resp = "FAIL (no run)", 0.0, 0, None
-            for _ in range(nblocks):
+            for bi in range(nblocks):
                 used += 1
                 try:
+                    # seed = block index: block 0 reproduces the historical
+                    # (rng_seed 0) trajectory, later blocks are new draws
                     content, dt, resp = _chat(
                         target, [{"role": "user", "content": prompt}],
-                        CODEGEN_MAX, sampling, think)
+                        CODEGEN_MAX, {**sampling, "seed": bi}, think)
                     v = bc.probe(task, content)
                 except Exception as e:  # noqa: BLE001
                     dt, v = 0.0, f"FAIL (EXC: {type(e).__name__})"
@@ -171,9 +180,9 @@ def run_roles(target, task_type, combo, stamp, is_vlm):
     for name in ROLE_TASKS[task_type]:
         fn = _PROBE_BY_NAME[name]
         passed, verdict, secs, used, turns = False, "FAIL (no run)", 0.0, 0, None
-        for _ in range(nblocks):
+        for bi in range(nblocks):
             used += 1
-            br.EXTRA_BODY = dict(extra)
+            br.EXTRA_BODY = {**extra, "seed": bi}  # block index as seed (see codegen)
             br.drain_transcript()  # discard stale turns from a prior block
             try:
                 ok, dt, detail = fn(target)

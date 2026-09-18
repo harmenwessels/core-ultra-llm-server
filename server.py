@@ -234,7 +234,17 @@ def _requested_think_mode(body: dict) -> str:
 
 # Reasoning delimiter pairs seen across families: HTML-style <think> (Qwen/SmolLM/
 # LFM/Gemma) and Mistral's [THINK] (Ministral-3 / Magistral reasoning models).
-_THINK_DELIMS = (("<think>", "</think>"), ("[THINK]", "[/THINK]"))
+_THINK_DELIMS = (("<think>", "</think>"), ("[THINK]", "[/THINK]"),
+                 # IFM K2-Horizon: opener chosen by reasoning effort, closer
+                 # mirrors it; the tags are added (not special) tokens, so the
+                 # default decode keeps them visible
+                 ("<ifm|think>", "</ifm|think>"),
+                 ("<ifm|think_fast>", "</ifm|think_fast>"),
+                 ("<ifm|think_faster>", "</ifm|think_faster>"))
+# Models whose native template ALWAYS opens a think block (K2 has no off
+# switch — its lowest effort still reasons). Their output is reasoning until
+# the closer, whatever mode was requested.
+_ALWAYS_REASONS: set[str] = set()
 
 
 def _split_reasoning(text: str, think_mode: str = "nothink") -> tuple[str | None, str]:
@@ -291,6 +301,21 @@ within <tool_call></tool_call> XML tags:
 </tool_call>"""
 
 _TOOL_CALL_RE = re.compile(r"<tool_call>\s*(\{.*?\})\s*</tool_call>", re.DOTALL)
+# Qwen3-Coder dialect (Ornith-1.0, Qwen3-Coder): same <tool_call> wrapper, but the
+# payload is XML rather than JSON — the model's own template instructs it to emit
+# "<function=name><parameter=key>value</parameter></function>" and renders prior
+# assistant calls that way, so it is not a model slip to repair but a second
+# hermes-family syntax to speak.
+_TOOL_CALL_XML_RE = re.compile(
+    r"<tool_call>\s*(<function=.*?</function>)\s*</tool_call>", re.DOTALL)
+_XML_FUNC_RE = re.compile(r"<function=([^>\s]+)\s*>(.*?)</function>", re.DOTALL)
+_XML_PARAM_RE = re.compile(r"<parameter=([^>\s]+)\s*>(.*?)</parameter>", re.DOTALL)
+# MiniCPM5 dialect: attribute-style XML, inline in content (no <tool_call>
+# wrapper); string params carrying < & or newlines are CDATA-wrapped.
+_ATTR_FUNC_RE = re.compile(
+    r'<function\s+name="([^"]+)"\s*>(.*?)</function>', re.DOTALL)
+_ATTR_PARAM_RE = re.compile(
+    r'<param\s+name="([^"]+)"\s*>(?:<!\[CDATA\[(.*?)\]\]>|(.*?))</param>', re.DOTALL)
 
 _TOOL_FORMATS: dict[str, str] = {}  # model id -> gemma | lfm | hermes
 _NATIVE_TEMPLATES: dict[str, object] = {}  # model id -> compiled jinja template
@@ -304,6 +329,36 @@ _REASONING_SYSPROMPT: dict[str, str] = {}
 # don't want one. A MISSING BOS destabilizes sensitive models into garbage
 # (Ministral-14B: walls of backticks); smaller models tolerated its absence.
 _BOS_TOKEN: dict[str, str] = {}
+
+
+# Tool/think delimiters that some vendors register as SPECIAL tokens. GenAI's
+# string decode drops special tokens, so a model whose markers are special must
+# be decoded from raw ids with skip_special_tokens=False or the parser never
+# sees them (Mistral [TOOL_CALLS]/[THINK]; MiniCPM5 <function/<param). Decided
+# per model from its tokenizer.json at load, not per family.
+_MARKER_TOKENS = {
+    "<tool_call>", "</tool_call>", "<function", "</function>", "<param",
+    "</param>", "[TOOL_CALLS]", "[ARGS]", "[THINK]", "[/THINK]", "<think>",
+    "</think>", "<ifm|tool_call>", "<ifm|think>", "<|tool_call_start|>",
+}
+_RAW_DECODE: set[str] = set()
+
+
+def _needs_raw_decode(model_dir: pathlib.Path) -> bool:
+    try:
+        tj = json.loads((model_dir / "tokenizer.json").read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return False
+    return any(t.get("special") and t.get("content") in _MARKER_TOKENS
+               for t in tj.get("added_tokens", []))
+
+
+def _tokenizer_adds_bos(pipe) -> bool:
+    """Does the pipeline's own tokenizer prepend a BOS to an empty string?"""
+    try:
+        return len(pipe.get_tokenizer().encode("").input_ids.data[0]) > 0
+    except Exception:  # noqa: BLE001 — VLM pipelines / odd tokenizers: assume not
+        return False
 
 
 def _read_bos(model_dir: pathlib.Path) -> str:
@@ -320,19 +375,40 @@ def _read_bos(model_dir: pathlib.Path) -> str:
 def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
     """Pick the tool language by inspecting the model's own chat template
     (or the models.yaml override)."""
-    tf = model_dir / "chat_template.jinja"
+    # A vendor template GenAI's Minja cannot parse (K2: `is sameas`, HF
+    # `{% generation %}` tags) makes the pipeline refuse to CONSTRUCT if it sits
+    # in chat_template.jinja. Such templates live in chat_template.vendor.jinja,
+    # which only this server-side jinja2 path reads.
+    tf = model_dir / "chat_template.vendor.jinja"
+    if not tf.exists():
+        tf = model_dir / "chat_template.jinja"
     if not tf.exists():
         return "hermes"
     template = tf.read_text(encoding="utf-8")
+    # `{% generation %}` marks assistant spans for training masks — a no-op
+    # for rendering, and unknown to jinja2
+    template = re.sub(r"\{%-?\s*(?:end)?generation\s*-?%\}", "", template)
     fmt = _TOOL_FORMAT_OVERRIDE.get(model_id)
     if fmt is None:
         fmt = "hermes"
         if "declaration:" in template and "<|tool" in template:
             fmt = "gemma"
+        elif "<ifm|tool_call>" in template:
+            # IFM K2-Horizon: tools rendered by the template, calls emitted as
+            # <ifm|tool_call>name <ifm|arg_key>k</ifm|arg_key><ifm|arg_value>v…
+            fmt = "k2"
         elif "[TOOL_CALLS]" in template and "[AVAILABLE_TOOLS]" in template:
             # Mistral (Ministral-3 / tekken): definitions in [AVAILABLE_TOOLS],
             # calls emitted as [TOOL_CALLS]name[ARGS]{json} — NOT Hermes.
             fmt = "mistral"
+        elif "<arg_key>" in template and "<tool_call>" in template:
+            # Spark-X2.5 (GLM-4.5's grammar; SGLang calls the parser "spark25"):
+            # tools in <tools>{json}</tools>, calls emitted as
+            # <tool_call>name<arg_key>k</arg_key><arg_value>v</arg_value>…</tool_call>
+            # — the <tool_call> wrapper looks Hermes but the body is not JSON.
+            # Must precede the native-hermes branch, which its `{% if tools %}`
+            # would otherwise match.
+            fmt = "spark"
         elif "<|tool_call_start|>" in template or "List of tools:" in template:
             fmt = "lfm"
         elif re.search(r"\{%-?\s*(?:if|for)[^%]*tools", template):
@@ -345,7 +421,13 @@ def _detect_tool_format(model_dir: pathlib.Path, model_id: str) -> str:
             template = _register_reasoning(model_id, template)
             env = jinja2.Environment(extensions=["jinja2.ext.loopcontrols"])
             env.filters["tojson"] = lambda v, **kw: json.dumps(v)
+
+            def _raise(msg):
+                raise ValueError(f"chat template: {msg}")
+            env.globals["raise_exception"] = _raise
             _NATIVE_TEMPLATES[model_id] = env.from_string(template)
+            if "<ifm|think" in template:
+                _ALWAYS_REASONS.add(model_id)
         except Exception as e:  # noqa: BLE001 — fall back rather than break
             log.warning("%s: native template compile failed (%s) — hermes "
                         "fallback", model_id, str(e)[:80])
@@ -383,15 +465,61 @@ def _inject_reasoning_sysprompt(messages: list, reasoning: str) -> list:
     return msgs
 
 
+def _dict_tool_args(message: dict) -> dict:
+    calls = []
+    for c in message.get("tool_calls") or []:
+        fn = dict(c.get("function") or {})
+        if isinstance(fn.get("arguments"), str):
+            try:
+                fn["arguments"] = json.loads(fn["arguments"] or "{}")
+            except ValueError:
+                pass  # leave the string; the template's error is the honest one
+        calls.append({**c, "function": fn})
+    return {**message, "tool_calls": calls}
+
+
 def _render_native(model_id: str, messages: list, tools: list | None,
-                   think: bool) -> str:
-    """Render the model's own template with everything GenAI cannot pass."""
+                   think: bool, effort: str | None = None) -> str:
+    """Render the model's own template with everything GenAI cannot pass.
+
+    `effort` is the OpenAI reasoning_effort (low/medium/high) for templates
+    that grade thinking rather than switch it (K2: think / think_fast /
+    think_faster). A nothink request maps to the lowest grade.
+    """
+    if effort not in ("low", "medium", "high"):
+        effort = "high" if think else "low"
     rp = _REASONING_SYSPROMPT.get(model_id)
     if rp and think:  # Mistral reasoner: inject the [THINK] system prompt
         messages = _inject_reasoning_sysprompt(messages, rp)
+    # An assistant turn that made a tool call carries content=None (the
+    # OpenAI shape, and exactly what _completion_message emits). Mistral's
+    # template takes len() of it and dies with "NoneType has no len()",
+    # which surfaced as an HTTP 500 on every tool-result continuation.
+    # Normalise to "" on a copy — never mutate the caller's messages.
+    messages = [{**m, "content": ""} if m.get("content") is None else m
+                for m in messages]
+    # OpenAI carries tool-call arguments as a JSON STRING; the vendor templates
+    # iterate them as a dict (K2 raises outright, MiniCPM5 calls .items()).
+    # Hand them a parsed copy — the wire shape is never mutated.
+    messages = [_dict_tool_args(m) if m.get("tool_calls") else m for m in messages]
+    if model_id in _ALWAYS_REASONS:
+        # K2's template refuses an assistant turn without a thinking field
+        # (think / think_fast / think_faster / reasoning_content). OpenAI
+        # history carries none, so supply the effort-matched tag with whatever
+        # reasoning the client echoed back (usually nothing -> empty pair,
+        # the vendor's own rendering for a turn without a trace).
+        key = {"low": "think_faster", "medium": "think_fast"}.get(effort, "think")
+        messages = [
+            {**m, key: str(m.get("reasoning_content") or "")}
+            if m.get("role") == "assistant" and not any(
+                isinstance(m.get(k), str) for k in
+                ("think", "think_fast", "think_faster", "reasoning_content", "reasoning"))
+            else m
+            for m in messages]
     return _NATIVE_TEMPLATES[model_id].render(
         messages=messages, tools=tools or None, add_generation_prompt=True,
-        enable_thinking=think, bos_token=_BOS_TOKEN.get(model_id, ""))
+        enable_thinking=think, reasoning_effort=effort,
+        bos_token=_BOS_TOKEN.get(model_id, ""))
 
 
 def _coerce_arg(value: str):
@@ -557,8 +685,94 @@ def _parse_mistral_calls(text: str, tools: list, id_prefix: str
     return "".join(out).strip(), calls
 
 
+_K2_BLOCK_RE = re.compile(r"<ifm\|tool_calls>(.*?)</ifm\|tool_calls>", re.DOTALL)
+_K2_CALL_RE = re.compile(r"<ifm\|tool_call>\s*([^\s<]+)\s*(.*?)</ifm\|tool_call>",
+                         re.DOTALL)
+_K2_ARG_RE = re.compile(
+    r"<ifm\|arg_key>(.*?)</ifm\|arg_key>\s*(?:<ifm\|arg_type>(.*?)</ifm\|arg_type>\s*)?"
+    r"<ifm\|arg_value>(.*?)</ifm\|arg_value>", re.DOTALL)
+
+
+def _parse_k2_calls(text: str, tools: list, id_prefix: str) -> tuple[str, list]:
+    """Parse IFM K2-Horizon's XML-ish calls. String arguments are rendered
+    verbatim (no quotes), non-strings as JSON — so type by the tool's own
+    parameter schema first, JSON second, string last."""
+    schemas = {t["function"]["name"]:
+               (t["function"].get("parameters") or {}).get("properties") or {}
+               for t in tools}
+    calls: list[dict] = []
+
+    def _typed(name: str, key: str, raw: str, hint: str | None):
+        want = hint or schemas.get(name, {}).get(key, {}).get("type")
+        raw = raw.strip("\n")
+        if want == "string":
+            return raw
+        try:
+            return json.loads(raw)
+        except (ValueError, TypeError):
+            return raw
+
+    def _consume_block(m: re.Match) -> str:
+        for cm in _K2_CALL_RE.finditer(m.group(1)):
+            name = cm.group(1).strip()
+            args = {k: _typed(name, k, v, (t or "").strip() or None)
+                    for k, t, v in _K2_ARG_RE.findall(cm.group(2))}
+            calls.append({
+                "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+                "type": "function",
+                "function": {"name": name,
+                             "arguments": json.dumps(args, ensure_ascii=False)},
+            })
+        return ""
+
+    content = _K2_BLOCK_RE.sub(_consume_block, text).strip()
+    return content, calls
+
+
+_SPARK_CALL_RE = re.compile(r"<tool_call>\s*([^\s<]+)\s*(.*?)</tool_call>", re.DOTALL)
+_SPARK_ARG_RE = re.compile(r"<arg_key>(.*?)</arg_key>\s*<arg_value>(.*?)</arg_value>",
+                           re.DOTALL)
+
+
+def _parse_spark_calls(text: str, tools: list, id_prefix: str) -> tuple[str, list]:
+    """Parse Spark-X2.5 / GLM-4.5-style calls: same shape as K2's minus the
+    outer block and the arg_type hint. The template renders string arguments
+    verbatim (no quotes) and everything else as JSON, so type by the tool's own
+    parameter schema first, JSON second, string last."""
+    schemas = {t["function"]["name"]:
+               (t["function"].get("parameters") or {}).get("properties") or {}
+               for t in tools}
+    calls: list[dict] = []
+
+    def _typed(name: str, key: str, raw: str):
+        raw = raw.strip("\n")
+        if schemas.get(name, {}).get(key, {}).get("type") == "string":
+            return raw
+        try:
+            return json.loads(raw)
+        except (ValueError, TypeError):
+            return raw
+
+    def _consume(m: re.Match) -> str:
+        name = m.group(1).strip()
+        args = {k.strip(): _typed(name, k.strip(), v)
+                for k, v in _SPARK_ARG_RE.findall(m.group(2))}
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {"name": name,
+                         "arguments": json.dumps(args, ensure_ascii=False)},
+        })
+        return ""
+
+    content = _SPARK_CALL_RE.sub(_consume, text).strip()
+    return content, calls
+
+
 _NATIVE_PARSERS = {
     "gemma": _parse_gemma_calls,
+    "k2": _parse_k2_calls,
+    "spark": _parse_spark_calls,
     "lfm": _parse_lfm_calls,
     "mistral": _parse_mistral_calls,
     "native-hermes": lambda text, tools, id_prefix:
@@ -631,6 +845,25 @@ def _inject_tools(messages: list, tools: list) -> list:
     return out
 
 
+def _parse_xml_tool_payload(payload: str) -> dict | None:
+    """Parse the Qwen3-Coder XML call body into the hermes {name, arguments} shape.
+
+    Non-scalar arguments are rendered by the template with `| tojson`, so try
+    JSON per parameter and fall back to the literal text for plain strings.
+    """
+    m = _XML_FUNC_RE.search(payload)
+    if m is None:
+        return None
+    args: dict = {}
+    for key, raw in _XML_PARAM_RE.findall(m.group(2)):
+        raw = raw.strip("\n")
+        try:
+            args[key] = json.loads(raw)
+        except (ValueError, TypeError):
+            args[key] = raw
+    return {"name": m.group(1).strip(), "arguments": args}
+
+
 def _extract_tool_calls(text: str, id_prefix: str = "call_") -> tuple[str, list]:
     """Split generated text into (content, OpenAI tool_calls list).
 
@@ -657,6 +890,43 @@ def _extract_tool_calls(text: str, id_prefix: str = "call_") -> tuple[str, list]
         return ""
 
     content = _TOOL_CALL_RE.sub(_consume, text).strip()
+
+    def _consume_xml(m: re.Match) -> str:
+        obj = _parse_xml_tool_payload(m.group(1))
+        if obj is None:
+            return m.group(0)
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {
+                "name": obj["name"],
+                "arguments": json.dumps(obj["arguments"], ensure_ascii=False),
+            },
+        })
+        return ""
+
+    content = _TOOL_CALL_XML_RE.sub(_consume_xml, content).strip()
+
+    def _consume_attr_xml(m: re.Match) -> str:
+        # MiniCPM5: <function name="x"><param name="k">v</param></function>.
+        # Values are rendered verbatim by its template (CDATA when unsafe), so
+        # JSON-decode only what parses; the rest are strings.
+        args: dict = {}
+        for key, cdata, plain in _ATTR_PARAM_RE.findall(m.group(2)):
+            raw = cdata if cdata else plain.strip("\n")
+            try:
+                args[key] = json.loads(raw)
+            except (ValueError, TypeError):
+                args[key] = raw
+        calls.append({
+            "id": f"{id_prefix}{uuid.uuid4().hex[:20]}",
+            "type": "function",
+            "function": {"name": m.group(1).strip(),
+                         "arguments": json.dumps(args, ensure_ascii=False)},
+        })
+        return ""
+
+    content = _ATTR_FUNC_RE.sub(_consume_attr_xml, content).strip()
     if not calls:
         # fallback: smaller models (Coder-1.5B) emit the call JSON bare or in a
         # ```json fence, without the <tool_call> wrapper
@@ -763,6 +1033,19 @@ def _load_pipelines() -> None:
         _prompt_lookup_enabled[model_id] = use_pl
         _TOOL_FORMATS[model_id] = _detect_tool_format(model_dir, model_id)
         _BOS_TOKEN[model_id] = _read_bos(model_dir)
+        if _BOS_TOKEN[model_id] and _tokenizer_adds_bos(pipe):
+            # The OV tokenizer IR bakes in its own BOS prepend for some models
+            # (LFM2.5, K2, MiniCPM5-2B, the Ministral Reasoning builds — but
+            # NOT the Ministral Instruct builds, so this is per-artifact, not
+            # per-family). Passing the literal too made every native-rendered
+            # prompt start BOS,BOS. Found by the 2026-09-17 fleet tokenizer audit.
+            log.info("%s: OV tokenizer prepends BOS itself — template gets an "
+                     "empty bos_token", model_id)
+            _BOS_TOKEN[model_id] = ""
+        if _needs_raw_decode(model_dir):
+            _RAW_DECODE.add(model_id)
+            log.info("%s: tool/think markers are special tokens — decoding raw "
+                     "ids with skip_special_tokens=False", model_id)
         if _TOOL_FORMATS[model_id] != "hermes":
             log.info("%s: native tool language '%s' (server-side template "
                      "rendering)", model_id, _TOOL_FORMATS[model_id])
@@ -829,9 +1112,24 @@ def _build_generation_config(pipe, body: dict, default_max: int = 1024,
             cfg.top_k = int(top_k)
     else:
         cfg.do_sample = False
+    # Repetition controls. presence/frequency_penalty are the OpenAI names;
+    # repetition_penalty is GenAI-native with no OpenAI equivalent. Vendors do
+    # recommend these per operating point (Ornith-1.5 asks for
+    # presence_penalty=1.5 on general tasks), and without pass-through no card
+    # could ever express it. Set only what the caller sent, so the pipeline's
+    # own defaults stand otherwise.
+    for knob in ("presence_penalty", "frequency_penalty", "repetition_penalty"):
+        value = body.get(knob)
+        if value is not None:
+            setattr(cfg, knob, float(value))
     stop = body.get("stop")
     if stop:
         cfg.stop_strings = set([stop] if isinstance(stop, str) else stop)
+    # GenAI's rng_seed defaults to 0, so "sampling" replays one trajectory per
+    # prompt unless the client varies the seed (OpenAI `seed`). The benchmark
+    # sends the block index so best-of-N actually draws N samples.
+    if body.get("seed") is not None:
+        cfg.rng_seed = int(body["seed"])
     return cfg
 
 
@@ -883,7 +1181,7 @@ def _run_streaming(pipe, model_id: str, inputs, gen_cfg,
 
 # --- virtual model: per-turn role router ------------------------------------
 # One model id (default virtual/agent) that routes each turn to the best
-# measured brain (BENCHMARKS.md role-fitness): a router classifies fresh
+# measured brain (benchmark/README.md role-fitness): a router classifies fresh
 # requests, the architect analyzes/plans (read-only tools), the executor
 # does edit->test->verify loops (full tools). Stateless across requests:
 # tool-result continuations are routed by the role encoded in our call ids;
@@ -1218,9 +1516,16 @@ async def chat_completions(request: Request):
         # native tool language: render the model's OWN template server-side
         # (tools + enable_thinking + tool-role turns), generate raw
         try:
-            history = _render_native(model_id, messages, tools if use_tools
-                                     else None, think_mode == "think")
+            history = _render_native(
+                model_id, messages, tools if use_tools else None,
+                think_mode == "think",
+                effort=str(body.get("reasoning_effort") or "").lower())
         except Exception as e:  # noqa: BLE001 — degrade, never 500
+            if model_id in _ALWAYS_REASONS:
+                # no fallback exists: GenAI cannot parse this family's vendor
+                # template, so a hermes retry would 500 inside generate()
+                raise HTTPException(status_code=400,
+                                    detail=f"chat template rejected the request: {e}")
             log.warning("[%s] native render failed (%s) — hermes fallback",
                         model_id, str(e)[:80])
             native_fmt = "hermes"
@@ -1233,7 +1538,10 @@ async def chat_completions(request: Request):
         pipe, body, default_max=4096 if use_tools else 1024, model_id=model_id)
     if native_fmt != "hermes":
         gen_cfg.apply_chat_template = False
-        if model_id not in _REASONING_SYSPROMPT:
+        if model_id in _ALWAYS_REASONS:
+            think_mode = "think"    # K2: every answer opens with reasoning;
+            # an unclosed block (budget out) is all reasoning, not content
+        elif model_id not in _REASONING_SYSPROMPT:
             think_mode = "nothink"  # native render handled thinking via kwarg;
             # (gemma reasoning has no decodable end-delimiter to split on).
             # Mistral reasoners DO have [THINK]/[/THINK] — keep think_mode so
@@ -1278,17 +1586,22 @@ async def chat_completions(request: Request):
             with _lock_for(model_id):
                 _apply_think_mode(model_id, pipe, think_mode)
                 t0 = time.perf_counter()
-                if model_id in _REASONING_SYSPROMPT \
-                        or _TOOL_FORMATS.get(model_id) == "mistral":
-                    # GenAI's string decode skips special tokens, stripping the
-                    # Mistral control tokens — [THINK]/[/THINK] (reasoning) AND
-                    # [TOOL_CALLS]/[ARGS] (tool calls). Decode the raw ids keeping
-                    # them so _split_reasoning and the mistral parser can see them.
+                if isinstance(history, str) \
+                        and (model_id in _RAW_DECODE
+                             or model_id in _REASONING_SYSPROMPT
+                             or _TOOL_FORMATS.get(model_id) == "mistral"):
+                    # GenAI's string decode skips special tokens, stripping
+                    # markers the parser needs — Mistral [THINK]/[TOOL_CALLS],
+                    # MiniCPM5 <function/<param. Decode the raw ids keeping them,
+                    # then drop only the sequence-control tokens.
                     tk = pipe.get_tokenizer()
                     res = pipe.generate(tk.encode(history),
                                         generation_config=gen_cfg)
                     txt = tk.decode(res.tokens[0], skip_special_tokens=False)
-                    txt = txt.replace("<s>", "").replace("</s>", "").strip()
+                    for ctl in ("<s>", "</s>", "<|im_end|>", "<|endoftext|>",
+                                "<|ifm|im_end|>", "<|end_of_text|>"):
+                        txt = txt.replace(ctl, "")
+                    txt = txt.strip()
                 else:
                     res = pipe.generate(history, generation_config=gen_cfg)
                     txt = res.texts[0] if hasattr(res, "texts") else str(res)
@@ -1508,9 +1821,14 @@ def _load_models_config() -> None:
             _PROMPT_LEN_OVERRIDE[mid] = int(max_prompt_len)
     if dirs:
         MODEL_DIRS = dirs
-        # registry replaces (not merges with) the env defaults
+        # registry replaces (not merges with) the env defaults. Prune against the
+        # ids the registry actually serves under — the ALIASES — because that is
+        # what SCHEDULER_MODELS was keyed by above and what _load_pipelines()
+        # looks up. Comparing against _model_id(dir) instead dropped the pool for
+        # every aliased entry, silently disabling prefix caching (finding 12).
+        registered = set(_REGISTRY_ALIASES)
         for k in list(SCHEDULER_MODELS):
-            if k not in {_model_id(d) for d in dirs}:
+            if k not in registered:
                 del SCHEDULER_MODELS[k]
     v = cfg.get("virtual") or {}
     if v.get("id"):

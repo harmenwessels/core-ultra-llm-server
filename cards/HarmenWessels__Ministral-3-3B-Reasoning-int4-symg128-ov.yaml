@@ -6,6 +6,7 @@
 # decoding temp 0.7 / top_p 0.95 (base model card). PROVENANCE: community
 # re-architecture + borrowed template — scores carry that caveat.
 hf_id: HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
 alias: ministral-3-3b-reasoning
 family: ministral3
 device: GPU

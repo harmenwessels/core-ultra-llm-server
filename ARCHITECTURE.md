@@ -25,7 +25,7 @@ flowchart TB
         sse["SSE streaming<br/>QueueStreamer + ov TextStreamer"]
     end
 
-    subgraph genai["openvino_genai (nightly)"]
+    subgraph genai["openvino_genai 2026.3"]
         vlm["VLMPipeline<br/>gemma-4-E2B-it-int4-ov<br/>(VLM-shaped IR, used text-only)"]
         llm["LLMPipeline<br/>Qwen2.5-Coder-3B-Instruct-int4-ov<br/>(plain LLM IR)"]
     end
@@ -119,7 +119,7 @@ The server bridges that into HTTP SSE:
 
 ### 4. OpenVINO GenAI pipelines (inference layer)
 
-`openvino_genai` (nightly build, pinned in `requirements.txt`) provides the high-level generation
+`openvino_genai` (2026.3 stable, pinned in `requirements.txt`) provides the high-level generation
 loop: tokenization, KV-cache management, sampling, and detokenization all happen inside the
 pipeline in C++ — Python only sees the streamer callbacks.
 

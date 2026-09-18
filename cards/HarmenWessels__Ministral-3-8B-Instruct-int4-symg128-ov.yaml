@@ -2,6 +2,7 @@
 # plain LlamaForCausalLM instruct (no reasoning). int4 sym g128 AWQ+SE. Chat
 # template borrowed from unsloth (Mistral [INST]). PROVENANCE: community llamafied.
 hf_id: HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov
+published: true   # uploaded 2026-09-14 — the leaderboard links it
 alias: ministral-3-8b-instruct
 family: ministral3
 device: GPU

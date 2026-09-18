@@ -1,4 +1,5 @@
 hf_id: HarmenWessels/MiniCPM5-1B-int4-g128-ov
+published: true   # live on the HF hub — the leaderboard links it
 alias: minicpm5-1b-g128-ov
 family: minicpm
 device: GPU

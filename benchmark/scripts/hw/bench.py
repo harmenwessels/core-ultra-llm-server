@@ -15,9 +15,9 @@ Runs warm-up first (first run pays compile + first-token cost), then 3 measured
 runs to show variance. Compile cache lives in --cache-dir.
 
 Usage:
-    .\.venv\Scripts\python.exe scripts\bench.py
-    .\.venv\Scripts\python.exe scripts\bench.py --device CPU       # debug fallback
-    .\.venv\Scripts\python.exe scripts\bench.py --max-new-tokens 256
+    .\.venv\Scripts\python.exe benchmark\scripts\hw\bench.py
+    .\.venv\Scripts\python.exe benchmark\scripts\hw\bench.py --device CPU       # debug fallback
+    .\.venv\Scripts\python.exe benchmark\scripts\hw\bench.py --max-new-tokens 256
 """
 
 from __future__ import annotations
@@ -29,12 +29,9 @@ import time
 import openvino_genai as ov_genai
 
 
-DEFAULT_MODEL_DIR = (
-    pathlib.Path(__file__).resolve().parent.parent
-    / "models"
-    / "gemma-4-E4B-it-int4-ov"
-)
-DEFAULT_CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / ".ovcache"
+ROOT = pathlib.Path(__file__).resolve().parents[3]  # repo root (../../../ from hw/)
+DEFAULT_MODEL_DIR = ROOT / "models" / "HarmenWessels" / "granite-4.1-8b-int4-cw-ov"
+DEFAULT_CACHE_DIR = ROOT / ".ovcache"
 
 # ~100-token coding prompt; expanded as a Gemma chat turn by the pipeline.
 PROMPT = (
@@ -131,6 +128,8 @@ def main() -> int:
     parser.add_argument("--device", default="GPU", help="GPU (default) or CPU")
     parser.add_argument("--max-new-tokens", type=int, default=256)
     parser.add_argument("--runs", type=int, default=3)
+    parser.add_argument("--gate-floor", type=float, default=None,
+                        help="tok/s floor for GATE 2 (default 15, which was set against a ~4B model)")
     parser.add_argument(
         "--tuned",
         action="store_true",
@@ -193,8 +192,12 @@ def main() -> int:
         print(f"Peak working set: {peak:.0f} MiB")
 
     median_decode = sorted(decodes)[len(decodes) // 2]
-    if args.device == "GPU" and median_decode < 15:
-        print("\nGATE 2 FAIL: median decode < 15 tok/s on GPU. Investigate before "
+    # The threshold is a silent-CPU-fallback tripwire, not a quality bar, and it
+    # was set against a ~4B model. Decode is bandwidth-bound (finding 1), so an 8B
+    # int4 tops out near 13 tok/s on this iGPU — pass --gate-floor for big models.
+    floor = 15.0 if args.gate_floor is None else args.gate_floor
+    if args.device == "GPU" and median_decode < floor:
+        print(f"\nGATE 2 FAIL: median decode < {floor:g} tok/s on GPU. Investigate before "
               "building the server (silent CPU fallback? wrong device? thermal?).")
         return 1
     print("\nGATE 2 PASS." if args.device == "GPU" else

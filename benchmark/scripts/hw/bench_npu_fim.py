@@ -17,7 +17,7 @@ import time
 
 import openvino_genai as ov_genai
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parents[3]  # repo root (../../../ from hw/)
 OUT_DIR = ROOT / "bench_results"
 M = ROOT / "models"
 

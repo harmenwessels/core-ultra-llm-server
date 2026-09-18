@@ -8,11 +8,12 @@
 #   benchmark/scripts/run_fleet.ps1 -Models "OpenVINO/Qwen3-14B-int4-ov"
 param(
   [string]$Tasks = "all",
-  [string[]]$Models = @()
+  [string[]]$Models = @(),
+  [string]$Venv = ".venv-genai"   # e.g. .venv-genai-231 for an engine A-B; the record's engine field says which ran
 )
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path "$PSScriptRoot\..\..").Path
-$py   = "$root\.venv-genai\Scripts\python.exe"
+$py   = "$root\$Venv\Scripts\python.exe"
 $log  = "$root\benchmark\results\fleet.log"
 New-Item -ItemType Directory -Force -Path "$root\benchmark\results" | Out-Null
 

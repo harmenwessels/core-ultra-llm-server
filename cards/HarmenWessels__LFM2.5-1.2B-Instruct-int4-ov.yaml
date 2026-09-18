@@ -1,4 +1,5 @@
 hf_id: HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov
+published: true   # live on the HF hub — the leaderboard links it
 alias: lfm2.5-1.2b-instruct-ov
 family: lfm2
 device: GPU

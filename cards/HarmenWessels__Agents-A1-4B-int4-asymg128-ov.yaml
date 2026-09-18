@@ -1,0 +1,23 @@
+# InternScience Agents-A1-4B (Apache-2.0, released 2026-07-14): a Qwen3.5-4B
+# fine-tune (identical text config — hybrid Gated-DeltaNet 3:1, vision tower,
+# MTP head) distilled from domain teachers for agentic work: long-horizon search
+# (GAIA 95.1 vs 58.3 base, BrowseComp 66.8 vs 47.2), scientific tools (MatTools
+# 49.3 vs 10.9), IFEval 94.8 vs 89.8. NO coding / SWE-bench numbers reported.
+# Hypothesis under test: does agentic distillation lift agent-loop (base 5/7)
+# without costing codegen (base 12/12)? Our suite cannot reward its search /
+# science strengths.
+# Self-converted with the base IR's exact recipe so the delta isolates the
+# fine-tune: VLM export, int4 asym g128 ratio 1.0, data-free (no AWQ/SE — the
+# VLM calibration path degrades coding). Asym -> GPU/CPU only, no NPU seat.
+# Hybrid thinking (<think>, enable_thinking) like the base; tool language hermes
+# wrapper with the Qwen3-Coder XML body (<function=…><parameter=…>), which the
+# server already parses. VLM-shaped IR -> VLMPipeline; benchmark skips fim.
+# Vendor decoding: temp 0.85 / top_p 0.95 / top_k 20 / presence_penalty 1.1.
+hf_id: HarmenWessels/Agents-A1-4B-int4-asymg128-ov
+published: false   # local experiment; publish only if it earns a fleet seat
+alias: agents-a1-4b
+family: qwen3.5
+device: GPU
+thinking: switchable
+decoding:
+  generative: { temp: 0.85, top_p: 0.95, top_k: 20, presence_penalty: 1.1 }

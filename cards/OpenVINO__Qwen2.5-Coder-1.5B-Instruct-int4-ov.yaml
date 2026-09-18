@@ -1,4 +1,5 @@
 hf_id: OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov
+published: true   # public on the HF hub — the leaderboard links it
 alias: coder-1.5b-cpu
 family: qwen2.5
 device: CPU
