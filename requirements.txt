@@ -1,16 +1,18 @@
-# Pinned to the OpenVINO 2026.3.1 patch release (2026-08-26). 2026.3 was the first
-# release whose GenAI ships gemma-4 *unified* dispatch (nightly index and the
-# from-source GenAI build retired); 2026.3.1 measured +6-10% decode over 2026.3.0
-# in an interleaved A-B on this box, identical quality (benchmark/README.md).
+# Pinned to OpenVINO 2026.4.0 (2026-09-16). 2026.3 was the first release whose GenAI
+# ships gemma-4 *unified* dispatch (nightly index and the from-source GenAI build
+# retired); 2026.3.1 measured +6-10% decode over 2026.3.0, and 2026.4.0 a further
+# +5% on Seed-Coder-8B / Coder-1.5B with parity on Ministral-8B (interleaved A-B,
+# scripts/engine_ab.py). Its openvino_tokenizers fixes the id-0 added-token drop;
+# the \uXXXX Split-regex bug remains (scripts/ov_tokenizer_id0_patch.py still applies).
 # Install on Windows with Python 3.12:
 #   py -3.12 -m venv .venv
 #   .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 
 # OpenVINO stable stack
-openvino==2026.3.1
-openvino-genai==2026.3.1.0
-openvino-tokenizers==2026.3.1.0
-nncf==3.3.0
+openvino==2026.4.0
+openvino-genai==2026.4.0.0
+openvino-tokenizers==2026.4.0.0
+nncf==3.4.0
 
 # Model download
 huggingface_hub==1.17.0
