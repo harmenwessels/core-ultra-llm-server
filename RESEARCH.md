@@ -644,6 +644,47 @@ Two harness notes: K2's tokenizer IR carries no chat template (the server render
 template itself), so a GenAI-level probe must render it with jinja2; Ministral's template's default
 system prompt alone overflows `MAX_PROMPT_LEN=1024` — use 2048.
 
+## Finding 21 — Qwen3.5 MTP speculative decoding on the iGPU: +9–11%, greedy only
+
+OpenVINO 2026.4 + optimum-intel 2.2.0 ship Qwen3.5's multi-token-prediction head as a built-in
+draft model (no second model: the export writes `openvino_mtp_model.xml`, 71 MB int4, next to the
+language model whenever the checkpoint has `mtp_num_hidden_layers > 0`). Tested 2026-09-20 on a
+fresh export of `Qwen/Qwen3.5-4B` with Intel's exact recipe (int4 asym g128, ratio 1.0, data-free;
+`models/HarmenWessels/Qwen3.5-4B-int4-asymg128-mtp-ov`, kept on disk) so the head is the only
+variable. Three things had to be learned to make it run at all:
+
+- the MTP submodel fails NNCF's group-size check (`rotary_emb` matmul, channel size 1) →
+  `--group-size-fallback ignore`;
+- the entry point is **`VLMPipeline`**, not `LLMPipeline` — Qwen3.5 IRs are decomposed
+  (language model + text embeddings) and MTP "requires a decomposed model with a text embeddings
+  model"; `LLMPipeline` dies on a missing `input_ids` port;
+- the linear-attention verifier refuses prefix caching → `SchedulerConfig(enable_prefix_caching=False)`.
+
+Interleaved plain/MTP A-B (`scripts/mtp_ab.py`, fresh process per arm, 300 greedy tokens, medians
+over adjacent pairs, 13b rules):
+
+| num_assistant_tokens | plain | MTP | Δ | pairs won |
+|---|---|---|---|---|
+| 1 | 24.0 | 24.1 | +0.4% | 2/3 |
+| 2 | 23.1 | 25.2 | **+9.0%** | 3/3 |
+| 3 | 22.8 | 25.3 | **+11.1%** | 3/3 |
+| 5 | 22.4 | 23.9 | +6.8% | 2/2 |
+
+TTFT unchanged (~240 ms). Output is not byte-identical across arms because the MTP path runs
+the continuous-batching pipeline while plain Qwen3.5 runs stateful — kernel-path noise, the same
+class as the cross-engine greedy differences in finding 20. The ceiling is set by a single draft
+layer: k=3 is the sweet spot, k=5 already loses acceptance.
+
+**But: `MTP speculative decoding supports greedy decoding only`** (runtime check). Exactly the
+EAGLE-3 verdict on Qwen3-8B: it cannot help the sampled `codegen` task, only the greedy
+structured tasks (edit / agent-loop / analysis), and only for Qwen3.5 IRs re-exported with the
+head — Intel's `OpenVINO/Qwen3.5-9B-int4-ov` and Echo9Zulu's 2B carry none. Server integration
+would be small (when `openvino_mtp_model.xml` exists, construct `VLMPipeline` with
+`draft_model=ov_genai.draft_model(dir, device)` + a no-prefix-caching scheduler and set
+`num_assistant_tokens=3` on greedy requests; sampled requests must drop it), but the payoff is
+~10% on three tasks of one family after re-exporting the 9B (20 GB download). Parked, not
+rejected: the lever is real, just narrow.
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`
