@@ -52,7 +52,8 @@ optimum-cli export openvino --model <hf_id> --task text-generation-with-past \
   guard, then run the CLI in-process. (NoPE etc. lives in the traced forward, so
   the llama OV config suffices.)
 - **Custom-code arch with `@strict` config / new mask API** (IFM K2-Horizon): use
-  `.venv-convert-k2` (optimum-intel@main + transformers 5.10.2 + OV 2026.3.1). Register
+  `.venv-convert-k2` (optimum-intel@main + transformers 5.10.2 + OV 2026.3.1; `.venv-convert-240`
+  = optimum-intel 2.2.0 + OV 2026.4 for MTP-capable Qwen3.5/Gemma-4 exports). Register
   llama's export config under the model_type and drive the CLI in-process with
   `--trust-remote-code` (`scripts/k2_export_remote.py`); when every custom switch
   is off in the shipped config, an exact llamafication (`scripts/k2_llamafy.py`, asserts each

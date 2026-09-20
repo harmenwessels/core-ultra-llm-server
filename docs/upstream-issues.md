@@ -6,8 +6,8 @@ tokenizer. Status column tracks filing.
 
 | # | Repo | Title | Status |
 |---|------|-------|--------|
-| 1 | openvinotoolkit/openvino_tokenizers | Added token with id 0 is dropped from the BPE vocab | draft |
-| 2 | openvinotoolkit/openvino_tokenizers | `\uXXXX` in a Split regex disables the `\s+(?!\S)` lookahead | draft |
+| 1 | openvinotoolkit/openvino_tokenizers | Added token with id 0 is dropped from the BPE vocab | fixed upstream in 2026.4.0.0 — not filed |
+| 2 | openvinotoolkit/openvino_tokenizers | `\uXXXX` in a Split regex disables the `\s+(?!\S)` lookahead | draft — still present in 2026.4.0.0 |
 | 3 | openvinotoolkit/openvino | GPU: fused int4 MatMul pair sharing an input produces non-deterministic garbage (hybrid-attention gate) | draft |
 
 ---

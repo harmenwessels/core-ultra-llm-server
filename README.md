@@ -20,7 +20,7 @@ quantization recipes, prompt-lookup decoding) and the model-conversion playbook,
 
 - Intel Core Ultra CPU with integrated Arc graphics (tested: Core Ultra 155H / Meteor Lake)
 - Windows 11 with a current Intel graphics driver (tested: 32.0.101.8991)
-- Python 3.12 (what this project is built and tested on; the OpenVINO 2026.3 wheels also ship
+- Python 3.12 (what this project is built and tested on; the OpenVINO 2026.4 wheels also ship
   for 3.13/3.14, untested here)
 - A Hugging Face account for model downloads (`hf auth login` — anonymous downloads of
   multi-GB files stall)
@@ -203,7 +203,7 @@ Best model per task type on a Core Ultra 155H Arc iGPU:
 | edit | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | 2/2 | — | — |
 | agent-loop | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | 7/7 | — | — |
 | analysis | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | 4/4 | — | — |
-| autocomplete-fim | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | 1/1 | — | — |
+| autocomplete-fim | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | 1/1 | — | — |
 
 <!--BEST-SETUP END-->
 
@@ -219,7 +219,7 @@ scripts/check_gpu.py            verify OpenVINO sees the Arc iGPU
 scripts/download_model.py       fetch OpenVINO IR models from Hugging Face
 benchmark/                      per-task-type benchmark: README leaderboard, scripts/, run records
 benchmark/scripts/hw/bench.py   TTFT + decode-throughput microbenchmark (3 measured runs)
-requirements.txt                pinned dependency versions (OpenVINO 2026.3 stable)
+requirements.txt                pinned dependency versions (OpenVINO 2026.4)
 models/<owner>/<name>/          downloaded models, mirroring HF repo ids (gitignored)
 .ovcache/                       compiled-blob cache (gitignored)
 ```
