@@ -607,11 +607,26 @@ Then the real benchmark path (`run_fleet.ps1 -Tasks codegen`) re-run on both ven
 177 s the previous sweep had recorded for 2026.3.1. The slowdown was **box state at the moment
 those models ran**, not the engine. Tiny models are the drift detector: a 3-minute task on a
 90 tok/s model is dominated by whatever else the box is doing, while a 14B at 30 tok/s averages
-it out. Rules that follow (added to the run-benchmark skill): a cross-sweep *time* delta is only
-a finding after an interleaved re-run of the specific model; per-task **throughput** (chars/s
-from the records) is the number to compare, not total seconds, because sampled output length
-varies per seed; and a model whose short tasks match to the second while its long tasks do not
-is drift, not engine.
+it out.
+
+**Confirmed by a full re-run (part D, 2026-09-20 evening, idle box)** of the 15 models whose
+totals had risen ≥14%: cells reproduced (13/15 identical, two single sampled-codegen flips) and
+10 of the 15 time deltas collapsed to ±10% or *faster* than 2026.3.1 (Qwen3-0.6B 510 → 305 s = the
+old time exactly; K2-0.9B 1079 → 675 s; Qwen3.5-2B 2402 → 1578 s; Coder-3B −16%). The five that
+stayed high reproduced to the second and decompose without an engine term:
+MiniCPM5-1B/2B +23% is **output length** (+52…77% more chars at equal or higher chars/s);
+Qwen3-14B +11% is −8% codegen chars/s, inside the drift band; Ministral-3B +20% and Ornith-1.0
++31% are **extra best-of-2 attempts** — different seeded trajectories failed block 0 on more cells
+(Ministral rate-limiter#1: 31 s/1 block → 156 s/2 blocks), and both models read parity in a direct
+interleaved A-B (Ministral-3B: sampled −1.0%, greedy +0.7%; server-level 100 vs 100 chars/s).
+Trap in the records: `response` holds only the last attempt's text while `runtime.seconds` sums
+every attempt, so chars/s computed from a `blocks_used=2` cell undercounts — compare b=1 cells,
+or per-attempt timings.
+
+Rules that follow (in the run-benchmark skill): a cross-sweep *time* delta is only a finding
+after an interleaved re-run of the specific model; compare per-task throughput on single-block
+cells, not totals, because sampled output length and retry count vary per seed; and a model
+whose short tasks match to the second while its long tasks do not is drift or retries, not engine.
 
 Two side observations. GenAI 2026.4's compile cache grows ~4× faster over a *fleet* sweep than
 2026.3.1's (44 GB after 10 models) — the per-model blob set is the same size, so this is more
