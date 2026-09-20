@@ -621,9 +621,28 @@ but still loses the `\uXXXX`-in-regex lookahead, so `scripts/ov_tokenizer_id0_pa
 the conversion path.
 
 Consequences: `requirements.txt` and the serving venv move to 2026.4 (337eb18); `.venv-genai`
-(2026.3.1) is retired once the branch merges; 186 of 190 records carry `2026.4.0.0-3407` — the
-only engine-stale rows left are Ornith-1.5 (the Echo9Zulu AWQ IR, 6.3 GB, not on disk; re-download
-to close the queue).
+(2026.3.1) is retired once the branch merges; all 190 records carry `2026.4.0.0-3407` (Ornith-1.5's
+Echo9Zulu IR was re-downloaded and re-run on 2026-09-20: 19/25, up from the August 16/25 — seeded
+best-of-2 codegen 9/12 and analysis 4/4; the retest queue is empty for the first time since June).
+
+**MoE gate re-test, same day: still blocked.** Intel's `OpenVINO/LFM2.5-8B-A1B-int4-ov` (hub revision
+unchanged since 2026-08-03) does not finish compiling on the iGPU in 15 min on 2026.4 either, while the
+CPU compiles it in 26 s and decodes at 9.7 tok/s. The "early release" listing is CPU-path validation.
+The IR carries no fused MoE op — optimum-intel 2.2.0 (the version that exported it, and the one in
+`.venv-convert-240`) lowers `lfm2_moe` to a dense batched matmul over all 32 experts, and the 2026.4
+opset has no MOE op — so a re-export changes nothing; the GPU fusions from PR #37199 are pattern
+matches the plugin evidently never reaches. Side effect worth knowing: the hung compile ballooned
+`pagefile.sys` to 36.6 GB (peak commit 28.5 GB) and Windows never shrinks it — 25 GB of disk "vanished"
+until a reboot. Cap any future MoE compile probe and expect to reboot after it.
+
+**NPU probe of the sym-int4 small models (2026-09-20, 2026.4, 96-token warm FIM completion):**
+K2-Horizon-0.9B **5.2 s** (real code continuation; fastest on NPU), MiniCPM5-2B 8.9 s (thinks first),
+Coder-1.5B-symg128 9.3 s (incumbent), Ministral-3B-Instruct 12.1 s (chatty), SmolLM3-3B 13.6 s (thinks
+first), K2-3.7B 14.7 s (real code); granite-3b channel-wise sym 140 s (cw int4 falls off the fast NPU
+path — keep NPU IRs at g128); MiniCPM5-1B and LFM2.5-1.2B are asym and the NPU plugin refuses them.
+Two harness notes: K2's tokenizer IR carries no chat template (the server renders the vendor
+template itself), so a GenAI-level probe must render it with jinja2; Ministral's template's default
+system prompt alone overflows `MAX_PROMPT_LEN=1024` — use 2048.
 
 ## Conversion playbook (Route B)
 
