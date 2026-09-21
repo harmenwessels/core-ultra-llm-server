@@ -28,9 +28,11 @@ function Stop-Servers {
 # Default fleet from benchmark/fleet.txt (single source of truth, shared with the
 # assembler); -Models overrides for targeted re-runs.
 $fleet = if ($Models.Count) { $Models } else {
+  # strip inline comments too — a line like "owner/model  # note" must yield the id, not
+  # a path with the note glued on (24 fleet entries were silently SKIPped on 2026-09-19)
   Get-Content "$root\benchmark\fleet.txt" |
-    ForEach-Object { $_.Trim() } |
-    Where-Object { $_ -and -not $_.StartsWith('#') }
+    ForEach-Object { ($_ -split '#', 2)[0].Trim() } |
+    Where-Object { $_ }
 }
 
 Log "=== fleet sweep: $($fleet.Count) models, tasks=$Tasks ==="

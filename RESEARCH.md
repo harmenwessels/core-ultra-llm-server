@@ -573,6 +573,58 @@ fix is tried; (2) GPU coherence verdicts on this class need N≥3 fresh processe
 (`scripts/gpu_trials.py`). Look first for a small projection sharing an input with a big
 one — gates, routers, auxiliary heads.
 
+## Finding 20 — OpenVINO 2026.4: quality-neutral, +0–6% decode, and a "small-model slowdown" that was drift
+
+The whole fleet (40 models, 190 records) was re-swept on OpenVINO 2026.4.0 / GenAI 2026.4.0.0 /
+tokenizers 2026.4.0.0 over 2026-09-18 → 09-20 (`.venv-genai-240`, cache `.ovcache-240`, pruned
+between models), after an interleaved A-B (`scripts/engine_ab.py`, 13b rules) against 2026.3.1:
+Seed-Coder-8B **+5.1%** (2/3 pairs), Qwen2.5-Coder-1.5B **+5.6%** (3/3), Ministral-8B-Instruct +0.9%
+(1/3) — parity to a small gain, TTFT unchanged, greedy text *not* byte-identical across engines
+(kernel changes; ±1–3 cells of knife-edge noise on any model, per the seeded-sampling rule).
+
+**Quality: net −5 cells over 40 models**, every swing a seeded-trajectory flip rather than a
+pattern — K2-Horizon-3.7B −4 (codegen 10→7, all sampled cells), gemma-4-12B −3, Qwen3-1.7B −3,
+K2-Horizon-0.9B +4, granite-8b +2, Ornith-1.0 +2. The leaderboard order barely moves: Qwen3-14B
+25/26 #1, Seed-Coder 24/26, K2-7B 24/26, Ministral-14B/8B-R 23/26. SmolLM3-3B's +5 (12→17/26) is
+the re-convert (native `smollm3` registration, sampled nothink card), not the engine.
+
+**Speed: ≥8B models flat to faster** (Ministral-14B-Instruct −18% total, 8B-Instruct −18%,
+8B-Reasoning −15%, Qwen3-8B −12%), and the sweep *looked* like it had found a regression on the
+small end: Qwen3-0.6B +67% total, MiniCPM5-1B +61%, K2-0.9B +57%, MiniCPM5-2B +36% — codegen
+throughput on Qwen3-0.6B halved (124 → 69 chars/s) while its edit/agent/FIM cells were identical
+to the second. Four hypotheses were tested and **all falsified** on 2026-09-20, interleaved A/B
+against 2026.3.1 on Qwen3-0.6B:
+
+| hypothesis | test | result |
+|---|---|---|
+| per-shape kernel compile on a cold cache | cold vs warm `CACHE_DIR`, server path | no difference; both engines write 43–44 blobs / 586 MB for this model |
+| sampler cost (codegen is the only sampled task) | `engine_ab.py … sampled` (temp 0.7 / top_p 0.8 / top_k 20, seeded) | −4% at 200 tokens, within drift |
+| per-token cost growing with context | `engine_ab.py … greedy 1500` (ignore_eos) | −0.8% |
+| the server path (streamer, config mapping) | server-level A/B, exact codegen body | 2026.4 407 vs 339 chars/s sampled, greedy equal |
+
+Then the real benchmark path (`run_fleet.ps1 -Tasks codegen`) re-run on both venvs back to back:
+**2026.4 = 177 s, 2026.3.1 = 193 s** — versus the 291 s the sweep had recorded for 2026.4 and the
+177 s the previous sweep had recorded for 2026.3.1. The slowdown was **box state at the moment
+those models ran**, not the engine. Tiny models are the drift detector: a 3-minute task on a
+90 tok/s model is dominated by whatever else the box is doing, while a 14B at 30 tok/s averages
+it out. Rules that follow (added to the run-benchmark skill): a cross-sweep *time* delta is only
+a finding after an interleaved re-run of the specific model; per-task **throughput** (chars/s
+from the records) is the number to compare, not total seconds, because sampled output length
+varies per seed; and a model whose short tasks match to the second while its long tasks do not
+is drift, not engine.
+
+Two side observations. GenAI 2026.4's compile cache grows ~4× faster over a *fleet* sweep than
+2026.3.1's (44 GB after 10 models) — the per-model blob set is the same size, so this is more
+shapes being cached across models; the sweep scripts prune blobs older than the current model's
+start every 10 min. And `openvino_tokenizers` 2026.4 fixes the id-0 added-token drop (finding 18)
+but still loses the `\uXXXX`-in-regex lookahead, so `scripts/ov_tokenizer_id0_patch.py` stays in
+the conversion path.
+
+Consequences: `requirements.txt` and the serving venv move to 2026.4 (337eb18); `.venv-genai`
+(2026.3.1) is retired once the branch merges; 186 of 190 records carry `2026.4.0.0-3407` — the
+only engine-stale rows left are Ornith-1.5 (the Echo9Zulu AWQ IR, 6.3 GB, not on disk; re-download
+to close the queue).
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`
