@@ -17,6 +17,11 @@ tool that tells us what to put in it.
   a cross-sweep **time** delta on a small model is drift until an interleaved re-run says otherwise
   (finding 20: a "+67%" on Qwen3-0.6B re-ran at parity). The Intel GPU driver (`32.0.101.8974` →
   `.8991` on 2026-08-24) changed nothing measurable; records carry `engine.gpu_driver` since 2026-09-13.
+- **Device:** every leaderboard row is served on the **Arc iGPU** of a Core Ultra 155H (the fleet's
+  production device; `DEVICE=GPU`). The **NPU** gets its own section further down — the same suites
+  via `run_fleet.ps1 -Device NPU` for the symmetric-int4 IRs that compile there (records carry a
+  `device` field since 2026-09-21; earlier records are all GPU). The two are not ranked against each
+  other: the NPU is a short-output lane, so its totals are dominated by the long generative tasks.
 - **Task types (5 suites):** `codegen` · `edit` · `autocomplete-fim` · `agent-loop`
   · `analysis` (diagnose / plan / route / recall).
 - **Scoring:** per (entry, task type) → **quality** = probe pass-rate, **runtime** = total
@@ -117,9 +122,9 @@ Fill-in-the-middle completion. Coder models get true FIM tokens
 candidates).
 
 <!--LEADERBOARD START-->
-## Overall
+## Overall — Arc iGPU (Core Ultra 155H)
 
-Every tested model, passes and wall-clock summed across all task types — ranked by total passed, then total time.
+**This is the leaderboard: every model served on the iGPU** (the fleet's production device), passes and wall-clock summed across all task types — ranked by total passed, then total time. NPU results are a separate section below.
 
 | # | Model | Passed | Total s | Size/Roles | Recipe |
 |---|---|---|---|---|---|
@@ -164,7 +169,7 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 39 | [OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 5/26 | 199 | 0.3 GB | data-free |
 | 40 | [Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov](https://huggingface.co/Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov) | 5/26 | 1051 | 0.7 GB | data-free |
 
-## Per-task-type leaderboard
+## Per-task-type leaderboard — GPU
 
 _190 runs._
 
@@ -386,6 +391,26 @@ _190 runs._
 ## Retest queue
 
 _None — all entries current._
+
+## NPU — NPU (Core Ultra 155H, Intel AI Boost)
+
+The same suites served on the **NPU** instead of the iGPU, for the fleet IRs that compile there (symmetric int4 g128; the NPU plugin refuses asymmetric IRs and channel-wise int4 falls off its fast path — RESEARCH findings 14 and 20). Not comparable row-for-row with the GPU tables: the NPU is a short-output lane (~5–15 s per 96-token completion), so total times are dominated by the long generative tasks.
+
+### Overall — NPU
+
+| # | Model | Passed | Total s | Size/Roles | Recipe |
+|---|---|---|---|---|---|
+| 1 | [HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov) | 1/1 | 5 | 0.9 GB | data-free |
+
+### Per-task-type — NPU
+
+_1 runs._
+
+#### autocomplete-fim
+
+| # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 1/1 | 5 | 5 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 
 ## Failures
 

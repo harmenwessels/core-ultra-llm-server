@@ -3136,5 +3136,23 @@
       "recipe": "awq+se",
       "size": 2.0
     }
-  ]
+  ],
+  "NPU": {
+    "autocomplete-fim": [
+      {
+        "subject": "HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov",
+        "kind": "single",
+        "quality": 1,
+        "cells": 1,
+        "seconds": 5.0,
+        "decoding": "greedy",
+        "think": "nothink",
+        "engine": "2026.4.0.0-3407-7ea2546852a",
+        "fails": [],
+        "detail": "data-free",
+        "recipe": "data-free",
+        "size": 0.9
+      }
+    ]
+  }
 }
