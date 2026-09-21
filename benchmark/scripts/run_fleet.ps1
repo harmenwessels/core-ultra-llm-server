@@ -6,10 +6,12 @@
 #   benchmark/scripts/run_fleet.ps1                 # full fleet, all tasks
 #   benchmark/scripts/run_fleet.ps1 -Tasks codegen  # one task type
 #   benchmark/scripts/run_fleet.ps1 -Models "OpenVINO/Qwen3-14B-int4-ov"
+#   benchmark/scripts/run_fleet.ps1 -Device NPU -Models ...   # NPU tables (sym-int4 IRs only)
 param(
   [string]$Tasks = "all",
   [string[]]$Models = @(),
-  [string]$Venv = ".venv-genai"   # e.g. .venv-genai-231 for an engine A-B; the record's engine field says which ran
+  [string]$Venv = ".venv-genai",  # e.g. .venv-genai-231 for an engine A-B; the record's engine field says which ran
+  [string]$Device = "GPU"          # GPU (the leaderboard) or NPU (its own tables); recorded in each run's header
 )
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path "$PSScriptRoot\..\..").Path
@@ -35,15 +37,17 @@ $fleet = if ($Models.Count) { $Models } else {
     Where-Object { $_ }
 }
 
-Log "=== fleet sweep: $($fleet.Count) models, tasks=$Tasks ==="
+$Device = $Device.ToUpper()
+$env:BENCH_DEVICE = $Device
+Log "=== fleet sweep: $($fleet.Count) models, tasks=$Tasks, device=$Device ==="
 foreach ($m in $fleet) {
   Stop-Servers
   $dir = "models/$m"
   if (-not (Test-Path "$root\$dir\openvino_language_model.xml") -and
       -not (Test-Path "$root\$dir\openvino_model.xml")) { Log "SKIP $m (IR not found)"; continue }
   Log "--- $m : starting server ---"
-  $env:MODEL_DIRS = $dir; $env:DEVICE = "GPU"
-  $slog = "$root\benchmark\results\server_$($m -replace '[\\/]','_').log"
+  $env:MODEL_DIRS = $dir; $env:DEVICE = $Device
+  $slog = "$root\benchmark\results\server_$($m -replace '[\\/]','_')$(if ($Device -ne 'GPU') { "_$Device" }).log"
   $srv = Start-Process -FilePath $py -ArgumentList "server.py" -WorkingDirectory $root `
            -PassThru -WindowStyle Hidden -RedirectStandardOutput $slog -RedirectStandardError "$slog.err"
   $ready = $false

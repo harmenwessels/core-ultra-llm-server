@@ -3,7 +3,11 @@
 Reads benchmark/results/runs/*.jsonl (the ONLY source — no legacy adapters),
 enriches single models with their IR quant recipe + size, and regenerates:
   - per-task-type leaderboards (single models + combos as peer rows) + retest queue,
-    written between <!--LEADERBOARD START/END--> markers in benchmark/README.md
+    written between <!--LEADERBOARD START/END--> markers in benchmark/README.md.
+    Records are grouped by the inference device in their header: the GPU block is
+    THE leaderboard (every fleet model, retest queue); an NPU block follows when NPU
+    records exist (opt-in subset — only sym-int4 IRs compile there, so no coverage
+    gaps are queued for it)
   - a best-setup summary between <!--BEST-SETUP START/END--> markers in the root README
   - benchmark/results/leaderboard.json
 
@@ -20,6 +24,12 @@ import bench_meta as bm  # noqa: E402
 
 CHECK = "--check" in sys.argv
 TASK_ORDER = ["codegen", "edit", "agent-loop", "analysis", "autocomplete-fim"]
+DEVICE_LABEL = {"GPU": "Arc iGPU (Core Ultra 155H)", "NPU": "NPU (Core Ultra 155H, Intel AI Boost)"}
+
+
+def _device(header: dict) -> str:
+    # records before 2026-09-21 carry no device field and were all GPU
+    return (header.get("device") or "GPU").upper()
 
 
 def _size_gb(model_dir: pathlib.Path) -> float:
@@ -61,10 +71,12 @@ def load_runs():
     return runs
 
 
-def aggregate(runs):
-    """Latest run per (task_type, subject). -> entry dicts."""
+def aggregate(runs, device="GPU"):
+    """Latest run per (task_type, subject) on one device. -> entry dicts."""
     by_key = {}
     for header, cells in runs:
+        if _device(header) != device:
+            continue
         key = (header["task_type"], header["subject"])
         # run_id ends in the stamp; later stamp wins
         if key in by_key and by_key[key][0]["run_id"] >= header["run_id"]:
@@ -157,7 +169,8 @@ def render_tables(entries) -> str:
 
 
 def render_retest(entries, runs) -> str:
-    versions = [h["engine"]["version"] for h, _ in runs if h["engine"]["version"] != "unknown"]
+    versions = [h["engine"]["version"] for h, _ in runs
+                if h["engine"]["version"] != "unknown" and _device(h) == "GPU"]
     newest = max(versions) if versions else None
     queued = []
     singles = {e["subject"] for rows in entries.values() for e in rows if e["kind"] == "single"}
@@ -219,24 +232,47 @@ def _splice(path: pathlib.Path, start: str, end: str, content: str):
         path.write_text(txt + sep + block + "\n", encoding="utf-8")
 
 
+def _failures(entries, device: str) -> list:
+    out = []
+    for tt in TASK_ORDER:
+        for e in rank(entries.get(tt, [])):
+            if e["fails"]:
+                tag = "" if device == "GPU" else f" ({device})"
+                out.append(f"**{e['subject']} / {tt}{tag}**:\n" +
+                           "\n".join(f"  - {x}" for x in e["fails"]))
+    return out
+
+
 def main():
     runs = load_runs()
-    entries = aggregate(runs)
+    entries = aggregate(runs, "GPU")
     overall = render_overall(entries)
     tables = render_tables(entries)
     retest = render_retest(entries, runs)
     summary = render_summary(entries)
-    failures = []
-    for tt in TASK_ORDER:
-        for e in rank(entries.get(tt, [])):
-            if e["fails"]:
-                failures.append(f"**{e['subject']} / {tt}**:\n" +
-                                "\n".join(f"  - {x}" for x in e["fails"]))
-    lb = (f"## Overall\n\nEvery tested model, passes and wall-clock summed across all "
-          f"task types — ranked by total passed, then total time.\n\n{overall}\n"
-          f"## Per-task-type leaderboard\n\n_{len(runs)} runs._\n\n{tables}\n"
-          f"## Retest queue\n\n{retest}\n"
-          + ("## Failures\n\n" + "\n\n".join(failures) + "\n" if failures else ""))
+    failures = _failures(entries, "GPU")
+    n_gpu = sum(_device(h) == "GPU" for h, _ in runs)
+    lb = (f"## Overall — {DEVICE_LABEL['GPU']}\n\n**This is the leaderboard: every model served on "
+          f"the iGPU** (the fleet's production device), passes and wall-clock summed across all "
+          f"task types — ranked by total passed, then total time. NPU results are a separate "
+          f"section below.\n\n{overall}\n"
+          f"## Per-task-type leaderboard — GPU\n\n_{n_gpu} runs._\n\n{tables}\n"
+          f"## Retest queue\n\n{retest}\n")
+    # NPU: the same tasks on the Core Ultra's NPU for the IRs that compile there
+    # (symmetric int4 only). An opt-in subset, so no coverage gaps are queued.
+    npu = aggregate(runs, "NPU")
+    if npu:
+        n_npu = sum(_device(h) == "NPU" for h, _ in runs)
+        lb += (f"## NPU — {DEVICE_LABEL['NPU']}\n\nThe same suites served on the **NPU** instead of "
+               f"the iGPU, for the fleet IRs that compile there (symmetric int4 g128; the NPU plugin "
+               f"refuses asymmetric IRs and channel-wise int4 falls off its fast path — RESEARCH "
+               f"findings 14 and 20). Not comparable row-for-row with the GPU tables: the NPU is a "
+               f"short-output lane (~5–15 s per 96-token completion), so total times are dominated by "
+               f"the long generative tasks.\n\n### Overall — NPU\n\n{render_overall(npu)}\n"
+               f"### Per-task-type — NPU\n\n_{n_npu} runs._\n\n"
+               + render_tables(npu).replace("### ", "#### ") + "\n")
+        failures += _failures(npu, "NPU")
+    lb += ("## Failures\n\n" + "\n\n".join(failures) + "\n") if failures else ""
 
     if CHECK:
         print("===== benchmark/README.md leaderboard block =====\n")
@@ -248,9 +284,11 @@ def main():
             "<!--LEADERBOARD END-->", lb)
     _splice(bm.REPO_ROOT / "README.md", "<!--BEST-SETUP START-->",
             "<!--BEST-SETUP END-->", summary)
+    lb_json = {tt: rank(rows) for tt, rows in entries.items()}     # GPU, unchanged shape
+    if npu:
+        lb_json["NPU"] = {tt: rank(rows) for tt, rows in npu.items()}
     (bm.RESULTS_DIR / "leaderboard.json").write_text(
-        json.dumps({tt: rank(rows) for tt, rows in entries.items()}, indent=2),
-        encoding="utf-8")
+        json.dumps(lb_json, indent=2), encoding="utf-8")
     print(f"assembled {len(runs)} runs -> benchmark/README.md + root README + leaderboard.json")
 
 

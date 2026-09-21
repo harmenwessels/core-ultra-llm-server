@@ -17,6 +17,11 @@ tool that tells us what to put in it.
   a cross-sweep **time** delta on a small model is drift until an interleaved re-run says otherwise
   (finding 20: a "+67%" on Qwen3-0.6B re-ran at parity). The Intel GPU driver (`32.0.101.8974` →
   `.8991` on 2026-08-24) changed nothing measurable; records carry `engine.gpu_driver` since 2026-09-13.
+- **Device:** every leaderboard row is served on the **Arc iGPU** of a Core Ultra 155H (the fleet's
+  production device; `DEVICE=GPU`). The **NPU** gets its own section further down — the same suites
+  via `run_fleet.ps1 -Device NPU` for the symmetric-int4 IRs that compile there (records carry a
+  `device` field since 2026-09-21; earlier records are all GPU). The two are not ranked against each
+  other: the NPU is a short-output lane, so its totals are dominated by the long generative tasks.
 - **Task types (5 suites):** `codegen` · `edit` · `autocomplete-fim` · `agent-loop`
   · `analysis` (diagnose / plan / route / recall).
 - **Scoring:** per (entry, task type) → **quality** = probe pass-rate, **runtime** = total
@@ -117,9 +122,9 @@ Fill-in-the-middle completion. Coder models get true FIM tokens
 candidates).
 
 <!--LEADERBOARD START-->
-## Overall
+## Overall — Arc iGPU (Core Ultra 155H)
 
-Every tested model, passes and wall-clock summed across all task types — ranked by total passed, then total time.
+**This is the leaderboard: every model served on the iGPU** (the fleet's production device), passes and wall-clock summed across all task types — ranked by total passed, then total time. NPU results are a separate section below.
 
 | # | Model | Passed | Total s | Size/Roles | Recipe |
 |---|---|---|---|---|---|
@@ -147,7 +152,7 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 22 | [Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov](https://huggingface.co/Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov) | 19/25 | 1963 | 6.2 GB | awq+se |
 | 23 | [HarmenWessels/granite-4.1-3b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-code-ov) | 18/26 | 505 | 1.8 GB | awq+se |
 | 24 | [OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 17/26 | 420 | 1.8 GB | scale_estimation |
-| 25 | [HarmenWessels/SmolLM3-3B-int4-symg128-ov](https://huggingface.co/HarmenWessels/SmolLM3-3B-int4-symg128-ov) | 17/26 | 447 | 1.7 GB | awq+se |
+| 25 | [HarmenWessels/SmolLM3-3B-int4-symg128-ov](https://huggingface.co/HarmenWessels/SmolLM3-3B-int4-symg128-ov) | 17/26 | 484 | 1.7 GB | awq+se |
 | 26 | [HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov) | 17/26 | 1776 | 1.0 GB | awq+se |
 | 27 | [HarmenWessels/Agents-A1-4B-int4-asymg128-ov](https://huggingface.co/HarmenWessels/Agents-A1-4B-int4-asymg128-ov) | 17/25 | 2863 | 3.5 GB | data-free |
 | 28 | [Echo9Zulu/OmniCoder-9B-int4_sym-ov](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 17/25 | 4101 | 6.1 GB | data-free |
@@ -164,7 +169,7 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 39 | [OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 5/26 | 199 | 0.3 GB | data-free |
 | 40 | [Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov](https://huggingface.co/Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov) | 5/26 | 1051 | 0.7 GB | data-free |
 
-## Per-task-type leaderboard
+## Per-task-type leaderboard — GPU
 
 _190 runs._
 
@@ -252,9 +257,9 @@ _190 runs._
 | 33 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 0/2 | 19 | 10 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 34 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 0/2 | 23 | 12 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 35 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 0/2 | 26 | 13 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 36 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 0/2 | 26 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 37 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 6.2 GB | 0/2 | 30 | 15 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 38 | Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov | single | 0.7 GB | 0/2 | 40 | 20 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 36 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 6.2 GB | 0/2 | 30 | 15 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 37 | Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov | single | 0.7 GB | 0/2 | 40 | 20 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 38 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 0/2 | 64 | 32 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 39 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 0/2 | 85 | 42 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 40 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 0/2 | 87 | 44 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 
@@ -357,10 +362,10 @@ _190 runs._
 | 3 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 1/1 | 2 | 2 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 4 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 1/1 | 2 | 2 | scale_estimation | greedy | nothink | 2026.4.0.0-3407 |
 | 5 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 1/1 | 3 | 3 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 6 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 7 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 8 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 9 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 6 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 1/1 | 3 | 3 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 7 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 8 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 9 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 1/1 | 4 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 10 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 1/1 | 5 | 5 | awq | greedy | nothink | 2026.4.0.0-3407 |
 | 11 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | single | 1.0 GB | 1/1 | 6 | 6 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 12 | HarmenWessels/K2-Horizon-7B-int4-symg128-ov | single | 5.7 GB | 1/1 | 8 | 8 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
@@ -386,6 +391,58 @@ _190 runs._
 ## Retest queue
 
 _None — all entries current._
+
+## NPU — NPU (Core Ultra 155H, Intel AI Boost)
+
+The same suites served on the **NPU** instead of the iGPU, for the fleet IRs that compile there (symmetric int4 g128; the NPU plugin refuses asymmetric IRs and channel-wise int4 falls off its fast path — RESEARCH findings 14 and 20). Not comparable row-for-row with the GPU tables: the NPU is a short-output lane (~5–15 s per 96-token completion), so total times are dominated by the long generative tasks.
+
+### Overall — NPU
+
+| # | Model | Passed | Total s | Size/Roles | Recipe |
+|---|---|---|---|---|---|
+| 1 | [HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov) | 9/10 | 225 | 3.2 GB | awq+se |
+| 2 | [HarmenWessels/MiniCPM5-2B-int4-symg128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-2B-int4-symg128-ov) | 8/10 | 129 | 1.6 GB | awq+se |
+| 3 | [HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov) | 7/10 | 232 | 2.0 GB | awq+se |
+| 4 | [HarmenWessels/SmolLM3-3B-int4-symg128-ov](https://huggingface.co/HarmenWessels/SmolLM3-3B-int4-symg128-ov) | 5/10 | 305 | 1.7 GB | awq+se |
+| 5 | [HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov) | 4/10 | 97 | 0.9 GB | data-free |
+| 6 | [HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov) | 4/10 | 175 | 0.7 GB | awq+se |
+
+### Per-task-type — NPU
+
+_18 runs._
+
+#### edit
+
+| # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 2/2 | 46 | 23 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 2 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 1/2 | 28 | 14 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 3 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 0/2 | 32 | 16 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 4 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 0/2 | 46 | 23 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 5 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 0/2 | 47 | 24 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 6 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 0/2 | 144 | 72 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+
+#### agent-loop
+
+| # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 7/7 | 164 | 23 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 2 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 6/7 | 92 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 3 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 6/7 | 173 | 25 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 4 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 4/7 | 124 | 18 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 5 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 4/7 | 150 | 21 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 6 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 3/7 | 60 | 9 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+
+#### autocomplete-fim
+
+| # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 1/1 | 5 | 5 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 2 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 1/1 | 9 | 9 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 3 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 1/1 | 11 | 11 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 4 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 1/1 | 12 | 12 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 5 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 0/1 | 5 | 5 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 6 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 0/1 | 15 | 15 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 
 ## Failures
 
@@ -697,10 +754,6 @@ _None — all entries current._
   - edit-exact: FAIL (old-match=True old='')
   - write-full: FAIL (writes=0 calls=[])
 
-**HarmenWessels/SmolLM3-3B-int4-symg128-ov / edit**:
-  - edit-exact: FAIL (edits=0 calls=[])
-  - write-full: FAIL (writes=0 calls=[])
-
 **Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=['read_file'])
   - write-full: FAIL (writes=0 calls=['read_file'])
@@ -708,6 +761,10 @@ _None — all entries current._
 **Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=[])
   - write-full: FAIL (exec/assert failed: '(' was never closed (<string>, line 1))
+
+**HarmenWessels/SmolLM3-3B-int4-symg128-ov / edit**:
+  - edit-exact: FAIL (edits=0 calls=['read_file'])
+  - write-full: FAIL (writes=0 calls=[])
 
 **HarmenWessels/granite-4.1-3b-int4-cw-code-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=[])
@@ -995,6 +1052,53 @@ _None — all entries current._
   - merge-fim: FAIL
 
 **HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov / autocomplete-fim**:
+  - merge-fim: FAIL
+
+**HarmenWessels/MiniCPM5-2B-int4-symg128-ov / edit (NPU)**:
+  - edit-exact: FAIL (edits=0 calls=['read_file'])
+
+**HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / edit (NPU)**:
+  - edit-exact: FAIL (edits=0 calls=[])
+  - write-full: FAIL (writes=0 calls=[])
+
+**HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov / edit (NPU)**:
+  - edit-exact: FAIL (old-match=True old='')
+  - write-full: FAIL (no ValueError on window > len)
+
+**HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / edit (NPU)**:
+  - edit-exact: FAIL (edits=0 calls=['read_file'])
+  - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)
+
+**HarmenWessels/SmolLM3-3B-int4-symg128-ov / edit (NPU)**:
+  - edit-exact: FAIL (edits=0 calls=['read_file'])
+  - write-full: FAIL (writes=0 calls=[])
+
+**HarmenWessels/MiniCPM5-2B-int4-symg128-ov / agent-loop (NPU)**:
+  - call-restraint: FAIL (calls=[('web_search', {'query': 'API acronym'})] content='')
+
+**HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / agent-loop (NPU)**:
+  - chain-depth: FAIL (stopped at turn 1: edits=0 green-tests-seen=0)
+
+**HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov / agent-loop (NPU)**:
+  - call-choose: FAIL (calls=[])
+  - result-use: FAIL (calls=[('edit_file', {'path': 'config.yaml', 'new_string': 'MAX_RETRIE)
+  - chain-depth: FAIL (turn 4: repeated call run_tests)
+
+**HarmenWessels/SmolLM3-3B-int4-symg128-ov / agent-loop (NPU)**:
+  - call-restraint: FAIL (calls=[('web_search', {'query': 'What does the acronym API stand for?')
+  - no-repeat: FAIL (calls=[])
+  - chain-depth: FAIL (stopped at turn 1: edits=0 green-tests-seen=0)
+
+**HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / agent-loop (NPU)**:
+  - call-choose: FAIL (calls=[('read_file', {'path': 'https://www.python.org/downloads/'})])
+  - result-use: FAIL (calls=[] content='```json\n{\n  "function": {\n    "name": "read_file")
+  - no-repeat: FAIL (calls=[])
+  - chain-depth: FAIL (turn 2: repeated call unknown_tool)
+
+**HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov / autocomplete-fim (NPU)**:
+  - merge-fim: FAIL
+
+**HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov / autocomplete-fim (NPU)**:
   - merge-fim: FAIL
 
 <!--LEADERBOARD END-->

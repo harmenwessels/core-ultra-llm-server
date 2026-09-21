@@ -700,6 +700,40 @@ would be small (when `openvino_mtp_model.xml` exists, construct `VLMPipeline` wi
 ~10% on three tasks of one family after re-exporting the 9B (20 GB download). Parked, not
 rejected: the lever is real, just narrow.
 
+## Finding 22 — The NPU has its own table now, and a stateful-pipeline trap in the server
+
+The leaderboard is measured on the iGPU; from 2026-09-21 the benchmark records carry a `device`
+field (`run_fleet.ps1 -Device NPU`) and the assembler renders NPU records in a separate section
+instead of mixing them into the ranking. First NPU sweep: the six sym-int4 g128 IRs that proved
+coherent in the probe, on the **short-output suites only** (autocomplete-fim / edit / agent-loop —
+the NPU's actual job per finding 14; codegen at 3072 tokens × best-of-2 on a 6–18 tok/s device would
+be hours per model for a number nobody would use). 25 minutes for all six:
+
+| model | FIM | edit | agent | total s | vs its GPU cells |
+|---|---|---|---|---|---|
+| K2-Horizon-3.7B | 0/1 | 2/2 | 7/7 | 225 | identical |
+| MiniCPM5-2B | 1/1 | 1/2 | 6/7 | 129 | identical |
+| Ministral-3B-Instruct | 1/1 | 0/2 | 6/7 | 233 | agent +1 |
+| SmolLM3-3B | 1/1 | 0/2 | 4/7 | 305 | identical |
+| Coder-1.5B-symg128 | 1/1 | 0/2 | 3/7 | 97 | agent +1 |
+| K2-Horizon-0.9B | 0/1 | 0/2 | 4/7 | 175 | agent −1 |
+
+Quality is the GPU quality within one knife-edge cell (device numerics move the same near-threshold
+cells finding 20 saw across engines); time is 2–4× the GPU's. So the NPU table is honest about what
+it is: the same brains, a slower lane that frees the iGPU.
+
+**The trap.** SmolLM3's FIM died on the NPU with `Check 'm_chat_input_type == STRING' failed`
+(pipeline_stateful.cpp) — after the server's warmup chat. GenAI's *stateful* pipeline (what the NPU
+gets; the GPU's paged-attention backend has no such check) pins its input kind on the first
+generate, and only the **string** overload asserts afterwards: verified on the NPU for every
+ordering — `ChatHistory` and encoded-ids calls are always accepted, a string call after either
+kind fails, and `finish_chat()` clears the pin. A server mixes all three kinds by design
+(pipeline-templated chat via `ChatHistory`, natively rendered strings, raw `/v1/completions`
+prompts, encoded ids for the raw-decode models), so the fix is one line per generate site:
+`_reset_input_kind(pipe)` → `finish_chat()` under the model lock before every generate. The server
+never uses GenAI's chat mode, so nothing is lost; SmolLM3 FIM on NPU went 0/1 (exception) → 1/1.
+Rule: any new server generate path must call the reset, or it works on GPU and dies on NPU.
+
 ## Conversion playbook (Route B)
 
 Separate venv (`.venv-convert/`, gitignored) with: `optimum` + `optimum-onnx` + `optimum-intel`

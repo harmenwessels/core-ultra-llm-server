@@ -315,6 +315,9 @@ def build_run_header(*, target, task_type, suite, suite_budget, decoding,
         "target": target, "task_type": task_type, "suite": suite,
         "suite_budget": suite_budget,
         "engine": engine or engine_info(),
+        # Inference device the server ran the model on. Set by run_fleet.ps1
+        # (BENCH_DEVICE); records without the field predate it and were all GPU.
+        "device": os.environ.get("BENCH_DEVICE", "GPU").upper(),
         "decoding": decoding, "think": think,
         "driver": driver, "notes": notes or [], "confidence": confidence,
     }

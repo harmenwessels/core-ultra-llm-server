@@ -353,6 +353,29 @@ def _needs_raw_decode(model_dir: pathlib.Path) -> bool:
                for t in tj.get("added_tokens", []))
 
 
+def _generates_from_ids(model_id: str) -> bool:
+    """Models whose chat path generates from encoded ids, so the raw decode keeps
+    the special-token markers the parser needs."""
+    return (model_id in _RAW_DECODE or model_id in _REASONING_SYSPROMPT
+            or _TOOL_FORMATS.get(model_id) == "mistral")
+
+
+def _reset_input_kind(pipe) -> None:
+    """GenAI's stateful pipeline (the NPU path; GPU uses paged attention and has
+    no such check) pins its input kind — ChatHistory / string / encoded ids — on
+    the first generate, and the STRING overload then asserts
+    ("m_chat_input_type == STRING") after a ChatHistory or encoded call. A server
+    mixes all three (templated chat via ChatHistory, native-rendered strings,
+    raw /v1/completions prompts, encoded raw-decode models), which is how
+    SmolLM3's FIM died on NPU right after a warmup chat (2026-09-21).
+    finish_chat() clears the pin (verified for every ordering); the server never
+    runs GenAI's chat mode, so there is nothing else to lose."""
+    try:
+        pipe.finish_chat()
+    except Exception:  # noqa: BLE001 — pipelines without chat state
+        pass
+
+
 def _tokenizer_adds_bos(pipe) -> bool:
     """Does the pipeline's own tokenizer prepend a BOS to an empty string?"""
     try:
@@ -1159,6 +1182,7 @@ def _run_streaming(pipe, model_id: str, inputs, gen_cfg,
         with _lock_for(model_id):
             if think_mode is not None:
                 _apply_think_mode(model_id, pipe, think_mode)
+            _reset_input_kind(pipe)
             t0 = time.perf_counter()
             try:
                 pipe.generate(inputs, generation_config=gen_cfg,
@@ -1251,6 +1275,7 @@ def _route_request(messages: list) -> str:
               '{"route": "design"} for architecture/planning/multi-step work.'
               f"\n\nUser request: {last_user[:2000]}\nJSON:")
     with _lock_for(router_id):
+        _reset_input_kind(pipe)
         out = pipe.generate(prompt, generation_config=cfg)
     text = out.texts[0] if hasattr(out, "texts") else str(out)
     try:
@@ -1363,6 +1388,7 @@ def _role_call(role: str, messages: list, tools: list | None, body: dict
     with _lock_for(model_id):
         if native_fmt == "hermes":
             _apply_think_mode(model_id, pipe, "nothink")
+        _reset_input_kind(pipe)
         result = pipe.generate(history, generation_config=gen_cfg)
     text = result.texts[0] if hasattr(result, "texts") else str(result)
     _, content = _split_reasoning(text, "nothink")
@@ -1585,11 +1611,9 @@ async def chat_completions(request: Request):
         def _blocking_generate():
             with _lock_for(model_id):
                 _apply_think_mode(model_id, pipe, think_mode)
+                _reset_input_kind(pipe)
                 t0 = time.perf_counter()
-                if isinstance(history, str) \
-                        and (model_id in _RAW_DECODE
-                             or model_id in _REASONING_SYSPROMPT
-                             or _TOOL_FORMATS.get(model_id) == "mistral"):
+                if isinstance(history, str) and _generates_from_ids(model_id):
                     # GenAI's string decode skips special tokens, stripping
                     # markers the parser needs — Mistral [THINK]/[TOOL_CALLS],
                     # MiniCPM5 <function/<param. Decode the raw ids keeping them,
@@ -1737,6 +1761,7 @@ async def completions(request: Request):
     if not body.get("stream", False):
         def _blocking_generate():
             with _lock_for(model_id):
+                _reset_input_kind(pipe)
                 return pipe.generate(prompt, generation_config=gen_cfg)
         result = await asyncio.to_thread(_blocking_generate)
         text = result.texts[0] if hasattr(result, "texts") else str(result)
