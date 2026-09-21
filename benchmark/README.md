@@ -123,13 +123,13 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 
 | # | Model | Passed | Total s | Size/Roles | Recipe |
 |---|---|---|---|---|---|
-| 1 | [OpenVINO/Qwen3-14B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-14B-int4-ov) | 25/26 | 1837 | 9.7 GB | data-free |
+| 1 | [OpenVINO/Qwen3-14B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-14B-int4-ov) | 25/26 | 1775 | 9.7 GB | data-free |
 | 2 | [HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov](https://huggingface.co/HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov) | 24/26 | 697 | 4.8 GB | awq+se |
 | 3 | [HarmenWessels/K2-Horizon-7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/K2-Horizon-7B-int4-symg128-ov) | 24/26 | 1995 | 5.7 GB | awq+se |
 | 4 | [HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov) | 23/26 | 1452 | 7.6 GB | awq+se |
 | 5 | [HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov) | 23/26 | 2910 | 4.9 GB | awq+se |
 | 6 | [OpenVINO/Qwen3.5-9B-int4-ov](https://huggingface.co/OpenVINO/Qwen3.5-9B-int4-ov) | 23/25 | 2973 | 6.1 GB | data-free |
-| 7 | [HarmenWessels/granite-4.1-8b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-code-ov) | 22/26 | 913 | 4.4 GB | awq+se |
+| 7 | [HarmenWessels/granite-4.1-8b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-code-ov) | 22/26 | 824 | 4.4 GB | awq+se |
 | 8 | [HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov) | 22/26 | 1238 | 4.9 GB | awq+se |
 | 9 | [HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov) | 22/26 | 1467 | 2.0 GB | awq+se |
 | 10 | [OpenVINO/Qwen3.5-4B-int4-ov](https://huggingface.co/OpenVINO/Qwen3.5-4B-int4-ov) | 22/25 | 2089 | 3.5 GB | data-free |
@@ -137,31 +137,31 @@ Every tested model, passes and wall-clock summed across all task types — ranke
 | 12 | [HarmenWessels/granite-4.1-8b-int4-cw-ov](https://huggingface.co/HarmenWessels/granite-4.1-8b-int4-cw-ov) | 21/26 | 809 | 4.4 GB | awq+se |
 | 13 | [HarmenWessels/gemma-4-E2B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E2B-it-qat-int4-ov) | 21/25 | 1279 | 4.4 GB | qat |
 | 14 | [HarmenWessels/gemma-4-E4B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-E4B-it-qat-int4-ov) | 21/25 | 1597 | 6.6 GB | qat |
-| 15 | [HarmenWessels/Ornith-1.0-9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ornith-1.0-9B-int4-symg128-ov) | 21/25 | 2640 | 6.1 GB | data-free |
+| 15 | [HarmenWessels/Ornith-1.0-9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ornith-1.0-9B-int4-symg128-ov) | 21/25 | 2567 | 6.1 GB | data-free |
 | 16 | [OpenVINO/Qwen3-4B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-4B-int4-ov) | 20/26 | 868 | 2.3 GB | awq |
 | 17 | [HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov) | 20/26 | 950 | 3.2 GB | awq+se |
 | 18 | [OpenVINO/Qwen3-8B-int4-cw-ov](https://huggingface.co/OpenVINO/Qwen3-8B-int4-cw-ov) | 20/26 | 1416 | 4.7 GB | data-free |
 | 19 | [HarmenWessels/Spark-X2.5-4B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Spark-X2.5-4B-int4-symg128-ov) | 20/26 | 2434 | 2.3 GB | awq+se |
 | 20 | [HarmenWessels/gemma-4-12B-it-qat-int4-ov](https://huggingface.co/HarmenWessels/gemma-4-12B-it-qat-int4-ov) | 20/25 | 2733 | 8.2 GB | qat |
-| 21 | [HarmenWessels/MiniCPM5-2B-int4-symg128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-2B-int4-symg128-ov) | 19/26 | 748 | 1.6 GB | awq+se |
-| 22 | [HarmenWessels/granite-4.1-3b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-code-ov) | 18/26 | 607 | 1.8 GB | awq+se |
-| 23 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | 17/26 | 447 | 1.7 GB | awq+se |
-| 24 | [OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 17/26 | 577 | 1.8 GB | scale_estimation |
-| 25 | [HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov) | 17/26 | 1776 | 1.0 GB | awq+se |
-| 26 | [HarmenWessels/Agents-A1-4B-int4-asymg128-ov](https://huggingface.co/HarmenWessels/Agents-A1-4B-int4-asymg128-ov) | 17/25 | 2863 | 3.5 GB | data-free |
-| 27 | [Echo9Zulu/OmniCoder-9B-int4_sym-ov](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 17/25 | 4101 | 6.1 GB | data-free |
-| 28 | [Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov](https://huggingface.co/Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov) | 16/25 | 1877 | 0.0 GB | awq+se |
+| 21 | [HarmenWessels/MiniCPM5-2B-int4-symg128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-2B-int4-symg128-ov) | 19/26 | 680 | 1.6 GB | awq+se |
+| 22 | [Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov](https://huggingface.co/Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov) | 19/25 | 1963 | 6.2 GB | awq+se |
+| 23 | [HarmenWessels/granite-4.1-3b-int4-cw-code-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-code-ov) | 18/26 | 505 | 1.8 GB | awq+se |
+| 24 | [OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov) | 17/26 | 420 | 1.8 GB | scale_estimation |
+| 25 | [HarmenWessels/SmolLM3-3B-int4-symg128-ov](https://huggingface.co/HarmenWessels/SmolLM3-3B-int4-symg128-ov) | 17/26 | 447 | 1.7 GB | awq+se |
+| 26 | [HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov) | 17/26 | 1776 | 1.0 GB | awq+se |
+| 27 | [HarmenWessels/Agents-A1-4B-int4-asymg128-ov](https://huggingface.co/HarmenWessels/Agents-A1-4B-int4-asymg128-ov) | 17/25 | 2863 | 3.5 GB | data-free |
+| 28 | [Echo9Zulu/OmniCoder-9B-int4_sym-ov](https://huggingface.co/Echo9Zulu/OmniCoder-9B-int4_sym-ov) | 17/25 | 4101 | 6.1 GB | data-free |
 | 29 | [HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov](https://huggingface.co/HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov) | 15/26 | 235 | 0.7 GB | data-free |
-| 30 | [HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov) | 15/26 | 1079 | 0.7 GB | awq+se |
-| 31 | [HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov) | 15/26 | 1139 | 2.0 GB | awq+se |
-| 32 | [HarmenWessels/granite-4.1-3b-int4-cw-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-ov) | 12/26 | 388 | 1.8 GB | awq+se |
-| 33 | [OpenVINO/Qwen3-1.7B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-1.7B-int4-ov) | 12/26 | 739 | 1.2 GB | data-free |
-| 34 | [Echo9Zulu/Qwen3.5-2B-int4_sym-ov](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | 12/25 | 2402 | 2.1 GB | data-free |
-| 35 | [HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov) | 11/26 | 269 | 0.9 GB | data-free |
-| 36 | [OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 11/26 | 433 | 0.9 GB | data-free |
-| 37 | [HarmenWessels/MiniCPM5-1B-int4-g128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-1B-int4-g128-ov) | 8/26 | 525 | 0.8 GB | data-free |
-| 38 | [OpenVINO/Qwen3-0.6B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-0.6B-int4-ov) | 7/26 | 387 | 0.4 GB | data-free |
-| 39 | [OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 5/26 | 309 | 0.3 GB | data-free |
+| 30 | [HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov](https://huggingface.co/HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov) | 15/26 | 675 | 0.7 GB | awq+se |
+| 31 | [HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov](https://huggingface.co/HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov) | 15/26 | 1137 | 2.0 GB | awq+se |
+| 32 | [HarmenWessels/granite-4.1-3b-int4-cw-ov](https://huggingface.co/HarmenWessels/granite-4.1-3b-int4-cw-ov) | 12/26 | 285 | 1.8 GB | awq+se |
+| 33 | [HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov](https://huggingface.co/HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov) | 11/26 | 269 | 0.9 GB | data-free |
+| 34 | [OpenVINO/Qwen3-1.7B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-1.7B-int4-ov) | 11/26 | 665 | 1.2 GB | data-free |
+| 35 | [Echo9Zulu/Qwen3.5-2B-int4_sym-ov](https://huggingface.co/Echo9Zulu/Qwen3.5-2B-int4_sym-ov) | 11/25 | 1578 | 2.1 GB | data-free |
+| 36 | [OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov) | 10/26 | 310 | 0.9 GB | data-free |
+| 37 | [HarmenWessels/MiniCPM5-1B-int4-g128-ov](https://huggingface.co/HarmenWessels/MiniCPM5-1B-int4-g128-ov) | 8/26 | 401 | 0.8 GB | data-free |
+| 38 | [OpenVINO/Qwen3-0.6B-int4-ov](https://huggingface.co/OpenVINO/Qwen3-0.6B-int4-ov) | 7/26 | 305 | 0.4 GB | data-free |
+| 39 | [OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov](https://huggingface.co/OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov) | 5/26 | 199 | 0.3 GB | data-free |
 | 40 | [Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov](https://huggingface.co/Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov) | 5/26 | 1051 | 0.7 GB | data-free |
 
 ## Per-task-type leaderboard
@@ -176,87 +176,87 @@ _190 runs._
 | 2 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 12/12 | 848 | 71 | qat | sampling | nothink | 2026.4.0.0-3407 |
 | 3 | HarmenWessels/K2-Horizon-7B-int4-symg128-ov | single | 5.7 GB | 12/12 | 891 | 74 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 4 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | single | 4.9 GB | 12/12 | 960 | 80 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 5 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 12/12 | 1049 | 87 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 5 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 12/12 | 1004 | 84 | data-free | sampling | nothink | 2026.4.0.0-3407 |
 | 6 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 12/12 | 1099 | 92 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 7 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 12/12 | 1884 | 157 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 8 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 11/12 | 384 | 32 | awq | sampling | nothink | 2026.4.0.0-3407 |
 | 9 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 11/12 | 567 | 47 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 10 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 11/12 | 704 | 59 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 10 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 11/12 | 635 | 53 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 11 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 11/12 | 722 | 60 | data-free | sampling | nothink | 2026.4.0.0-3407 |
 | 12 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 11/12 | 827 | 69 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 13 | OpenVINO/Qwen3.5-4B-int4-ov | single | 3.5 GB | 11/12 | 1179 | 98 | data-free | sampling | nothink | 2026.4.0.0-3407 |
 | 14 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 11/12 | 1379 | 115 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 15 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 11/12 | 1526 | 127 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 15 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 11/12 | 1487 | 124 | data-free | sampling | nothink | 2026.4.0.0-3407 |
 | 16 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 10/12 | 637 | 53 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 17 | HarmenWessels/Agents-A1-4B-int4-asymg128-ov | single | 3.5 GB | 10/12 | 1246 | 104 | data-free | sampling | nothink | 2026.4.0.0-3407 |
 | 18 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 10/12 | 1264 | 105 | qat | sampling | nothink | 2026.4.0.0-3407 |
-| 19 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 9/12 | 284 | 24 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 19 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 9/12 | 224 | 19 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 20 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 9/12 | 308 | 26 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 21 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 8.2 GB | 9/12 | 2056 | 171 | qat | sampling | nothink | 2026.4.0.0-3407 |
-| 22 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 8/12 | 315 | 26 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 23 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | single | 2.3 GB | 8/12 | 1438 | 120 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 24 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 7/12 | 184 | 15 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 25 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 7/12 | 470 | 39 | scale_estimation | sampling | nothink | 2026.4.0.0-3407 |
-| 26 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 7/12 | 608 | 51 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 27 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 0.0 GB | 7/12 | 1334 | 111 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
-| 28 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 6/12 | 863 | 72 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 21 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 6.2 GB | 9/12 | 1367 | 114 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 22 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 8.2 GB | 9/12 | 2056 | 171 | qat | sampling | nothink | 2026.4.0.0-3407 |
+| 23 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 8/12 | 291 | 24 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 24 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | single | 2.3 GB | 8/12 | 1438 | 120 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 25 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 7/12 | 184 | 15 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 26 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 7/12 | 331 | 28 | scale_estimation | sampling | nothink | 2026.4.0.0-3407 |
+| 27 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 7/12 | 608 | 51 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 28 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 6/12 | 855 | 71 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 29 | Echo9Zulu/OmniCoder-9B-int4_sym-ov | single | 6.1 GB | 6/12 | 2368 | 197 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 30 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 5/12 | 200 | 17 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 31 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 5/12 | 281 | 23 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 32 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 5/12 | 350 | 29 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 33 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 5/12 | 499 | 42 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 34 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 5/12 | 793 | 66 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 35 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | single | 1.0 GB | 5/12 | 1101 | 92 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 36 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 3/12 | 395 | 33 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 30 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 5/12 | 200 | 17 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 31 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 5/12 | 200 | 17 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 32 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 5/12 | 466 | 39 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 33 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | single | 1.0 GB | 5/12 | 1101 | 92 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 34 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 4/12 | 242 | 20 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 35 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 4/12 | 443 | 37 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 36 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 3/12 | 292 | 24 | data-free | sampling | nothink | 2026.4.0.0-3407 |
 | 37 | Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov | single | 0.7 GB | 3/12 | 822 | 68 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 38 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 3/12 | 1078 | 90 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 39 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 2/12 | 168 | 14 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 40 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 1/12 | 239 | 20 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 38 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 2/12 | 130 | 11 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 39 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 2/12 | 713 | 59 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 40 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 1/12 | 139 | 12 | data-free | sampling | nothink | 2026.4.0.0-3407 |
 
 ### edit
 
 | # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 2/2 | 19 | 10 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 2 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 2/2 | 25 | 12 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 1 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 2/2 | 17 | 8 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 2 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 2/2 | 19 | 10 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 3 | OpenVINO/Qwen3.5-4B-int4-ov | single | 3.5 GB | 2/2 | 30 | 15 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 4 | HarmenWessels/K2-Horizon-7B-int4-symg128-ov | single | 5.7 GB | 2/2 | 33 | 16 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 5 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 2/2 | 35 | 18 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 6 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | single | 1.0 GB | 2/2 | 39 | 20 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 7 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 2/2 | 43 | 22 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 8 | Echo9Zulu/OmniCoder-9B-int4_sym-ov | single | 6.1 GB | 2/2 | 57 | 28 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 9 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 2/2 | 67 | 34 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 9 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 2/2 | 63 | 32 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 10 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | single | 4.9 GB | 2/2 | 68 | 34 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 11 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 1/2 | 14 | 7 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 12 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 1/2 | 19 | 10 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 13 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 1/2 | 20 | 10 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 14 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | single | 2.3 GB | 1/2 | 26 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 15 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 1/2 | 29 | 14 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 11 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 1/2 | 13 | 6 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 12 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 1/2 | 15 | 8 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 13 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 1/2 | 19 | 10 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 14 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 1/2 | 26 | 13 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 15 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | single | 2.3 GB | 1/2 | 26 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 16 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 1/2 | 31 | 16 | qat | greedy | nothink | 2026.4.0.0-3407 |
 | 17 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 1/2 | 35 | 18 | qat | greedy | nothink | 2026.4.0.0-3407 |
-| 18 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 1/2 | 40 | 20 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 19 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 1/2 | 41 | 20 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 18 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 1/2 | 39 | 20 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 19 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 1/2 | 40 | 20 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 20 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 1/2 | 65 | 32 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 21 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 8.2 GB | 1/2 | 73 | 36 | qat | greedy | nothink | 2026.4.0.0-3407 |
 | 22 | HarmenWessels/Agents-A1-4B-int4-asymg128-ov | single | 3.5 GB | 1/2 | 258 | 129 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 23 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 0/2 | 5 | 2 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 24 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 0/2 | 6 | 3 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 25 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 0/2 | 7 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 26 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 0/2 | 8 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 27 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 0/2 | 8 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 28 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 0/2 | 12 | 6 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 29 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 0/2 | 13 | 6 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 30 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 0/2 | 18 | 9 | scale_estimation | greedy | nothink | 2026.4.0.0-3407 |
-| 31 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 0/2 | 19 | 10 | awq | greedy | nothink | 2026.4.0.0-3407 |
-| 32 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 0/2 | 19 | 10 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 33 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 0/2 | 21 | 10 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 34 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 0/2 | 21 | 10 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 25 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 0/2 | 7 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 26 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 0/2 | 7 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 27 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 0/2 | 7 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 28 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 0/2 | 10 | 5 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 29 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 0/2 | 11 | 6 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 30 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 0/2 | 14 | 7 | scale_estimation | greedy | nothink | 2026.4.0.0-3407 |
+| 31 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 0/2 | 16 | 8 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 32 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 0/2 | 19 | 10 | awq | greedy | nothink | 2026.4.0.0-3407 |
+| 33 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 0/2 | 19 | 10 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 34 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 0/2 | 23 | 12 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 35 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 0/2 | 26 | 13 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 36 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 0/2 | 26 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 37 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 0.0 GB | 0/2 | 29 | 14 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
+| 37 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 6.2 GB | 0/2 | 30 | 15 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 38 | Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov | single | 0.7 GB | 0/2 | 40 | 20 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 39 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 0/2 | 87 | 44 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 40 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 0/2 | 103 | 52 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 39 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 0/2 | 85 | 42 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 40 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 0/2 | 87 | 44 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 
 ### agent-loop
 
@@ -265,42 +265,42 @@ _190 runs._
 | 1 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 7/7 | 44 | 6 | qat | greedy | nothink | 2026.4.0.0-3407 |
 | 2 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 7/7 | 58 | 8 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 3 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 7/7 | 60 | 9 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 4 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 7/7 | 73 | 10 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 5 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 7/7 | 80 | 11 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 4 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 7/7 | 72 | 10 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 5 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 7/7 | 73 | 10 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 6 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 7/7 | 89 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 7 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 7/7 | 89 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 8 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | single | 2.3 GB | 7/7 | 110 | 16 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 9 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 8.2 GB | 7/7 | 137 | 20 | qat | greedy | nothink | 2026.4.0.0-3407 |
 | 10 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 7/7 | 145 | 21 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 11 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 6/7 | 37 | 5 | scale_estimation | greedy | nothink | 2026.4.0.0-3407 |
-| 12 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 6/7 | 49 | 7 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 11 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 6/7 | 32 | 5 | scale_estimation | greedy | nothink | 2026.4.0.0-3407 |
+| 12 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 6/7 | 43 | 6 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 13 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 6/7 | 59 | 8 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 14 | HarmenWessels/K2-Horizon-7B-int4-symg128-ov | single | 5.7 GB | 6/7 | 84 | 12 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 15 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 6/7 | 87 | 12 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 16 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 6/7 | 112 | 16 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 17 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | single | 4.9 GB | 6/7 | 121 | 17 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 18 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 6/7 | 122 | 17 | data-free | sampling | nothink | 2026.4.0.0-3407 |
-| 19 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 0.0 GB | 6/7 | 163 | 23 | awq+se | sampling | nothink | 2026.3.0.0-3277 |
+| 16 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 6/7 | 110 | 16 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 17 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 6/7 | 116 | 17 | data-free | sampling | nothink | 2026.4.0.0-3407 |
+| 18 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | single | 4.9 GB | 6/7 | 121 | 17 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 19 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 6.2 GB | 6/7 | 210 | 30 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 20 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 6/7 | 505 | 72 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 21 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 5/7 | 20 | 3 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 22 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 5/7 | 27 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 23 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 5/7 | 31 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 22 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 5/7 | 24 | 3 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 23 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 5/7 | 29 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 24 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 5/7 | 31 | 4 | awq | greedy | nothink | 2026.4.0.0-3407 |
-| 25 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 5/7 | 43 | 6 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 26 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 5/7 | 72 | 10 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 25 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 5/7 | 44 | 6 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 26 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 5/7 | 56 | 8 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 27 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | single | 1.0 GB | 5/7 | 110 | 16 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
 | 28 | OpenVINO/Qwen3.5-4B-int4-ov | single | 3.5 GB | 5/7 | 128 | 18 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 29 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 5/7 | 155 | 22 | qat | greedy | nothink | 2026.4.0.0-3407 |
-| 30 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 5/7 | 483 | 69 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 30 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 5/7 | 306 | 44 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 31 | Echo9Zulu/OmniCoder-9B-int4_sym-ov | single | 6.1 GB | 5/7 | 530 | 76 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 32 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 4/7 | 22 | 3 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 33 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 4/7 | 33 | 5 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 32 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 4/7 | 19 | 3 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 33 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 4/7 | 27 | 4 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 34 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 4/7 | 57 | 8 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 35 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 3/7 | 27 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 35 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 3/7 | 26 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 36 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 3/7 | 27 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 37 | HarmenWessels/Agents-A1-4B-int4-asymg128-ov | single | 3.5 GB | 3/7 | 428 | 61 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 38 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 2/7 | 25 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 39 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 2/7 | 27 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 38 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 2/7 | 22 | 3 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 39 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 2/7 | 26 | 4 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 40 | Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov | single | 0.7 GB | 0/7 | 62 | 9 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 
 ### analysis
@@ -310,50 +310,50 @@ _190 runs._
 | 1 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 4/4 | 63 | 16 | awq+se | greedy | think | 2026.4.0.0-3407 |
 | 2 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 4/4 | 78 | 20 | awq+se | greedy | think | 2026.4.0.0-3407 |
 | 3 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 4/4 | 260 | 65 | awq+se | sampling | think | 2026.4.0.0-3407 |
-| 4 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | single | 1.0 GB | 4/4 | 520 | 130 | awq+se | sampling | think | 2026.4.0.0-3407 |
-| 5 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 4/4 | 595 | 149 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 6 | OpenVINO/Qwen3.5-4B-int4-ov | single | 3.5 GB | 4/4 | 752 | 188 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 7 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 4/4 | 1046 | 262 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 8 | Echo9Zulu/OmniCoder-9B-int4_sym-ov | single | 6.1 GB | 4/4 | 1146 | 286 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 9 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 3/4 | 34 | 8 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 10 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 3/4 | 43 | 11 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 11 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 3/4 | 50 | 12 | awq+se | greedy | think | 2026.4.0.0-3407 |
-| 12 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 3/4 | 50 | 12 | scale_estimation | greedy | think | 2026.4.0.0-3407 |
-| 13 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 3/4 | 52 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
-| 14 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 3/4 | 91 | 23 | awq+se | greedy | think | 2026.4.0.0-3407 |
-| 15 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 3/4 | 157 | 39 | awq+se | greedy | think | 2026.4.0.0-3407 |
-| 16 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 3/4 | 187 | 47 | awq+se | sampling | think | 2026.4.0.0-3407 |
-| 17 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 3/4 | 189 | 47 | awq+se | greedy | think | 2026.4.0.0-3407 |
-| 18 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 3/4 | 208 | 52 | awq+se | greedy | think | 2026.4.0.0-3407 |
-| 19 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 3/4 | 245 | 61 | qat | greedy | think | 2026.4.0.0-3407 |
-| 20 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 3/4 | 254 | 64 | qat | greedy | think | 2026.4.0.0-3407 |
-| 21 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 3/4 | 281 | 70 | awq+se | greedy | think | 2026.4.0.0-3407 |
-| 22 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 0.0 GB | 3/4 | 351 | 88 | awq+se | sampling | think | 2026.3.0.0-3277 |
-| 23 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 3/4 | 367 | 92 | awq+se | sampling | think | 2026.4.0.0-3407 |
+| 4 | Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov | single | 6.2 GB | 4/4 | 356 | 89 | awq+se | sampling | think | 2026.4.0.0-3407 |
+| 5 | HarmenWessels/Spark-X2.5-1.7B-int4-symg128-ov | single | 1.0 GB | 4/4 | 520 | 130 | awq+se | sampling | think | 2026.4.0.0-3407 |
+| 6 | OpenVINO/Qwen3-14B-int4-ov | single | 9.7 GB | 4/4 | 584 | 146 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 7 | OpenVINO/Qwen3.5-4B-int4-ov | single | 3.5 GB | 4/4 | 752 | 188 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 8 | OpenVINO/Qwen3.5-9B-int4-ov | single | 6.1 GB | 4/4 | 1046 | 262 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 9 | Echo9Zulu/OmniCoder-9B-int4_sym-ov | single | 6.1 GB | 4/4 | 1146 | 286 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 10 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 3/4 | 34 | 8 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 11 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 3/4 | 34 | 8 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 12 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 3/4 | 40 | 10 | awq+se | greedy | think | 2026.4.0.0-3407 |
+| 13 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 3/4 | 41 | 10 | scale_estimation | greedy | think | 2026.4.0.0-3407 |
+| 14 | HarmenWessels/SmolLM3-3B-int4-symg128-ov | single | 1.7 GB | 3/4 | 52 | 13 | awq+se | sampling | nothink | 2026.4.0.0-3407 |
+| 15 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 3/4 | 83 | 21 | awq+se | greedy | think | 2026.4.0.0-3407 |
+| 16 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 3/4 | 134 | 34 | awq+se | sampling | think | 2026.4.0.0-3407 |
+| 17 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 3/4 | 157 | 39 | awq+se | greedy | think | 2026.4.0.0-3407 |
+| 18 | HarmenWessels/granite-4.1-3b-int4-cw-code-ov | single | 1.8 GB | 3/4 | 168 | 42 | awq+se | greedy | think | 2026.4.0.0-3407 |
+| 19 | HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov | single | 2.0 GB | 3/4 | 211 | 53 | awq+se | greedy | think | 2026.4.0.0-3407 |
+| 20 | HarmenWessels/gemma-4-E2B-it-qat-int4-ov | single | 4.4 GB | 3/4 | 245 | 61 | qat | greedy | think | 2026.4.0.0-3407 |
+| 21 | HarmenWessels/gemma-4-E4B-it-qat-int4-ov | single | 6.6 GB | 3/4 | 254 | 64 | qat | greedy | think | 2026.4.0.0-3407 |
+| 22 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 3/4 | 281 | 70 | awq+se | greedy | think | 2026.4.0.0-3407 |
+| 23 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 3/4 | 330 | 82 | awq+se | sampling | think | 2026.4.0.0-3407 |
 | 24 | OpenVINO/Qwen3-4B-int4-ov | single | 2.3 GB | 3/4 | 429 | 107 | awq | greedy | think | 2026.4.0.0-3407 |
 | 25 | HarmenWessels/gemma-4-12B-it-qat-int4-ov | single | 8.2 GB | 3/4 | 467 | 117 | qat | greedy | think | 2026.4.0.0-3407 |
-| 26 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 3/4 | 609 | 152 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 27 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 3/4 | 720 | 180 | awq+se | sampling | think | 2026.4.0.0-3407 |
-| 28 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | single | 2.3 GB | 3/4 | 785 | 196 | awq+se | sampling | think | 2026.4.0.0-3407 |
-| 29 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 3/4 | 821 | 205 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 30 | HarmenWessels/Agents-A1-4B-int4-asymg128-ov | single | 3.5 GB | 3/4 | 931 | 233 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 31 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 3/4 | 951 | 238 | data-free | sampling | think | 2026.4.0.0-3407 |
+| 26 | Echo9Zulu/Qwen3.5-2B-int4_sym-ov | single | 2.1 GB | 3/4 | 544 | 136 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 27 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 3/4 | 609 | 152 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 28 | HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov | single | 2.0 GB | 3/4 | 720 | 180 | awq+se | sampling | think | 2026.4.0.0-3407 |
+| 29 | HarmenWessels/Spark-X2.5-4B-int4-symg128-ov | single | 2.3 GB | 3/4 | 785 | 196 | awq+se | sampling | think | 2026.4.0.0-3407 |
+| 30 | HarmenWessels/Ornith-1.0-9B-int4-symg128-ov | single | 6.1 GB | 3/4 | 925 | 231 | data-free | sampling | think | 2026.4.0.0-3407 |
+| 31 | HarmenWessels/Agents-A1-4B-int4-asymg128-ov | single | 3.5 GB | 3/4 | 931 | 233 | data-free | greedy | think | 2026.4.0.0-3407 |
 | 32 | HarmenWessels/K2-Horizon-7B-int4-symg128-ov | single | 5.7 GB | 3/4 | 979 | 245 | awq+se | sampling | think | 2026.4.0.0-3407 |
 | 33 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | single | 4.9 GB | 3/4 | 1754 | 438 | awq+se | sampling | think | 2026.4.0.0-3407 |
 | 34 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 2/4 | 24 | 6 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 35 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 2/4 | 94 | 24 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 35 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 2/4 | 75 | 19 | data-free | greedy | think | 2026.4.0.0-3407 |
 | 36 | Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov | single | 0.7 GB | 2/4 | 125 | 31 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 37 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 2/4 | 194 | 48 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 37 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 2/4 | 179 | 45 | data-free | greedy | think | 2026.4.0.0-3407 |
 | 38 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 2/4 | 2249 | 562 | awq+se | sampling | think | 2026.4.0.0-3407 |
-| 39 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 1/4 | 36 | 9 | data-free | greedy | think | 2026.4.0.0-3407 |
-| 40 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 1/4 | 187 | 47 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 39 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 1/4 | 28 | 7 | data-free | greedy | think | 2026.4.0.0-3407 |
+| 40 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 1/4 | 147 | 37 | data-free | greedy | think | 2026.4.0.0-3407 |
 
 ### autocomplete-fim
 
 | # | Entry | Kind | Size/Roles | Quality | Total s | Avg s | Recipe | Decode | Think | Engine |
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1 | HarmenWessels/LFM2.5-1.2B-Instruct-int4-ov | single | 0.7 GB | 1/1 | 1 | 1 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 2 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 1/1 | 2 | 2 | data-free | greedy | nothink | 2026.4.0.0-3407 |
+| 2 | OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov | single | 0.3 GB | 1/1 | 1 | 1 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 3 | OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov | single | 0.9 GB | 1/1 | 2 | 2 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 4 | OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov | single | 1.8 GB | 1/1 | 2 | 2 | scale_estimation | greedy | nothink | 2026.4.0.0-3407 |
 | 5 | HarmenWessels/MiniCPM5-2B-int4-symg128-ov | single | 1.6 GB | 1/1 | 3 | 3 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
@@ -369,27 +369,23 @@ _190 runs._
 | 15 | HarmenWessels/MiniCPM5-1B-int4-g128-ov | single | 0.8 GB | 0/1 | 1 | 1 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 16 | HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov | single | 0.9 GB | 0/1 | 1 | 1 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 17 | Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov | single | 0.7 GB | 0/1 | 2 | 2 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 18 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 0/1 | 2 | 2 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 19 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 0/1 | 2 | 2 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 20 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 0/1 | 3 | 3 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 18 | HarmenWessels/granite-4.1-3b-int4-cw-ov | single | 1.8 GB | 0/1 | 2 | 2 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 19 | HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov | single | 0.7 GB | 0/1 | 2 | 2 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 20 | OpenVINO/Qwen3-0.6B-int4-ov | single | 0.4 GB | 0/1 | 2 | 2 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 21 | OpenVINO/Qwen3-1.7B-int4-ov | single | 1.2 GB | 0/1 | 3 | 3 | data-free | greedy | nothink | 2026.4.0.0-3407 |
 | 22 | HarmenWessels/K2-Horizon-3.7B-int4-symg128-ov | single | 3.2 GB | 0/1 | 5 | 5 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 23 | HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov | single | 4.8 GB | 0/1 | 5 | 5 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 24 | HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov | single | 4.9 GB | 0/1 | 7 | 7 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 25 | OpenVINO/Qwen3-8B-int4-cw-ov | single | 4.7 GB | 0/1 | 7 | 7 | data-free | greedy | nothink | 2026.4.0.0-3407 |
-| 26 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 0/1 | 8 | 8 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 27 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 0/1 | 8 | 8 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
-| 28 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 0/1 | 9 | 9 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 26 | HarmenWessels/granite-4.1-8b-int4-cw-code-ov | single | 4.4 GB | 0/1 | 8 | 8 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 27 | HarmenWessels/granite-4.1-8b-int4-cw-ov | single | 4.4 GB | 0/1 | 8 | 8 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
+| 28 | HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov | single | 4.9 GB | 0/1 | 8 | 8 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 29 | HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov | single | 7.6 GB | 0/1 | 11 | 11 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 | 30 | HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov | single | 7.6 GB | 0/1 | 11 | 11 | awq+se | greedy | nothink | 2026.4.0.0-3407 |
 
 ## Retest queue
 
-- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / agent-loop: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.4.0.0-3407-7ea2546852a
-- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / analysis: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.4.0.0-3407-7ea2546852a
-- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / codegen: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.4.0.0-3407-7ea2546852a
-- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / edit: engine 2026.3.0.0-3277-bd8d6542e3c != newest 2026.4.0.0-3407-7ea2546852a
-- Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov: not yet run on autocomplete-fim
+_None — all entries current._
 
 ## Failures
 
@@ -439,6 +435,11 @@ _190 runs._
   - parse-duration#0: FAIL (parse_duration('2h45m') -> 0)
   - rle-codec#0: FAIL (IndexError: string index out of range)
 
+**Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / codegen**:
+  - merge-intervals#0: FAIL (NameError: name 'merge_intervals' is not defined)
+  - rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)
+  - rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)
+
 **HarmenWessels/gemma-4-12B-it-qat-int4-ov / codegen**:
   - merge-intervals#0: FAIL (NameError: name '__name__Ä™_main__' is not defined)
   - parse-duration#0: FAIL (error: cannot refer to an open group at position 1)
@@ -477,13 +478,6 @@ _190 runs._
   - rle-codec#1: FAIL (SyntaxError: invalid syntax. Perhaps you forgot a comma? (<string>, line 1))
   - group-anagrams#0: FAIL (_ga() -> [['ate'], ['bat'], ['eat'], ['nat'], ['tan'], ['tea']])
 
-**Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / codegen**:
-  - merge-intervals#0: FAIL (NameError: name 'merge_intervals' is not defined)
-  - merge-intervals#1: FAIL (SyntaxError: 'return' outside function (<string>, line 2))
-  - rate-limiter#1: FAIL (SyntaxError: unterminated string literal (detected at line 5) (<string>, line 5))
-  - rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)
-  - rle-codec#1: FAIL (SyntaxError: invalid syntax (<string>, line 1))
-
 **HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / codegen**:
   - lru-cache#0: FAIL (NameError: name 'LRUCache' is not defined)
   - lru-cache#1: FAIL (NameError: name 'LRUCache' is not defined)
@@ -500,15 +494,6 @@ _190 runs._
   - parse-duration#1: FAIL (SyntaxError: invalid syntax (<string>, line 3))
   - rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)
 
-**HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / codegen**:
-  - rate-limiter#0: FAIL (_seq() -> [True, False, False, False])
-  - rate-limiter#1: FAIL (_seq() -> [False, False, False, False])
-  - parse-duration#0: FAIL (ValueError: invalid literal for int() with base 10: '2h45')
-  - parse-duration#1: FAIL (ValueError: invalid literal for int() with base 10: '1h30m15')
-  - rle-codec#0: FAIL (ValueError: invalid literal for int() with base 10: '3b1c3')
-  - rle-codec#1: FAIL (IndexError: string index out of range)
-  - group-anagrams#0: FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])
-
 **HarmenWessels/granite-4.1-3b-int4-cw-ov / codegen**:
   - merge-intervals#0: FAIL (NameError: name 'merge_intervals' is not defined)
   - rate-limiter#1: FAIL (ImportError: cannot import name 'deque' from 'datetime' (~\AppData\Local\Programs\Python\Python312\Lib\datetime.py))
@@ -518,23 +503,14 @@ _190 runs._
   - rle-codec#0: FAIL (rle_decode('a3b1c3') -> 'a3b1c3')
   - rle-codec#1: FAIL (ValueError: invalid literal for int() with base 10: '')
 
-**OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov / codegen**:
-  - merge-intervals#0: FAIL (IndexError: list index out of range)
+**HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / codegen**:
+  - rate-limiter#0: FAIL (_seq() -> [True, False, False, False])
   - rate-limiter#1: FAIL (_seq() -> [False, False, False, False])
-  - parse-duration#0: FAIL (ValueError: invalid literal for int() with base 10: '2h45m')
+  - parse-duration#0: FAIL (ValueError: invalid literal for int() with base 10: '2h45')
   - parse-duration#1: FAIL (ValueError: invalid literal for int() with base 10: '1h30m15')
-  - rle-codec#0: FAIL (TypeError: sequence item 1: expected str instance, int found)
-  - rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)
+  - rle-codec#0: FAIL (ValueError: invalid literal for int() with base 10: '3b1c3')
+  - rle-codec#1: FAIL (IndexError: string index out of range)
   - group-anagrams#0: FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])
-
-**OpenVINO/Qwen3-1.7B-int4-ov / codegen**:
-  - rate-limiter#0: FAIL (NameError: name 'SlidingWindowLimiter' is not defined)
-  - rate-limiter#1: FAIL (NameError: name 'SlidingWindowLimiter' is not defined)
-  - lru-cache#0: FAIL (AttributeError: 'NoneType' object has no attribute 'next')
-  - lru-cache#1: FAIL (missing definition)
-  - parse-duration#1: FAIL (NameError: name 'parse_duration' is not defined)
-  - rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)
-  - rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)
 
 **HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov / codegen**:
   - merge-intervals#1: FAIL (SyntaxError: invalid syntax (<string>, line 1))
@@ -553,6 +529,26 @@ _190 runs._
   - rle-codec#0: FAIL (exec timeout)
   - rle-codec#1: FAIL (rle_encode('aaabccc') -> 'a3a1a3')
   - group-anagrams#0: FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])
+
+**OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov / codegen**:
+  - merge-intervals#0: FAIL (IndexError: list index out of range)
+  - rate-limiter#0: FAIL (_seq() -> [True, True, False, False])
+  - rate-limiter#1: FAIL (_seq() -> [False, False, False, False])
+  - parse-duration#0: FAIL (ValueError: invalid literal for int() with base 10: '2h45m')
+  - parse-duration#1: FAIL (ValueError: invalid literal for int() with base 10: '1h30m15')
+  - rle-codec#0: FAIL (TypeError: sequence item 1: expected str instance, int found)
+  - rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)
+  - group-anagrams#0: FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])
+
+**OpenVINO/Qwen3-1.7B-int4-ov / codegen**:
+  - merge-intervals#0: FAIL (NameError: name 'merge_intervals' is not defined)
+  - rate-limiter#0: FAIL (NameError: name 'SlidingWindowLimiter' is not defined)
+  - rate-limiter#1: FAIL (NameError: name 'SlidingWindowLimiter' is not defined)
+  - lru-cache#0: FAIL (AttributeError: 'NoneType' object has no attribute 'next')
+  - lru-cache#1: FAIL (missing definition)
+  - parse-duration#1: FAIL (NameError: name 'parse_duration' is not defined)
+  - rle-codec#0: FAIL (NameError: name 'rle_encode' is not defined)
+  - rle-codec#1: FAIL (NameError: name 'rle_encode' is not defined)
 
 **HarmenWessels/MiniCPM5-1B-int4-g128-ov / codegen**:
   - rate-limiter#0: FAIL (TypeError: '>=' not supported between instances of 'datetime.datetime' and 'int')
@@ -576,17 +572,6 @@ _190 runs._
   - rle-codec#0: FAIL (missing definition)
   - rle-codec#1: FAIL (rle_decode('a3b1c3') -> 'a4b2c4')
 
-**Echo9Zulu/Qwen3.5-2B-int4_sym-ov / codegen**:
-  - rate-limiter#0: FAIL (_seq() -> [True, True, False, False])
-  - rate-limiter#1: FAIL (_seq() -> [True, True, True, True])
-  - lru-cache#1: FAIL (AttributeError: 'dict' object has no attribute 'move_to_end')
-  - parse-duration#0: FAIL (ValueError: Invalid unit: 2h45m. Allowed units: h, m, s.)
-  - parse-duration#1: FAIL (SyntaxError: invalid syntax (<string>, line 1))
-  - rle-codec#0: FAIL (rle_decode(rle_encode('zzzzzzzzzzzz')) -> 'z')
-  - rle-codec#1: FAIL (SyntaxError: invalid syntax (<string>, line 2))
-  - group-anagrams#0: FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])
-  - group-anagrams#1: FAIL (TypeError: unhashable type: 'list')
-
 **OpenVINO/Qwen3-0.6B-int4-ov / codegen**:
   - merge-intervals#1: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [[1, 3], [8, 10]])
   - rate-limiter#0: FAIL (_seq() -> [True, True, True, True])
@@ -599,8 +584,20 @@ _190 runs._
   - rle-codec#1: FAIL (rle_decode('a3b1c3') -> 'a1b1c1')
   - group-anagrams#0: FAIL (NameError: name 'group_anagrams' is not defined)
 
+**Echo9Zulu/Qwen3.5-2B-int4_sym-ov / codegen**:
+  - merge-intervals#0: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [[1, 3], [8, 10], [1, 6]])
+  - rate-limiter#0: FAIL (_seq() -> [True, True, False, False])
+  - rate-limiter#1: FAIL (_seq() -> [True, True, True, True])
+  - lru-cache#1: FAIL (AttributeError: 'dict' object has no attribute 'move_to_end')
+  - parse-duration#0: FAIL (ValueError: Invalid unit: 2h45m. Allowed units: h, m, s.)
+  - parse-duration#1: FAIL (SyntaxError: invalid syntax (<string>, line 1))
+  - rle-codec#0: FAIL (rle_decode(rle_encode('zzzzzzzzzzzz')) -> 'z')
+  - rle-codec#1: FAIL (SyntaxError: invalid syntax (<string>, line 2))
+  - group-anagrams#0: FAIL (_ga() -> [['a', 'b', 't'], ['a', 'e', 't'], ['a', 'n', 't']])
+  - group-anagrams#1: FAIL (TypeError: unhashable type: 'list')
+
 **OpenVINO/Qwen2.5-Coder-0.5B-Instruct-int4-ov / codegen**:
-  - merge-intervals#0: FAIL (IndexError: list index out of range)
+  - merge-intervals#0: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [(1, 6), [2, 6], [8, 10]])
   - merge-intervals#1: FAIL (merge_intervals([[1,3],[2,6],[8,10]]) -> [(1, 3), [2, 6], [2, 6]])
   - rate-limiter#0: FAIL (_seq() -> [True, True, True, True])
   - rate-limiter#1: FAIL (_seq() -> [True, True, False, False])
@@ -615,17 +612,17 @@ _190 runs._
 **HarmenWessels/MiniCPM5-2B-int4-symg128-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=['read_file'])
 
-**HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov / edit**:
-  - write-full: FAIL (writes=0 calls=['read_file'])
-
 **Echo9Zulu/Qwen3.5-2B-int4_sym-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=['read_file'])
 
-**HarmenWessels/Spark-X2.5-4B-int4-symg128-ov / edit**:
-  - edit-exact: FAIL (edits=0 calls=['read_file'])
+**HarmenWessels/Seed-Coder-8B-Instruct-int4-cw-ov / edit**:
+  - write-full: FAIL (writes=0 calls=['read_file'])
 
 **HarmenWessels/granite-4.1-8b-int4-cw-code-ov / edit**:
   - edit-exact: FAIL (old-match=False old='if window < 1:\n        raise ValueError("window )
+
+**HarmenWessels/Spark-X2.5-4B-int4-symg128-ov / edit**:
+  - edit-exact: FAIL (edits=0 calls=['read_file'])
 
 **HarmenWessels/gemma-4-E2B-it-qat-int4-ov / edit**:
   - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)
@@ -633,11 +630,11 @@ _190 runs._
 **HarmenWessels/gemma-4-E4B-it-qat-int4-ov / edit**:
   - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)
 
-**HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / edit**:
-  - write-full: FAIL (exec/assert failed: '[' was never closed (<string>, line 15))
-
 **HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=['read_file'])
+
+**HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / edit**:
+  - write-full: FAIL (exec/assert failed: '[' was never closed (<string>, line 15))
 
 **HarmenWessels/Ministral-3-14B-Reasoning-int4-symg128-ov / edit**:
   - write-full: FAIL (exec/assert failed: '[' was never closed (<string>, line 15))
@@ -656,28 +653,32 @@ _190 runs._
   - edit-exact: FAIL (old-match=False old='def moving_average(values, window):\\n    ')
   - write-full: FAIL (exec/assert failed: 'mean')
 
-**HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / edit**:
-  - edit-exact: FAIL (old-match=False old='moving_average = lambda values, window:')
-  - write-full: FAIL (writes=0 calls=[])
-
 **HarmenWessels/MiniCPM5-1B-int4-g128-ov / edit**:
   - edit-exact: FAIL (old-match=True old='moving_average')
+  - write-full: FAIL (writes=0 calls=[])
+
+**HarmenWessels/Qwen2.5-Coder-1.5B-int4-symg128-ov / edit**:
+  - edit-exact: FAIL (old-match=False old='moving_average = lambda values, window:')
   - write-full: FAIL (writes=0 calls=[])
 
 **OpenVINO/Qwen3-0.6B-int4-ov / edit**:
   - edit-exact: FAIL (old-match=True old='')
   - write-full: FAIL (writes=0 calls=[])
 
-**OpenVINO/Qwen3-1.7B-int4-ov / edit**:
-  - edit-exact: FAIL (old-match=True old='return [sum(values[i:i + window]) / window\n      )
-  - write-full: FAIL (writes=0 calls=[])
-
 **OpenVINO/Qwen2.5-Coder-1.5B-Instruct-int4-ov / edit**:
   - edit-exact: FAIL (old-match=True old='window must satisfy 1 <= window <= len(values)')
   - write-full: FAIL (writes=0 calls=[])
 
+**OpenVINO/Qwen3-1.7B-int4-ov / edit**:
+  - edit-exact: FAIL (old-match=True old='return [sum(values[i:i + window]) / window\n      )
+  - write-full: FAIL (writes=0 calls=[])
+
 **OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=[])
+  - write-full: FAIL (writes=0 calls=[])
+
+**HarmenWessels/granite-4.1-3b-int4-cw-ov / edit**:
+  - edit-exact: FAIL (old-match=True old='')
   - write-full: FAIL (writes=0 calls=[])
 
 **OpenVINO/Qwen3-4B-int4-ov / edit**:
@@ -687,10 +688,6 @@ _190 runs._
 **OpenVINO/Qwen3-8B-int4-cw-ov / edit**:
   - edit-exact: FAIL (old-match=True old='return [sum(values[i:i + window]) / window\n      )
   - write-full: FAIL (writes=0 calls=['edit_file'])
-
-**HarmenWessels/granite-4.1-3b-int4-cw-ov / edit**:
-  - edit-exact: FAIL (old-match=True old='')
-  - write-full: FAIL (writes=0 calls=[])
 
 **HarmenWessels/Ministral-3-3B-Instruct-int4-symg128-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=[])
@@ -712,13 +709,13 @@ _190 runs._
   - edit-exact: FAIL (edits=0 calls=[])
   - write-full: FAIL (exec/assert failed: '(' was never closed (<string>, line 1))
 
-**HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / edit**:
-  - edit-exact: FAIL (edits=0 calls=[])
-  - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)
-
 **HarmenWessels/granite-4.1-3b-int4-cw-code-ov / edit**:
   - edit-exact: FAIL (edits=0 calls=[])
   - write-full: FAIL (writes=0 calls=[])
+
+**HarmenWessels/Ministral-3-3B-Reasoning-int4-symg128-ov / edit**:
+  - edit-exact: FAIL (edits=0 calls=[])
+  - write-full: FAIL (exec/assert failed: unterminated triple-quoted string literal (detecte)
 
 **OpenVINO/Qwen2.5-Coder-3B-Instruct-int4-ov / agent-loop**:
   - result-use: FAIL (calls=[('read_file', {'path': 'config.yaml'})] content='')
@@ -738,14 +735,14 @@ _190 runs._
 **OpenVINO/Qwen3-14B-int4-ov / agent-loop**:
   - chain-depth: FAIL (turn 1: repeated call edit_file)
 
-**HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov / agent-loop**:
-  - no-repeat: FAIL (calls=[])
-
 **HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / agent-loop**:
   - chain-depth: FAIL (turn 4: repeated call read_file)
 
+**HarmenWessels/Ministral-3-8B-Reasoning-int4-symg128-ov / agent-loop**:
+  - no-repeat: FAIL (calls=[])
+
 **Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / agent-loop**:
-  - chain-depth: FAIL (turn 4: repeated call read_file)
+  - chain-depth: FAIL (turn 4: repeated call run_tests)
 
 **OpenVINO/Qwen3.5-9B-int4-ov / agent-loop**:
   - chain-depth: FAIL (turn 1: repeated call read_file)
@@ -868,11 +865,11 @@ _190 runs._
 **HarmenWessels/granite-4.1-8b-int4-cw-code-ov / analysis**:
   - diagnose: FAIL (content='the test fails because the expected median value for the list)
 
-**HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / analysis**:
-  - diagnose: FAIL (content="the issue is that the function doesn't handle the case where )
-
 **HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov / analysis**:
   - route: FAIL (4/6 [chat:chat, edit:edit, design:design, chat:None, edit:None, design)
+
+**HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / analysis**:
+  - diagnose: FAIL (content="the issue is that the function doesn't handle the case where )
 
 **HarmenWessels/granite-4.1-3b-int4-cw-code-ov / analysis**:
   - recall-deep: FAIL (content='(answer omitted from transcript for brevity) (answer omitted )
@@ -889,9 +886,6 @@ _190 runs._
 **HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov / analysis**:
   - route: FAIL (4/6 [chat:chat, edit:edit, design:None, chat:None, edit:edit, design:d)
 
-**Echo9Zulu/Ornith-1.5-9B-int4_asym-awq-ov / analysis**:
-  - route: FAIL (5/6 [chat:chat, edit:edit, design:None, chat:chat, edit:edit, design:d)
-
 **HarmenWessels/MiniCPM5-2B-int4-symg128-ov / analysis**:
   - route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design)
 
@@ -900,6 +894,9 @@ _190 runs._
 
 **HarmenWessels/gemma-4-12B-it-qat-int4-ov / analysis**:
   - route: FAIL (2/6 [chat:None, edit:None, design:None, chat:None, edit:edit, design:d)
+
+**Echo9Zulu/Qwen3.5-2B-int4_sym-ov / analysis**:
+  - route: FAIL (4/6 [chat:None, edit:edit, design:design, chat:chat, edit:edit, design)
 
 **OpenVINO/Qwen3-8B-int4-cw-ov / analysis**:
   - plan: FAIL (symbols=0 numbered=False code=False)
@@ -910,14 +907,11 @@ _190 runs._
 **HarmenWessels/Spark-X2.5-4B-int4-symg128-ov / analysis**:
   - recall-deep: FAIL (EXC: timed out)
 
-**Echo9Zulu/Qwen3.5-2B-int4_sym-ov / analysis**:
-  - route: FAIL (4/6 [chat:None, edit:edit, design:design, chat:chat, edit:edit, design)
+**HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / analysis**:
+  - route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:None, edit:edit, design)
 
 **HarmenWessels/Agents-A1-4B-int4-asymg128-ov / analysis**:
   - route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:chat, edit:edit, design)
-
-**HarmenWessels/Ornith-1.0-9B-int4-symg128-ov / analysis**:
-  - route: FAIL (5/6 [chat:chat, edit:edit, design:design, chat:None, edit:edit, design)
 
 **HarmenWessels/K2-Horizon-7B-int4-symg128-ov / analysis**:
   - route: FAIL (3/6 [chat:None, edit:edit, design:None, chat:None, edit:edit, design:d)
@@ -964,13 +958,13 @@ _190 runs._
 **Echo9Zulu/LFM2.5-1.2B-Thinking-int4_asym-ov / autocomplete-fim**:
   - merge-fim: FAIL
 
+**HarmenWessels/granite-4.1-3b-int4-cw-ov / autocomplete-fim**:
+  - merge-fim: FAIL
+
 **HarmenWessels/K2-Horizon-0.9B-int4-symg128-ov / autocomplete-fim**:
   - merge-fim: FAIL
 
 **OpenVINO/Qwen3-0.6B-int4-ov / autocomplete-fim**:
-  - merge-fim: FAIL
-
-**HarmenWessels/granite-4.1-3b-int4-cw-ov / autocomplete-fim**:
   - merge-fim: FAIL
 
 **OpenVINO/Qwen3-1.7B-int4-ov / autocomplete-fim**:
@@ -988,13 +982,13 @@ _190 runs._
 **OpenVINO/Qwen3-8B-int4-cw-ov / autocomplete-fim**:
   - merge-fim: FAIL
 
+**HarmenWessels/granite-4.1-8b-int4-cw-code-ov / autocomplete-fim**:
+  - merge-fim: FAIL
+
 **HarmenWessels/granite-4.1-8b-int4-cw-ov / autocomplete-fim**:
   - merge-fim: FAIL
 
 **HarmenWessels/Ministral-3-8B-Instruct-int4-symg128-ov / autocomplete-fim**:
-  - merge-fim: FAIL
-
-**HarmenWessels/granite-4.1-8b-int4-cw-code-ov / autocomplete-fim**:
   - merge-fim: FAIL
 
 **HarmenWessels/Ministral-3-14B-Instruct-int4-symg128-ov / autocomplete-fim**:

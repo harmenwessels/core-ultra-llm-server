@@ -13,7 +13,7 @@
 # answers are direct and bounded, so analysis runs nothink here and the structured class
 # samples (greedy loops). The preflight think-split probe fails by design for this card.
 hf_id: HarmenWessels/SmolLM3-3B-int4-symg128-ov
-published: false   # upload after tonight's 2026.4 sweep
+published: true   # public on the HF hub — the leaderboard links it
 alias: smollm3-3b
 family: smollm3
 device: GPU

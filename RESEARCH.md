@@ -607,11 +607,26 @@ Then the real benchmark path (`run_fleet.ps1 -Tasks codegen`) re-run on both ven
 177 s the previous sweep had recorded for 2026.3.1. The slowdown was **box state at the moment
 those models ran**, not the engine. Tiny models are the drift detector: a 3-minute task on a
 90 tok/s model is dominated by whatever else the box is doing, while a 14B at 30 tok/s averages
-it out. Rules that follow (added to the run-benchmark skill): a cross-sweep *time* delta is only
-a finding after an interleaved re-run of the specific model; per-task **throughput** (chars/s
-from the records) is the number to compare, not total seconds, because sampled output length
-varies per seed; and a model whose short tasks match to the second while its long tasks do not
-is drift, not engine.
+it out.
+
+**Confirmed by a full re-run (part D, 2026-09-20 evening, idle box)** of the 15 models whose
+totals had risen ≥14%: cells reproduced (13/15 identical, two single sampled-codegen flips) and
+10 of the 15 time deltas collapsed to ±10% or *faster* than 2026.3.1 (Qwen3-0.6B 510 → 305 s = the
+old time exactly; K2-0.9B 1079 → 675 s; Qwen3.5-2B 2402 → 1578 s; Coder-3B −16%). The five that
+stayed high reproduced to the second and decompose without an engine term:
+MiniCPM5-1B/2B +23% is **output length** (+52…77% more chars at equal or higher chars/s);
+Qwen3-14B +11% is −8% codegen chars/s, inside the drift band; Ministral-3B +20% and Ornith-1.0
++31% are **extra best-of-2 attempts** — different seeded trajectories failed block 0 on more cells
+(Ministral rate-limiter#1: 31 s/1 block → 156 s/2 blocks), and both models read parity in a direct
+interleaved A-B (Ministral-3B: sampled −1.0%, greedy +0.7%; server-level 100 vs 100 chars/s).
+Trap in the records: `response` holds only the last attempt's text while `runtime.seconds` sums
+every attempt, so chars/s computed from a `blocks_used=2` cell undercounts — compare b=1 cells,
+or per-attempt timings.
+
+Rules that follow (in the run-benchmark skill): a cross-sweep *time* delta is only a finding
+after an interleaved re-run of the specific model; compare per-task throughput on single-block
+cells, not totals, because sampled output length and retry count vary per seed; and a model
+whose short tasks match to the second while its long tasks do not is drift or retries, not engine.
 
 Two side observations. GenAI 2026.4's compile cache grows ~4× faster over a *fleet* sweep than
 2026.3.1's (44 GB after 10 models) — the per-model blob set is the same size, so this is more
@@ -621,9 +636,69 @@ but still loses the `\uXXXX`-in-regex lookahead, so `scripts/ov_tokenizer_id0_pa
 the conversion path.
 
 Consequences: `requirements.txt` and the serving venv move to 2026.4 (337eb18); `.venv-genai`
-(2026.3.1) is retired once the branch merges; 186 of 190 records carry `2026.4.0.0-3407` — the
-only engine-stale rows left are Ornith-1.5 (the Echo9Zulu AWQ IR, 6.3 GB, not on disk; re-download
-to close the queue).
+(2026.3.1) is retired once the branch merges; all 190 records carry `2026.4.0.0-3407` (Ornith-1.5's
+Echo9Zulu IR was re-downloaded and re-run on 2026-09-20: 19/25, up from the August 16/25 — seeded
+best-of-2 codegen 9/12 and analysis 4/4; the retest queue is empty for the first time since June).
+
+**MoE gate re-test, same day: still blocked.** Intel's `OpenVINO/LFM2.5-8B-A1B-int4-ov` (hub revision
+unchanged since 2026-08-03) does not finish compiling on the iGPU in 15 min on 2026.4 either, while the
+CPU compiles it in 26 s and decodes at 9.7 tok/s. The "early release" listing is CPU-path validation.
+The IR carries no fused MoE op — optimum-intel 2.2.0 (the version that exported it, and the one in
+`.venv-convert-240`) lowers `lfm2_moe` to a dense batched matmul over all 32 experts, and the 2026.4
+opset has no MOE op — so a re-export changes nothing; the GPU fusions from PR #37199 are pattern
+matches the plugin evidently never reaches. Side effect worth knowing: the hung compile ballooned
+`pagefile.sys` to 36.6 GB (peak commit 28.5 GB) and Windows never shrinks it — 25 GB of disk "vanished"
+until a reboot. Cap any future MoE compile probe and expect to reboot after it.
+
+**NPU probe of the sym-int4 small models (2026-09-20, 2026.4, 96-token warm FIM completion):**
+K2-Horizon-0.9B **5.2 s** (real code continuation; fastest on NPU), MiniCPM5-2B 8.9 s (thinks first),
+Coder-1.5B-symg128 9.3 s (incumbent), Ministral-3B-Instruct 12.1 s (chatty), SmolLM3-3B 13.6 s (thinks
+first), K2-3.7B 14.7 s (real code); granite-3b channel-wise sym 140 s (cw int4 falls off the fast NPU
+path — keep NPU IRs at g128); MiniCPM5-1B and LFM2.5-1.2B are asym and the NPU plugin refuses them.
+Two harness notes: K2's tokenizer IR carries no chat template (the server renders the vendor
+template itself), so a GenAI-level probe must render it with jinja2; Ministral's template's default
+system prompt alone overflows `MAX_PROMPT_LEN=1024` — use 2048.
+
+## Finding 21 — Qwen3.5 MTP speculative decoding on the iGPU: +9–11%, greedy only
+
+OpenVINO 2026.4 + optimum-intel 2.2.0 ship Qwen3.5's multi-token-prediction head as a built-in
+draft model (no second model: the export writes `openvino_mtp_model.xml`, 71 MB int4, next to the
+language model whenever the checkpoint has `mtp_num_hidden_layers > 0`). Tested 2026-09-20 on a
+fresh export of `Qwen/Qwen3.5-4B` with Intel's exact recipe (int4 asym g128, ratio 1.0, data-free;
+`models/HarmenWessels/Qwen3.5-4B-int4-asymg128-mtp-ov`, kept on disk) so the head is the only
+variable. Three things had to be learned to make it run at all:
+
+- the MTP submodel fails NNCF's group-size check (`rotary_emb` matmul, channel size 1) →
+  `--group-size-fallback ignore`;
+- the entry point is **`VLMPipeline`**, not `LLMPipeline` — Qwen3.5 IRs are decomposed
+  (language model + text embeddings) and MTP "requires a decomposed model with a text embeddings
+  model"; `LLMPipeline` dies on a missing `input_ids` port;
+- the linear-attention verifier refuses prefix caching → `SchedulerConfig(enable_prefix_caching=False)`.
+
+Interleaved plain/MTP A-B (`scripts/mtp_ab.py`, fresh process per arm, 300 greedy tokens, medians
+over adjacent pairs, 13b rules):
+
+| num_assistant_tokens | plain | MTP | Δ | pairs won |
+|---|---|---|---|---|
+| 1 | 24.0 | 24.1 | +0.4% | 2/3 |
+| 2 | 23.1 | 25.2 | **+9.0%** | 3/3 |
+| 3 | 22.8 | 25.3 | **+11.1%** | 3/3 |
+| 5 | 22.4 | 23.9 | +6.8% | 2/2 |
+
+TTFT unchanged (~240 ms). Output is not byte-identical across arms because the MTP path runs
+the continuous-batching pipeline while plain Qwen3.5 runs stateful — kernel-path noise, the same
+class as the cross-engine greedy differences in finding 20. The ceiling is set by a single draft
+layer: k=3 is the sweet spot, k=5 already loses acceptance.
+
+**But: `MTP speculative decoding supports greedy decoding only`** (runtime check). Exactly the
+EAGLE-3 verdict on Qwen3-8B: it cannot help the sampled `codegen` task, only the greedy
+structured tasks (edit / agent-loop / analysis), and only for Qwen3.5 IRs re-exported with the
+head — Intel's `OpenVINO/Qwen3.5-9B-int4-ov` and Echo9Zulu's 2B carry none. Server integration
+would be small (when `openvino_mtp_model.xml` exists, construct `VLMPipeline` with
+`draft_model=ov_genai.draft_model(dir, device)` + a no-prefix-caching scheduler and set
+`num_assistant_tokens=3` on greedy requests; sampled requests must drop it), but the payoff is
+~10% on three tasks of one family after re-exporting the 9B (20 GB download). Parked, not
+rejected: the lever is real, just narrow.
 
 ## Conversion playbook (Route B)
 
